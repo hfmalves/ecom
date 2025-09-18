@@ -2,6 +2,8 @@
 
 namespace Config;
 
+use App\Filters\Admin\AuthFilter;
+use App\Filters\Admin\NoAuthFilter;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\Cors;
 use CodeIgniter\Filters\CSRF;
@@ -12,8 +14,6 @@ use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
 use CodeIgniter\Filters\SecureHeaders;
-use App\Filters\Admin\AuthFilter;
-use App\Filters\Admin\NoAuthFilter;
 
 
 class Filters extends BaseFilters
