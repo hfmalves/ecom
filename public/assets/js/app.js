@@ -20,6 +20,7 @@ function formHandler(endpoint, initForm = {}, options = {}) {
             try {
                 const csrfKey = Object.keys(this.form).find(k => k.startsWith('csrf_'));
                 const csrfValue = this.form[csrfKey];
+
                 const resp = await fetch(endpoint, {
                     method: "POST",
                     headers: {
@@ -31,6 +32,7 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                 const isJSON = (resp.headers.get("content-type") || "").includes("application/json");
                 const data = isJSON ? await resp.json() : {};
                 this.refreshCsrf(data);
+                // 🔹 Caso 1: erros de validação (mostra nos inputs, sem toast)
                 if (data.status === "error" && data.errors) {
                     this.errors = {};
                     for (const k in data.errors) {
@@ -38,23 +40,22 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                             ? data.errors[k][0]
                             : data.errors[k];
                     }
-
-                    // dispara toasts para cada erro
-                    Object.values(this.errors).forEach(msg => {
-                        if (typeof showToast === "function") {
-                            showToast(msg, "danger");
-                        } else {
-                            console.error("showToast não está definido");
-                        }
-                    });
-
-                    return; // garante que não continua
+                    return;
                 }
+                // 🔹 Caso 2: erro geral (sem "errors", mas tem message)
+                if (data.status === "error" && data.message) {
+                    showToast(data.message, "danger");
+                    return;
+                }
+                // 🔹 Caso 3: erro HTTP
                 if (!resp.ok) {
                     showToast(`Erro ${resp.status}: ${resp.statusText}`, "danger");
                     return;
                 }
-                if (data.message) showToast(data.message, "success");
+                // 🔹 Sucesso
+                if (data.message) {
+                    showToast(data.message, "success");
+                }
                 if (data.status === "2fa_required") {
                     this.step = "2fa";
                     return;
@@ -104,9 +105,7 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                 });
 
                 const data = await resp.json();
-
                 this.refreshCsrf(data);
-
                 if (data.status === "success" && data.redirect) {
                     window.location.href = data.redirect;
                 } else if (data.status === "error") {

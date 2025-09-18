@@ -86,7 +86,7 @@
                                                 <!-- Password -->
                                                 <div class="mb-3">
                                                     <div class="float-end">
-                                                        <a href="<?= site_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da password?</a>
+                                                        <a href="<?= base_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da password?</a>
                                                     </div>
 
                                                     <label class="form-label" for="password">Password</label>

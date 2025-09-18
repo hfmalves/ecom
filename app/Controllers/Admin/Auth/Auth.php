@@ -23,13 +23,10 @@ class Auth extends BaseController
     public function attemptLogin()
     {
         $data = $this->request->getJSON(true);
-
-        // Regras específicas de LOGIN (não usar as do model)
         $loginRules = [
             'email'    => 'required|valid_email',
             'password' => 'required',
         ];
-
         $loginMessages = [
             'email' => [
                 'required'    => 'O email é obrigatório.',
@@ -39,7 +36,6 @@ class Auth extends BaseController
                 'required' => 'A password é obrigatória.',
             ],
         ];
-
         if (! $this->validateData($data, $loginRules, $loginMessages)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -63,24 +59,19 @@ class Auth extends BaseController
                 ],
             ]);
         }
-        log_message('error', 'Valor de login_2step: ' . $user['login_2step']);
         if (!empty($user['login_2step']) && $user['login_2step'] == 1) {
-            log_message('error', 'Valor de login_2step entrou: ' . $user['login_2step']);
+            $this->usersTokens
+                ->where('user_id', $user['id'])
+                ->where('type', '2fa')
+                ->delete();
             $code = random_int(1000, 9999);
-
-            $ok = $this->usersTokens->insert([
+            $this->usersTokens->insert([
                 'user_id'    => $user['id'],
                 'token'      => $code,
                 'type'       => '2fa',
                 'expires_at' => date('Y-m-d H:i:s', strtotime('+1 minutes')),
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
-
-            if (! $ok) {
-                log_message('error', 'Erro no insert: ' . json_encode($this->usersTokens->errors()));
-            } else {
-                log_message('debug', 'Query do insert: ' . $this->usersTokens->getLastQuery());
-            }
             sendEmail(
                 $user['email'],
                 'O seu código de login',
@@ -116,10 +107,6 @@ class Auth extends BaseController
                 'hash'  => csrf_hash(),
             ],
         ]);
-    }
-    public function twoStep()
-    {
-        return view('auth/two_step');
     }
     public function verify2FA()
     {
@@ -162,9 +149,9 @@ class Auth extends BaseController
             'redirect' => site_url('/dashboard'),
         ]);
     }
-
     public function logout()
     {
-        // destrói sessão e redireciona
+        session()->destroy();
+        return redirect()->to('/login');
     }
 }

@@ -36,7 +36,8 @@ class Users extends Model
     protected $deletedField  = 'deleted_at';
     protected $validationRules = [
         'email'      => 'required|valid_email|is_unique[users.email,id,{id}]',
-        'password'   => 'min_length[6]',
+        'password'     => 'required|min_length[6]',
+        'password_confirm' => 'required|matches[password]',
         'phone'      => 'permit_empty|min_length[9]|max_length[20]',
         'is_active'  => 'in_list[0,1]',
         'is_verified'=> 'in_list[0,1]',
@@ -49,7 +50,12 @@ class Users extends Model
             'is_unique'   => 'Este email já está registado.',
         ],
         'password' => [
-            'min_length'  => 'A password deve ter pelo menos 6 caracteres.',
+            'required'   => 'A password é obrigatória.',
+            'min_length' => 'A password deve ter pelo menos 6 caracteres.',
+        ],
+        'password_confirm' => [
+            'required' => 'A confirmação é obrigatória.',
+            'matches'  => 'As passwords não coincidem.',
         ],
         'phone' => [
             'min_length'  => 'O número de telefone deve ter pelo menos 9 dígitos.',

@@ -59,6 +59,7 @@ class UserTokens extends Model
             'required' => 'A data de expiração é obrigatória.',
             'valid_date' => 'A data de expiração não tem um formato válido (Y-m-d H:i:s).',
         ],
+
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
