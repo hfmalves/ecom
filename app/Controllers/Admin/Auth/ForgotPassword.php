@@ -19,7 +19,7 @@ class ForgotPassword extends BaseController
     }
     public function index()
     {
-        return view('auth/recovery');
+        return view('admin/auth/recovery');
     }
 
     public function sendRecovery()
@@ -91,7 +91,7 @@ class ForgotPassword extends BaseController
     public function reset($token = null)
     {
         // renderiza view com formulário
-        return view('auth/reset_password', [
+        return view('admin/auth/reset_password', [
             'token' => $token,
             'csrf'  => [
                 'token' => csrf_token(),

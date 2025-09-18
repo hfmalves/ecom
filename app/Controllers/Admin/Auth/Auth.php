@@ -18,7 +18,7 @@ class Auth extends BaseController
     }
     public function login()
     {
-        return view('auth/login');
+        return view('admin/auth/login');
     }
     public function attemptLogin()
     {
@@ -97,11 +97,12 @@ class Auth extends BaseController
             'is_active'  => $user['is_active'],
             'is_verified'=> $user['is_verified'],
             'login_2step'=> $user['login_2step'],
+            'isLoggedIn' => true
         ]);
         return $this->response->setJSON([
             'status'   => 'success',
             'message'  => 'Login efetuado com sucesso!',
-            'redirect' => base_url('/dashboard'),
+            'redirect' => base_url('/admin/dashboard'),
             'csrf'     => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
@@ -142,16 +143,17 @@ class Auth extends BaseController
             'is_active'  => $user['is_active'],
             'is_verified'=> $user['is_verified'],
             'login_2step'=> $user['login_2step'],
+            'isLoggedIn' => true
         ]);
         return $this->response->setJSON([
             'status'   => 'success',
             'message'  => 'Login concluído!',
-            'redirect' => base_url('/dashboard'),
+            'redirect' => base_url('/admin/dashboard'),
         ]);
     }
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('/login');
+        return redirect()->to('/admin/auth/login');
     }
 }

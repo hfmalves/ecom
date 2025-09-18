@@ -26,24 +26,29 @@ class AuthFilter implements FilterInterface
     public function before(RequestInterface $request, $arguments = null)
     {
         $session = session();
-        $uri     = trim($request->getUri()->getPath(), '/');
-        // Rotas públicas de auth
+        $user    = $session->get('user');
         $authRoutes = [
             'admin/auth/login',
             'admin/auth/register',
-            'admin/auth/recovery'
+            'admin/auth/recovery',
+            'admin/auth/reset',
         ];
-        // SEM sessão → só pode ver as rotas de auth
-        if (! $session->get('isLoggedIn')) {
-            if (! in_array($uri, $authRoutes)) {
+        $path = ltrim($request->getUri()->getPath(), '/');
+        if (empty($user) || empty($user['isLoggedIn'])) {
+            if (! in_array($path, $authRoutes)) {
                 return redirect()->to(base_url('admin/auth/login'));
             }
         }
-        // COM sessão → não pode aceder às rotas de auth
-        if ($session->get('isLoggedIn') && in_array($uri, $authRoutes)) {
+        if (! empty($user['isLoggedIn']) && in_array($path, $authRoutes)) {
+            return redirect()->to(base_url('admin/dashboard'));
+        }
+
+        // Extra: se abrir só /admin → manda para dashboard
+        if (! empty($user['isLoggedIn']) && $path === 'admin') {
             return redirect()->to(base_url('admin/dashboard'));
         }
     }
+
 
     /**
      * Allows After filters to inspect and modify the response

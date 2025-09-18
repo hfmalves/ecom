@@ -59,18 +59,21 @@
                                     <div class="mt-4">
                                         <form
                                                 x-data="formHandler(
-                                                    '<?= site_url('auth/recovery') ?>',
-                                                    { email: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
-                                                )"
-                                                @submit.prevent="submit()">
+                                                        '<?= base_url('admin/auth/reset') ?>',
+                                                        { token: '<?= esc($token) ?>', password: '', password_confirm: '', <?= $csrf['token'] ?>: '<?= $csrf['hash'] ?>' },
+                                                        { redirect: '<?= site_url('admin/auth/login') ?>' }
+                                                    )"
+                                                @submit.prevent="submit()"
+                                        >
+                                            <input type="hidden" name="token" x-model="form.token">
 
-                                            <div class="mb-3" x-data="{ field: 'email' }">
-                                                <label class="form-label" :for="field">Email</label>
-                                                <input type="email"
+                                            <!-- Nova Password -->
+                                            <div class="mb-3" x-data="{ field: 'password' }">
+                                                <label class="form-label" :for="field">Nova Password</label>
+                                                <input type="password"
                                                        class="form-control"
                                                        :id="field"
                                                        :name="field"
-                                                       placeholder="Endereço de email"
                                                        x-model="form[field]"
                                                        :class="{ 'is-invalid': errors[field] }">
                                                 <template x-if="errors[field]">
@@ -78,19 +81,27 @@
                                                 </template>
                                             </div>
 
+                                            <!-- Confirmar Password -->
+                                            <div class="mb-3" x-data="{ field: 'password_confirm' }">
+                                                <label class="form-label" :for="field">Confirmar Password</label>
+                                                <input type="password"
+                                                       class="form-control"
+                                                       :id="field"
+                                                       :name="field"
+                                                       x-model="form[field]"
+                                                       :class="{ 'is-invalid': errors[field] }">
+                                                <template x-if="errors[field]">
+                                                    <small class="text-danger" x-text="errors[field]"></small>
+                                                </template>
+                                            </div>
 
                                             <div class="mt-3 d-grid">
                                                 <button type="submit" class="btn btn-primary" :disabled="loading">
-                                                    <span x-show="!loading"><Enviar></Enviar></span>
-                                                    <span x-show="loading">A enviar...</span>
+                                                    <span x-show="!loading">Alterar Password</span>
+                                                    <span x-show="loading">A alterar...</span>
                                                 </button>
                                             </div>
                                         </form>
-                                        <div class="mt-5 text-center">
-                                            <p>Deseja voltar a iniciar sessão ?
-                                                <a href="<?= base_url(); ?>" class="fw-medium text-primary"> Clique aqui. </a>
-                                            </p>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">

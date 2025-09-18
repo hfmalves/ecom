@@ -46,8 +46,9 @@
                             <div class="d-flex flex-column h-100">
                                 <div class="mb-4 mb-md-5">
                                     <a href="index.html" class="d-block auth-logo">
-                                        <img src="assets/images/logo-dark.png" alt="" height="18" class="auth-logo-dark">
-                                        <img src="assets/images/logo-light.png" alt="" height="18" class="auth-logo-light">
+                                        <img src="<?= base_url('assets/images/logo-dark.png') ?>" alt="Logo Dark" height="18" class="auth-logo-dark">
+                                        <img src="<?= base_url('assets/images/logo-light.png') ?>" alt="Logo Light" height="18" class="auth-logo-light">
+
                                     </a>
                                 </div>
                                 <div class="my-auto">
@@ -59,12 +60,12 @@
                                     <div class="mt-4">
                                         <form
                                                 x-data="formHandler(
-                                                    '<?= base_url('auth/login') ?>',
+                                                    '<?= base_url('admin/auth/login') ?>',
                                                     { email: '', password: '', remember: false, code: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
                                                 )"
                                                 @submit.prevent="step === 'login'
                                                 ? submit()
-                                                : submit2FA('<?= base_url('auth/verify2FA') ?>')">
+                                                : submit2FA('<?= base_url('admin/auth/verify2FA') ?>')">
 
                                             <!-- STEP LOGIN -->
                                             <div x-show="step === 'login'">
@@ -86,7 +87,7 @@
                                                 <!-- Password -->
                                                 <div class="mb-3" x-data="{ field: 'password' }">
                                                     <div class="float-end">
-                                                        <a href="<?= base_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da palavra-passe?</a>
+                                                        <a href="<?= base_url('admin/auth/recovery') ?>" class="text-muted">Esqueceu-se da palavra-passe?</a>
                                                     </div>
                                                     <label class="form-label" :for="field">Password</label>
                                                     <div class="input-group auth-pass-inputgroup">

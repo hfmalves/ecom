@@ -46,8 +46,9 @@
                             <div class="d-flex flex-column h-100">
                                 <div class="mb-4 mb-md-5">
                                     <a href="index.html" class="d-block auth-logo">
-                                        <img src="assets/images/logo-dark.png" alt="" height="18" class="auth-logo-dark">
-                                        <img src="assets/images/logo-light.png" alt="" height="18" class="auth-logo-light">
+                                        <img src="<?= base_url('assets/images/logo-dark.png') ?>" alt="Logo Dark" height="18" class="auth-logo-dark">
+                                        <img src="<?= base_url('assets/images/logo-light.png') ?>" alt="Logo Light" height="18" class="auth-logo-light">
+
                                     </a>
                                 </div>
                                 <div class="my-auto">
@@ -59,21 +60,18 @@
                                     <div class="mt-4">
                                         <form
                                                 x-data="formHandler(
-                                                        '<?= base_url('auth/reset') ?>',
-                                                        { token: '<?= esc($token) ?>', password: '', password_confirm: '', <?= $csrf['token'] ?>: '<?= $csrf['hash'] ?>' },
-                                                        { redirect: '<?= site_url('auth/login') ?>' }
-                                                    )"
-                                                @submit.prevent="submit()"
-                                        >
-                                            <input type="hidden" name="token" x-model="form.token">
+                                                    '<?= site_url('admin/auth/recovery') ?>',
+                                                    { email: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
+                                                )"
+                                                @submit.prevent="submit()">
 
-                                            <!-- Nova Password -->
-                                            <div class="mb-3" x-data="{ field: 'password' }">
-                                                <label class="form-label" :for="field">Nova Password</label>
-                                                <input type="password"
+                                            <div class="mb-3" x-data="{ field: 'email' }">
+                                                <label class="form-label" :for="field">Email</label>
+                                                <input type="email"
                                                        class="form-control"
                                                        :id="field"
                                                        :name="field"
+                                                       placeholder="Endereço de email"
                                                        x-model="form[field]"
                                                        :class="{ 'is-invalid': errors[field] }">
                                                 <template x-if="errors[field]">
@@ -81,27 +79,19 @@
                                                 </template>
                                             </div>
 
-                                            <!-- Confirmar Password -->
-                                            <div class="mb-3" x-data="{ field: 'password_confirm' }">
-                                                <label class="form-label" :for="field">Confirmar Password</label>
-                                                <input type="password"
-                                                       class="form-control"
-                                                       :id="field"
-                                                       :name="field"
-                                                       x-model="form[field]"
-                                                       :class="{ 'is-invalid': errors[field] }">
-                                                <template x-if="errors[field]">
-                                                    <small class="text-danger" x-text="errors[field]"></small>
-                                                </template>
-                                            </div>
 
                                             <div class="mt-3 d-grid">
                                                 <button type="submit" class="btn btn-primary" :disabled="loading">
-                                                    <span x-show="!loading">Alterar Password</span>
-                                                    <span x-show="loading">A alterar...</span>
+                                                    <span x-show="!loading">Enviar </span>
+                                                    <span x-show="loading">A enviar...</span>
                                                 </button>
                                             </div>
                                         </form>
+                                        <div class="mt-5 text-center">
+                                            <p>Deseja voltar a iniciar sessão ?
+                                                <a href="<?= base_url(); ?>admin" class="fw-medium text-primary"> Clique aqui. </a>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
