@@ -68,44 +68,40 @@
                                             <!-- STEP LOGIN -->
                                             <div x-show="step === 'login'">
                                                 <!-- Email -->
-                                                <div class="mb-3">
-                                                    <label class="form-label" for="email">Email</label>
+                                                <div class="mb-3" x-data="{ field: 'email' }">
+                                                    <label class="form-label" :for="field">Email</label>
                                                     <input type="text"
                                                            class="form-control"
-                                                           id="email"
-                                                           name="email"
+                                                           :id="field"
+                                                           :name="field"
                                                            placeholder="Enter your email address"
-                                                           x-model="form.email"
-                                                           :class="{ 'is-invalid': errors.email }">
-
-                                                    <template x-if="errors.email">
-                                                        <small class="text-danger" x-text="errors.email"></small>
+                                                           x-model="form[field]"
+                                                           :class="{ 'is-invalid': errors[field] }">
+                                                    <template x-if="errors[field]">
+                                                        <small class="text-danger" x-text="errors[field]"></small>
                                                     </template>
                                                 </div>
 
                                                 <!-- Password -->
-                                                <div class="mb-3">
+                                                <div class="mb-3" x-data="{ field: 'password' }">
                                                     <div class="float-end">
                                                         <a href="<?= base_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da password?</a>
                                                     </div>
-
-                                                    <label class="form-label" for="password">Password</label>
+                                                    <label class="form-label" :for="field">Password</label>
                                                     <div class="input-group auth-pass-inputgroup">
                                                         <input type="password"
                                                                class="form-control"
-                                                               id="password"
-                                                               name="password"
+                                                               :id="field"
+                                                               :name="field"
                                                                placeholder="Enter password"
-                                                               x-model="form.password"
-                                                               :class="{ 'is-invalid': errors.password }">
-
+                                                               x-model="form[field]"
+                                                               :class="{ 'is-invalid': errors[field] }">
                                                         <button class="btn btn-light" type="button" id="password-addon">
                                                             <i class="mdi mdi-eye-outline"></i>
                                                         </button>
                                                     </div>
-
-                                                    <template x-if="errors.password">
-                                                        <small class="text-danger" x-text="errors.password"></small>
+                                                    <template x-if="errors[field]">
+                                                        <small class="text-danger" x-text="errors[field]"></small>
                                                     </template>
                                                 </div>
 
@@ -117,17 +113,17 @@
                                             </div>
                                             <!-- STEP 2FA -->
                                             <div x-show="step === '2fa'">
-                                                <div class="mb-3">
-                                                    <label for="code" class="form-label">Código de Validação</label>
+                                                <div class="mb-3" x-data="{ field: 'code' }">
+                                                    <label class="form-label" :for="field">Código de Validação</label>
                                                     <input type="text"
                                                            class="form-control"
-                                                           id="code"
-                                                           name="code"
+                                                           :id="field"
+                                                           :name="field"
                                                            placeholder="Introduza o código"
-                                                           x-model="form.code"
-                                                           :class="{ 'is-invalid': errors.code }">
-                                                    <template x-if="errors.code">
-                                                        <small class="text-danger" x-text="errors.code"></small>
+                                                           x-model="form[field]"
+                                                           :class="{ 'is-invalid': errors[field] }">
+                                                    <template x-if="errors[field]">
+                                                        <small class="text-danger" x-text="errors[field]"></small>
                                                     </template>
                                                 </div>
                                             </div>

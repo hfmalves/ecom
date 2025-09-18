@@ -67,21 +67,31 @@
                                         >
                                             <input type="hidden" name="token" x-model="form.token">
 
-                                            <div class="mb-3">
-                                                <label for="password" class="form-label">Nova Password</label>
-                                                <input type="password" class="form-control" id="password" name="password"
-                                                       x-model="form.password" :class="{ 'is-invalid': errors.password }">
-                                                <template x-if="errors.password">
-                                                    <small class="text-danger" x-text="errors.password"></small>
+                                            <!-- Nova Password -->
+                                            <div class="mb-3" x-data="{ field: 'password' }">
+                                                <label class="form-label" :for="field">Nova Password</label>
+                                                <input type="password"
+                                                       class="form-control"
+                                                       :id="field"
+                                                       :name="field"
+                                                       x-model="form[field]"
+                                                       :class="{ 'is-invalid': errors[field] }">
+                                                <template x-if="errors[field]">
+                                                    <small class="text-danger" x-text="errors[field]"></small>
                                                 </template>
                                             </div>
 
-                                            <div class="mb-3">
-                                                <label for="password_confirm" class="form-label">Confirmar Password</label>
-                                                <input type="password" class="form-control" id="password_confirm" name="password_confirm"
-                                                       x-model="form.password_confirm" :class="{ 'is-invalid': errors.password_confirm }">
-                                                <template x-if="errors.password_confirm">
-                                                    <small class="text-danger" x-text="errors.password_confirm"></small>
+                                            <!-- Confirmar Password -->
+                                            <div class="mb-3" x-data="{ field: 'password_confirm' }">
+                                                <label class="form-label" :for="field">Confirmar Password</label>
+                                                <input type="password"
+                                                       class="form-control"
+                                                       :id="field"
+                                                       :name="field"
+                                                       x-model="form[field]"
+                                                       :class="{ 'is-invalid': errors[field] }">
+                                                <template x-if="errors[field]">
+                                                    <small class="text-danger" x-text="errors[field]"></small>
                                                 </template>
                                             </div>
 

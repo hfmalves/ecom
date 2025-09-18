@@ -64,20 +64,20 @@
                                                 )"
                                                 @submit.prevent="submit()">
 
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email</label>
+                                            <div class="mb-3" x-data="{ field: 'email' }">
+                                                <label class="form-label" :for="field">Email</label>
                                                 <input type="email"
                                                        class="form-control"
-                                                       id="email"
-                                                       name="email"
+                                                       :id="field"
+                                                       :name="field"
                                                        placeholder="Introduza o seu email"
-                                                       x-model="form.email"
-                                                       :class="{ 'is-invalid': errors.email }"
-                                                       >
-                                                <template x-if="errors.email">
-                                                    <small class="text-danger" x-text="errors.email"></small>
+                                                       x-model="form[field]"
+                                                       :class="{ 'is-invalid': errors[field] }">
+                                                <template x-if="errors[field]">
+                                                    <small class="text-danger" x-text="errors[field]"></small>
                                                 </template>
                                             </div>
+
 
                                             <div class="mt-3 d-grid">
                                                 <button type="submit" class="btn btn-primary" :disabled="loading">
