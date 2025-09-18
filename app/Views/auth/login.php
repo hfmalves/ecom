@@ -54,79 +54,101 @@
                                         <p class="text-muted">Sign in to continue to Skote.</p>
                                     </div>
                                     <div class="mt-4">
-                                        <form x-data="formHandler({
-                                                                    url: '<?= site_url('auth/login') ?>',
-                                                                    csrfToken: '<?= csrf_token() ?>',
-                                                                    csrfHash: '<?= csrf_hash() ?>'
-                                                                })"
-                                              x-init="init"
-                                              @submit.prevent="submitForm">
+                                        <form
+                                                x-data="formHandler(
+    '<?= site_url('auth/login') ?>',
+    { email: '', password: '', remember: false, code: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
+)"
+                                                @submit.prevent="step === 'login'
+            ? submit()
+            : submit2FA('<?= site_url('auth/verify2fa') ?>')">
 
-                                            <!-- Username -->
-                                            <div class="mb-3" x-data="{ field: 'username' }">
-                                                <label class="form-label" :for="field" x-text="field"></label>
-                                                <input type="text"
-                                                       class="form-control"
-                                                       :id="field"
-                                                       :name="field"
-                                                       :placeholder="'Enter ' + field"
-                                                       data-field="username"
-                                                       x-model="form[field]"
-                                                       :class="{ 'is-invalid': errors[field] }">
-                                                 <template x-if="errors[field]">
-                                                    <small class="text-danger" x-text="errors[field]"></small>
-                                                </template>
-                                            </div>
-
-                                            <!-- Password -->
-                                            <div class="mb-3" x-data="{ field: 'password' }">
-                                                <div class="float-end">
-                                                    <a href="<?= site_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da password?</a>
-                                                </div>
-
-                                                <label class="form-label" :for="field" x-text="field"></label>
-
-                                                <div class="input-group auth-pass-inputgroup">
-                                                    <input type="password"
+                                            <!-- STEP LOGIN -->
+                                            <div x-show="step === 'login'">
+                                                <!-- Email -->
+                                                <div class="mb-3">
+                                                    <label class="form-label" for="email">Email</label>
+                                                    <input type="text"
                                                            class="form-control"
-                                                           :id="field"
-                                                           :name="field"
-                                                           :placeholder="'Enter ' + field"
-                                                           data-field="password"
-                                                    x-model="form[field]"
-                                                    :class="{ 'is-invalid': errors[field] }">
+                                                           id="email"
+                                                           name="email"
+                                                           placeholder="Enter your email address"
+                                                           x-model="form.email"
+                                                           :class="{ 'is-invalid': errors.email }">
 
-                                                    <button class="btn btn-light" type="button" id="password-addon">
-                                                        <i class="mdi mdi-eye-outline"></i>
-                                                    </button>
+                                                    <template x-if="errors.email">
+                                                        <small class="text-danger" x-text="errors.email"></small>
+                                                    </template>
                                                 </div>
 
-                                                <template x-if="errors[field]">
-                                                    <small class="text-danger" x-text="errors[field]"></small>
-                                                </template>
+                                                <!-- Password -->
+                                                <div class="mb-3">
+                                                    <div class="float-end">
+                                                        <a href="<?= site_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da password?</a>
+                                                    </div>
+
+                                                    <label class="form-label" for="password">Password</label>
+                                                    <div class="input-group auth-pass-inputgroup">
+                                                        <input type="password"
+                                                               class="form-control"
+                                                               id="password"
+                                                               name="password"
+                                                               placeholder="Enter password"
+                                                               x-model="form.password"
+                                                               :class="{ 'is-invalid': errors.password }">
+
+                                                        <button class="btn btn-light" type="button" id="password-addon">
+                                                            <i class="mdi mdi-eye-outline"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    <template x-if="errors.password">
+                                                        <small class="text-danger" x-text="errors.password"></small>
+                                                    </template>
+                                                </div>
+
+                                                <!-- Remember -->
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="remember" x-model="form.remember">
+                                                    <label class="form-check-label" for="remember">Remember me</label>
+                                                </div>
                                             </div>
 
-
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="remember-check" data-field="remember" x-model="form.remember">
-                                                <label class="form-check-label" for="remember-check">
-                                                    Remember me
-                                                </label>
+                                            <!-- STEP 2FA -->
+                                            <div x-show="step === '2fa'">
+                                                <div class="mb-3">
+                                                    <label for="code" class="form-label">Código de Validação</label>
+                                                    <input type="text"
+                                                           class="form-control"
+                                                           id="code"
+                                                           name="code"
+                                                           placeholder="Introduza o código"
+                                                           x-model="form.code"
+                                                           :class="{ 'is-invalid': errors.code }">
+                                                    <template x-if="errors.code">
+                                                        <small class="text-danger" x-text="errors.code"></small>
+                                                    </template>
+                                                </div>
                                             </div>
 
+                                            <!-- Botão único -->
                                             <div class="mt-3 d-grid">
-                                                <button type="submit" class="btn btn-primary waves-effect waves-light" :disabled="loading">
-                                                    <span x-show="!loading">Log In</span>
+                                                <button type="submit" class="btn btn-primary waves-effect waves-light"
+                                                        :disabled="loading">
+                                                    <span x-show="!loading" x-text="step === 'login' ? 'Log In' : 'Validar Código'"></span>
                                                     <span x-show="loading">A validar...</span>
                                                 </button>
                                             </div>
                                         </form>
-                                        <pre x-text="JSON.stringify(errors, null, 2)"></pre>
 
                                         <div class="mt-5 text-center">
-                                            <p>Don't have an account ? <a href="auth-register-2.html" class="fw-medium text-primary"> Signup now </a> </p>
+                                            <p>Don't have an account ?
+                                                <a href="auth-register-2.html" class="fw-medium text-primary"> Signup now </a>
+                                            </p>
                                         </div>
                                     </div>
+
+
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
                                     <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>

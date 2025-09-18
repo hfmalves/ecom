@@ -35,7 +35,6 @@ class Users extends Model
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
     protected $validationRules = [
-        'username'       => 'required|min_length[3]|max_length[100]',
         'email'      => 'required|valid_email|is_unique[users.email,id,{id}]',
         'password'   => 'min_length[6]',
         'phone'      => 'permit_empty|min_length[9]|max_length[20]',
@@ -44,11 +43,6 @@ class Users extends Model
         'login_2step'=> 'in_list[0,1]',
     ];
     protected $validationMessages = [
-        'username' => [
-            'required'   => 'O nome é obrigatório.',
-            'min_length' => 'O nome deve ter pelo menos 3 caracteres.',
-            'max_length' => 'O nome não pode ultrapassar 100 caracteres.',
-        ],
         'email' => [
             'required'    => 'O email é obrigatório.',
             'valid_email' => 'O email não é válido.',
