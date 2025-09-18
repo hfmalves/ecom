@@ -17,6 +17,8 @@
         <link href="<?= base_url('assets/css/icons.min.css') ?>" rel="stylesheet" type="text/css" />
         <!-- App Css -->
         <link href="<?= base_url('assets/css/app.min.css') ?>" id="app-style" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     </head>
     <body class="auth-body-bg">
         <div class="container-fluid p-0">
@@ -56,12 +58,12 @@
                                     <div class="mt-4">
                                         <form
                                                 x-data="formHandler(
-    '<?= site_url('auth/login') ?>',
-    { email: '', password: '', remember: false, code: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
-)"
+                                                    '<?= site_url('auth/login') ?>',
+                                                    { email: '', password: '', remember: false, code: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
+                                                )"
                                                 @submit.prevent="step === 'login'
-            ? submit()
-            : submit2FA('<?= site_url('auth/verify2fa') ?>')">
+                                                ? submit()
+                                                : submit2FA('<?= site_url('auth/verify2FA') ?>')">
 
                                             <!-- STEP LOGIN -->
                                             <div x-show="step === 'login'">
@@ -113,7 +115,6 @@
                                                     <label class="form-check-label" for="remember">Remember me</label>
                                                 </div>
                                             </div>
-
                                             <!-- STEP 2FA -->
                                             <div x-show="step === '2fa'">
                                                 <div class="mb-3">
@@ -130,7 +131,6 @@
                                                     </template>
                                                 </div>
                                             </div>
-
                                             <!-- Botão único -->
                                             <div class="mt-3 d-grid">
                                                 <button type="submit" class="btn btn-primary waves-effect waves-light"
@@ -140,15 +140,12 @@
                                                 </button>
                                             </div>
                                         </form>
-
                                         <div class="mt-5 text-center">
                                             <p>Don't have an account ?
                                                 <a href="auth-register-2.html" class="fw-medium text-primary"> Signup now </a>
                                             </p>
                                         </div>
                                     </div>
-
-
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
                                     <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
@@ -162,6 +159,8 @@
             <!-- end row -->
         </div>
         <!-- Scripts -->
+        <script src="<?= base_url('assets/libs/jquery/jquery.min.js') ?>"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
         <script src="<?= base_url('assets/libs/jquery/jquery.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/metismenu/metisMenu.min.js') ?>"></script>

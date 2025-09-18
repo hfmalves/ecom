@@ -9,14 +9,11 @@ $routes->group('auth', ['namespace' => 'App\Controllers\Admin\Auth'], function (
     // Login / Logout / 2FA
     $routes->get('login', 'Auth::login', ['filter' => 'noauth']);
     $routes->post('login', 'Auth::attemptLogin', ['filter' => 'noauth']);
-    $routes->get('2_step', 'Auth::twoStep', ['filter' => 'noauth']);
-    $routes->post('2_step', 'Auth::verifyTwoStep', ['filter' => 'noauth']);
+    $routes->post('verify2FA', 'Auth::verify2FA', ['filter' => 'noauth']);
     $routes->get('logout', 'Auth::logout', ['filter' => 'auth']);
-
     // Registo
     $routes->get('register', 'Register::index', ['filter' => 'noauth']);
     $routes->post('register', 'Register::attemptRegister', ['filter' => 'noauth']);
-
     // Recuperação
     $routes->get('recovery', 'ForgotPassword::index', ['filter' => 'noauth']);
     $routes->post('recovery', 'ForgotPassword::sendRecovery', ['filter' => 'noauth']);

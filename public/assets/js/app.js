@@ -6,7 +6,6 @@ function formHandler(endpoint, initForm = {}, options = {}) {
         loading: false,
         step: 'login',
         opts: Object.assign({ redirect: false, resetOnSuccess: false }, options),
-
         refreshCsrf(data) {
             if (data && data.csrf) {
                 Object.keys(this.form).forEach(k => {
@@ -15,29 +14,23 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                 this.form[data.csrf.token] = data.csrf.hash;
             }
         },
-
         async submit() {
             this.loading = true;
             this.errors = {};
-
             try {
-                // extrair token csrf_* do form
                 const csrfKey = Object.keys(this.form).find(k => k.startsWith('csrf_'));
                 const csrfValue = this.form[csrfKey];
-
                 const resp = await fetch(endpoint, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": csrfValue, // <- token vai no header
+                        "X-CSRF-TOKEN": csrfValue,
                     },
                     body: JSON.stringify(this.form),
                 });
-
                 const isJSON = (resp.headers.get("content-type") || "").includes("application/json");
                 const data = isJSON ? await resp.json() : {};
                 this.refreshCsrf(data);
-
                 if (data.status === "error" && data.errors) {
                     this.errors = {};
                     for (const k in data.errors) {
@@ -45,7 +38,17 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                             ? data.errors[k][0]
                             : data.errors[k];
                     }
-                    return;
+
+                    // dispara toasts para cada erro
+                    Object.values(this.errors).forEach(msg => {
+                        if (typeof showToast === "function") {
+                            showToast(msg, "danger");
+                        } else {
+                            console.error("showToast não está definido");
+                        }
+                    });
+
+                    return; // garante que não continua
                 }
                 if (!resp.ok) {
                     showToast(`Erro ${resp.status}: ${resp.statusText}`, "danger");
@@ -81,11 +84,15 @@ function formHandler(endpoint, initForm = {}, options = {}) {
             this.errors = {};
 
             try {
+                // 👇 pega no token do form
+                const csrfKey = Object.keys(this.form).find(k => k.startsWith('csrf_'));
+                const csrfValue = this.form[csrfKey];
+
                 const resp = await fetch(urlVerify, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": csrfValue, // <- mandas o token aqui
+                        "X-CSRF-TOKEN": csrfValue, // agora existe
                     },
                     body: JSON.stringify({
                         email: this.form.email,
@@ -104,6 +111,7 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                     window.location.href = data.redirect;
                 } else if (data.status === "error") {
                     this.errors.code = data.message || "Código inválido.";
+                    showToast(this.errors.code, "danger"); // mostra toast se o código for errado
                 }
             } catch (e) {
                 showToast("Erro na validação 2FA.", "danger");
@@ -111,5 +119,27 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                 this.loading = false;
             }
         }
+
     };
 }
+function showToast(message, type = "info", title = "") {
+    if (typeof toastr === "undefined") {
+        console.error("Toastr não foi carregado.");
+        return;
+    }
+    switch (type) {
+        case "success":
+            toastr.success(message, title);
+            break;
+        case "error":
+        case "danger": // alias para error
+            toastr.error(message, title);
+            break;
+        case "warning":
+            toastr.warning(message, title);
+            break;
+        default:
+            toastr.info(message, title);
+    }
+}
+window.showToast = showToast;

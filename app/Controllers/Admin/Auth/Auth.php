@@ -20,7 +20,6 @@ class Auth extends BaseController
     {
         return view('auth/login');
     }
-
     public function attemptLogin()
     {
         $data = $this->request->getJSON(true);
@@ -118,14 +117,10 @@ class Auth extends BaseController
             ],
         ]);
     }
-
-
-
     public function twoStep()
     {
         return view('auth/two_step');
     }
-
     public function verify2FA()
     {
         $data = $this->request->getJSON(true);
