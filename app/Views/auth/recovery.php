@@ -70,7 +70,7 @@
                                                        class="form-control"
                                                        :id="field"
                                                        :name="field"
-                                                       placeholder="Introduza o seu email"
+                                                       placeholder="Endereço de email"
                                                        x-model="form[field]"
                                                        :class="{ 'is-invalid': errors[field] }">
                                                 <template x-if="errors[field]">
@@ -81,20 +81,20 @@
 
                                             <div class="mt-3 d-grid">
                                                 <button type="submit" class="btn btn-primary" :disabled="loading">
-                                                    <span x-show="!loading">Enviar</span>
+                                                    <span x-show="!loading"><Enviar></Enviar></span>
                                                     <span x-show="loading">A enviar...</span>
                                                 </button>
                                             </div>
                                         </form>
                                         <div class="mt-5 text-center">
-                                            <p>Don't have an account ?
-                                                <a href="auth-register-2.html" class="fw-medium text-primary"> Signup now </a>
+                                            <p>Deseja voltar a iniciar sessão ?
+                                                <a href="<?= base_url(); ?>" class="fw-medium text-primary"> Clique aqui. </a>
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
-                                    <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                                    <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Bagg – eCommerce para profissionais  <br> Engineered with <i class="mdi mdi-heart text-danger"></i> by Hugo Digital Studio</p>
                                 </div>
                             </div>
                         </div>

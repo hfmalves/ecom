@@ -52,18 +52,19 @@
                                 </div>
                                 <div class="my-auto">
                                     <div>
-                                        <h5 class="text-primary">Welcome Back !</h5>
-                                        <p class="text-muted">Sign in to continue to Skote.</p>
+                                        <h5 class="text-primary">Bem-vindo de volta!</h5>
+                                        <p class="text-muted">Faça login para aceder à aplicação.</p>
+
                                     </div>
                                     <div class="mt-4">
                                         <form
                                                 x-data="formHandler(
-                                                    '<?= site_url('auth/login') ?>',
+                                                    '<?= base_url('auth/login') ?>',
                                                     { email: '', password: '', remember: false, code: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' }
                                                 )"
                                                 @submit.prevent="step === 'login'
                                                 ? submit()
-                                                : submit2FA('<?= site_url('auth/verify2FA') ?>')">
+                                                : submit2FA('<?= base_url('auth/verify2FA') ?>')">
 
                                             <!-- STEP LOGIN -->
                                             <div x-show="step === 'login'">
@@ -74,7 +75,7 @@
                                                            class="form-control"
                                                            :id="field"
                                                            :name="field"
-                                                           placeholder="Enter your email address"
+                                                           placeholder="Endereço de Email"
                                                            x-model="form[field]"
                                                            :class="{ 'is-invalid': errors[field] }">
                                                     <template x-if="errors[field]">
@@ -85,7 +86,7 @@
                                                 <!-- Password -->
                                                 <div class="mb-3" x-data="{ field: 'password' }">
                                                     <div class="float-end">
-                                                        <a href="<?= base_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da password?</a>
+                                                        <a href="<?= base_url('auth/recovery') ?>" class="text-muted">Esqueceu-se da palavra-passe?</a>
                                                     </div>
                                                     <label class="form-label" :for="field">Password</label>
                                                     <div class="input-group auth-pass-inputgroup">
@@ -93,7 +94,7 @@
                                                                class="form-control"
                                                                :id="field"
                                                                :name="field"
-                                                               placeholder="Enter password"
+                                                               placeholder="Palavra-passe"
                                                                x-model="form[field]"
                                                                :class="{ 'is-invalid': errors[field] }">
                                                         <button class="btn btn-light" type="button" id="password-addon">
@@ -108,7 +109,7 @@
                                                 <!-- Remember -->
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" id="remember" x-model="form.remember">
-                                                    <label class="form-check-label" for="remember">Remember me</label>
+                                                    <label class="form-check-label" for="remember">Guardar credenciais</label>
                                                 </div>
                                             </div>
                                             <!-- STEP 2FA -->
@@ -131,20 +132,16 @@
                                             <div class="mt-3 d-grid">
                                                 <button type="submit" class="btn btn-primary waves-effect waves-light"
                                                         :disabled="loading">
-                                                    <span x-show="!loading" x-text="step === 'login' ? 'Log In' : 'Validar Código'"></span>
+                                                    <span x-show="!loading" x-text="step === 'login' ? 'Iniciar sessão' : 'Validar Código'"></span>
                                                     <span x-show="loading">A validar...</span>
                                                 </button>
                                             </div>
                                         </form>
-                                        <div class="mt-5 text-center">
-                                            <p>Don't have an account ?
-                                                <a href="auth-register-2.html" class="fw-medium text-primary"> Signup now </a>
-                                            </p>
-                                        </div>
+
                                     </div>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
-                                    <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                                    <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Bagg – eCommerce para profissionais  <br> Engineered with <i class="mdi mdi-heart text-danger"></i> by Hugo Digital Studio</p>
                                 </div>
                             </div>
                         </div>

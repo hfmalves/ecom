@@ -102,16 +102,10 @@
                                                 </button>
                                             </div>
                                         </form>
-
-                                        <div class="mt-5 text-center">
-                                            <p>Don't have an account ?
-                                                <a href="auth-register-2.html" class="fw-medium text-primary"> Signup now </a>
-                                            </p>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
-                                    <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Skote. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand</p>
+                                    <p class="mb-0">© <script>document.write(new Date().getFullYear())</script> Bagg – eCommerce para profissionais  <br> Engineered with <i class="mdi mdi-heart text-danger"></i> by Hugo Digital Studio</p>
                                 </div>
                             </div>
                         </div>
