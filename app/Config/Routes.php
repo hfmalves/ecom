@@ -5,8 +5,10 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
+$routes->get('/', 'Admin\Auth\Auth::login', ['filter' => 'noauth']);
+
 $routes->group('auth', ['namespace' => 'App\Controllers\Admin\Auth'], function ($routes) {
-    // Login / Logout / 2FA
+    $routes->get('/', 'Auth::login', ['filter' => 'noauth']);
     $routes->get('login', 'Auth::login', ['filter' => 'noauth']);
     $routes->post('login', 'Auth::attemptLogin', ['filter' => 'noauth']);
     $routes->post('verify2FA', 'Auth::verify2FA', ['filter' => 'noauth']);

@@ -101,7 +101,7 @@ class Auth extends BaseController
         return $this->response->setJSON([
             'status'   => 'success',
             'message'  => 'Login efetuado com sucesso!',
-            'redirect' => site_url('/dashboard'),
+            'redirect' => base_url('/dashboard'),
             'csrf'     => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
@@ -146,7 +146,7 @@ class Auth extends BaseController
         return $this->response->setJSON([
             'status'   => 'success',
             'message'  => 'Login concluído!',
-            'redirect' => site_url('/dashboard'),
+            'redirect' => base_url('/dashboard'),
         ]);
     }
     public function logout()

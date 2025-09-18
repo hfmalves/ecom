@@ -140,7 +140,7 @@ class ForgotPassword extends BaseController
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Password alterada com sucesso. Pode fazer login.',
-            'redirect' => site_url('auth/login'),
+            'redirect' => base_url('auth/login'),
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
