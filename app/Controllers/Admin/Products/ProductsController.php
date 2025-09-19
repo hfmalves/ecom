@@ -68,5 +68,12 @@ class ProductsController extends BaseController
         ];
         return view('admin/products/edit', $data);
     }
-
+    public function update()
+    {
+        $data = $this->request->getJSON(true);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Produto guardado com sucesso!'
+        ]);
+    }
 }

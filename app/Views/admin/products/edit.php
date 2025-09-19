@@ -17,392 +17,489 @@ Dashboard
         </div>
     </div><!--end col-->
 </div><!--end row-->
-<div class="row">
-    <div class="col-8">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Informação Geral</h4>
-                <p class="card-title-desc">Informação Geral do Produto</p>
-                <div class="row">
-                    <!-- Nome -->
-                    <div class="col-8">
-                        <div class="mb-2">
-                            <label for="name" class="form-label">Nome</label>
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Nome do produto">
+<form
+        x-data="formHandler(
+    '<?= base_url('admin/products/update') ?>',
+    {
+        status: '<?= esc($product['status']) ?>',
+        name: '<?= esc($product['name']) ?>',
+        slug: '<?= esc($product['slug']) ?>',
+        description: '<?= esc($product['description']) ?>',
+        short_description: '<?= esc($product['short_description']) ?>',
+        meta_title: '<?= esc($product['meta_title']) ?>',
+        meta_description: '<?= esc($product['meta_description']) ?>',
+        meta_keywords: '<?= esc($product['meta_keywords']) ?>',
+        cost_price: '<?= esc($product['cost_price']) ?>',
+        base_price: '<?= esc($product['base_price']) ?>',
+        base_price_tax: '<?= esc($product['base_price_tax']) ?>',
+        tax_class_id: '<?= esc($product['tax_class_id']) ?>',
+        discount_type: '<?= esc($product['discount_type']) ?>',
+        discount_value: '<?= esc($product['discount_value']) ?>',
+        special_price: '<?= esc($product['special_price']) ?>',
+        special_price_start: '<?= esc($product['special_price_start']) ?>',
+        special_price_end: '<?= esc($product['special_price_end']) ?>',
+        weight: '<?= esc($product['weight']) ?>',
+        width: '<?= esc($product['width']) ?>',
+        height: '<?= esc($product['height']) ?>',
+        length: '<?= esc($product['length']) ?>',
+        type: '<?= esc($product['type']) ?>',
+        visibility: '<?= esc($product['visibility']) ?>',
+        is_featured: <?= $product['is_featured'] ? 'true' : 'false' ?>,
+        is_new: <?= $product['is_new'] ? 'true' : 'false' ?>,
+        stock_qty: '<?= esc($product['stock_qty']) ?>',
+        manage_stock: <?= $product['manage_stock'] ? 'true' : 'false' ?>,
+        sku: '<?= esc($product['sku']) ?>',
+        ean: '<?= esc($product['ean']) ?>',
+        upc: '<?= esc($product['upc']) ?>',
+        isbn: '<?= esc($product['isbn']) ?>',
+        gtin: '<?= esc($product['gtin']) ?>',
+        supplier_id: '<?= esc($product['supplier_id']) ?>',
+        brand_id: '<?= esc($product['brand_id']) ?>',
+        category_id: '<?= esc($product['category_id']) ?>',
+        <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+    },
+)"
+        @submit.prevent="submit"
+>
+    <div class="row">
+        <div class="col-8">
+            <!-- Informação Geral -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Informação Geral</h4>
+                    <p class="card-title-desc">Informação Geral do Produto</p>
+                    <div class="row">
+                        <div class="col-8" x-data="{ field: 'name' }">
+                            <label class="form-label" :for="field">Nome</label>
+                            <input type="text" class="form-control" :id="field" :name="field"
+                                   placeholder="Nome do produto"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
-                    </div>
-                    <!-- Slug -->
-                    <div class="col-4">
-                        <div class="mb-2">
-                            <label for="slug" class="form-label">Slug</label>
-                            <input type="text" class="form-control" id="slug" name="slug" placeholder="ex: produto-exemplo">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <!-- Descrição -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="description">Descrição</label>
-                            <textarea id="description" name="description"></textarea>
-                        </div>
-                    </div>
-                    <!-- Descrição curta -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="short_description">Descrição Pequena</label>
-                            <textarea id="short_description" name="short_description"></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <!-- Meta Title -->
-                    <div class="col-md-12">
-                        <div class="mb-2">
-                            <label for="meta_title" class="form-label">Meta Title</label>
-                            <input type="text" class="form-control" id="meta_title" name="meta_title" placeholder="Título SEO do produto">
+                        <div class="col-4" x-data="{ field: 'slug' }">
+                            <label class="form-label" :for="field">Slug</label>
+                            <input type="text" class="form-control" :id="field" :name="field"
+                                   placeholder="ex: produto-exemplo"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
 
-                    <!-- Meta Description -->
-                    <div class="col-md-12">
-                        <div class="mb-2">
-                            <label for="meta_description" class="form-label">Meta Description</label>
-                            <textarea class="form-control" id="meta_description" name="meta_description" rows="3" placeholder="Descrição SEO do produto"></textarea>
+                    <div class="row">
+                        <div class="col-md-6" x-data="{ field: 'description' }">
+                            <label :for="field">Descrição</label>
+                            <textarea class="form-control" :id="field" :name="field"
+                                      x-model="form[field]" :class="{ 'is-invalid': errors[field] }"></textarea>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-6" x-data="{ field: 'short_description' }">
+                            <label :for="field">Descrição Pequena</label>
+                            <textarea class="form-control" :id="field" :name="field"
+                                      x-model="form[field]" :class="{ 'is-invalid': errors[field] }"></textarea>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
 
-                    <!-- Meta Keywords -->
-                    <div class="col-md-12">
-                        <div class="mb-2">
-                            <label for="meta_keywords" class="form-label">Meta Keywords</label>
-                            <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" placeholder="ex: sapatilhas, running, homem">
+                    <div class="row">
+                        <div class="col-md-12" x-data="{ field: 'meta_title' }">
+                            <label class="form-label" :for="field">Meta Title</label>
+                            <input type="text" class="form-control" :id="field" :name="field"
+                                   x-model="form[field]" placeholder="Título SEO do produto"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-12" x-data="{ field: 'meta_description' }">
+                            <label class="form-label" :for="field">Meta Description</label>
+                            <textarea class="form-control" :id="field" :name="field" rows="3"
+                                      placeholder="Descrição SEO do produto"
+                                      x-model="form[field]" :class="{ 'is-invalid': errors[field] }"></textarea>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-12" x-data="{ field: 'meta_keywords' }">
+                            <label class="form-label" :for="field">Meta Keywords</label>
+                            <input type="text" class="form-control" :id="field" :name="field"
+                                   placeholder="ex: sapatilhas, running, homem"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Valores de Venda</h4>
-                <p class="card-title-desc">Preços e impostos aplicáveis ao produto</p>
-                <p class="card-title-desc">Create beautifully simple form labels that float over your input fields.</p>
-                <div class="row">
-                    <!-- Preço de custo -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="cost_price" class="form-label">Preço de Custo</label>
-                            <input type="number" step="0.01" class="form-control" id="cost_price" name="cost_price" placeholder="0.00">
-                        </div>
-                    </div>
-                    <!-- Preço base -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="base_price" class="form-label">Preço Base</label>
-                            <input type="number" step="0.01" class="form-control" id="base_price" name="base_price" placeholder="0.00">
-                        </div>
-                    </div>
-                    <!-- Preço base com imposto -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="base_price_tax" class="form-label">Preço Base + Imposto</label>
-                            <input type="number" step="0.01" class="form-control" id="base_price_tax" name="base_price_tax" placeholder="0.00">
-                        </div>
-                    </div>
 
-                    <div class="col-md-3">
-                        <div class="m">
-                            <label for="tax_class_id" class="form-label">Taxa de Imposto</label>
-                            <select id="tax_class_id" name="tax_class_id" class="form-select">
+            <!-- Valores de Venda -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Valores de Venda</h4>
+                    <p class="card-title-desc">Preços e impostos aplicáveis ao produto</p>
+                    <div class="row">
+                        <div class="col-md-3" x-data="{ field: 'cost_price' }">
+                            <label class="form-label" :for="field">Preço de Custo</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" placeholder="0.00"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'base_price' }">
+                            <label class="form-label" :for="field">Preço Base</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" placeholder="0.00"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'base_price_tax' }">
+                            <label class="form-label" :for="field">Preço Base + Imposto</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" placeholder="0.00"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'tax_class_id' }">
+                            <label class="form-label" :for="field">Taxa de Imposto</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
                             </select>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title mt-3">Valores Promocionais</h4>
-                <p class="card-title-desc">Definições de descontos e promoções do produto</p>
-                <div class="row">
-                    <!-- Tipo de desconto -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="discount_type" class="form-label">Tipo de Desconto</label>
-                            <select id="discount_type" name="discount_type" class="form-select">
+
+            <!-- Valores Promocionais -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Valores Promocionais</h4>
+                    <p class="card-title-desc">Definições de descontos e promoções do produto</p>
+                    <div class="row">
+                        <div class="col-md-3" x-data="{ field: 'discount_type' }">
+                            <label class="form-label" :for="field">Tipo de Desconto</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="percent">Percentagem (%)</option>
                                 <option value="fixed">Valor Fixo (€)</option>
                             </select>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="discount_value" class="form-label">Valor do Desconto</label>
-                            <input type="number" step="0.01" class="form-control" id="discount_value" name="discount_value" placeholder="0.00">
+                        <div class="col-md-3" x-data="{ field: 'discount_value' }">
+                            <label class="form-label" :for="field">Valor do Desconto</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" placeholder="0.00"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'special_price' }">
+                            <label class="form-label" :for="field">Preço Promocional</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" placeholder="0.00"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'special_price_start' }">
+                            <label class="form-label" :for="field">Início Promoção</label>
+                            <input type="date" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'special_price_end' }">
+                            <label class="form-label" :for="field">Fim Promoção</label>
+                            <input type="date" class="form-control"
+                                   :id="field" :name="field"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="special_price" class="form-label">Preço Promocional</label>
-                            <input type="number" step="0.01" class="form-control" id="special_price" name="special_price" placeholder="0.00">
+            </div>
+
+            <!-- Dimensões -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Dimensões</h4>
+                    <p class="card-title-desc">Medidas físicas do produto para envio e logística</p>
+                    <div class="row">
+                        <div class="col-md-3" x-data="{ field: 'weight' }">
+                            <label class="form-label" :for="field">Peso (kg)</label>
+                            <input type="number" step="0.01" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="0.00" x-model="form[field]"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="special_price_start" class="form-label">Início Promoção</label>
-                            <input type="date" class="form-control" id="special_price_start" name="special_price_start">
+                        <div class="col-md-3" x-data="{ field: 'width' }">
+                            <label class="form-label" :for="field">Largura (cm)</label>
+                            <input type="number" step="0.1" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="0.0" x-model="form[field]"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="special_price_end" class="form-label">Fim Promoção</label>
-                            <input type="date" class="form-control" id="special_price_end" name="special_price_end">
+                        <div class="col-md-3" x-data="{ field: 'height' }">
+                            <label class="form-label" :for="field">Altura (cm)</label>
+                            <input type="number" step="0.1" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="0.0" x-model="form[field]"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-3" x-data="{ field: 'length' }">
+                            <label class="form-label" :for="field">Comprimento (cm)</label>
+                            <input type="number" step="0.1" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="0.0" x-model="form[field]"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Dimensões</h4>
-                <p class="card-title-desc">Medidas físicas do produto para envio e logística</p>
-                <div class="row">
-                    <!-- Peso -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="weight" class="form-label">Peso (kg)</label>
-                            <input type="number" step="0.01" class="form-control" id="weight" name="weight" placeholder="0.00">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <!-- Largura -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="width" class="form-label">Largura (cm)</label>
-                            <input type="number" step="0.1" class="form-control" id="width" name="width" placeholder="0.0">
-                        </div>
-                    </div>
-                    <!-- Altura -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="height" class="form-label">Altura (cm)</label>
-                            <input type="number" step="0.1" class="form-control" id="height" name="height" placeholder="0.0">
-                        </div>
-                    </div>
-                    <!-- Comprimento -->
-                    <div class="col-md-3">
-                        <div class="mb-2">
-                            <label for="length" class="form-label">Comprimento (cm)</label>
-                            <input type="number" step="0.1" class="form-control" id="length" name="length" placeholder="0.0">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-4">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Visibilidade</h4>
-                <p class="card-title-desc">Informações de Visibilidade</p>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="type" class="form-label">Estado</label>
-                            <select id="type" name="type" class="form-select">
+
+        <!-- Coluna lateral -->
+        <div class="col-4">
+            <!-- Visibilidade -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Visibilidade</h4>
+                    <p class="card-title-desc">Informações de Visibilidade</p>
+                    <div class="row">
+                        <div class="col-md-6" x-data="{ field: 'status' }">
+                            <label class="form-label" :for="field">Estado</label>
+                            <select class="form-select"  :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="active">Ativo</option>
                                 <option value="inactive">Inativo</option>
                                 <option value="draft">Rascunho</option>
                                 <option value="archived">Arquivado</option>
                             </select>
+                            <template x-if="errors[field]">
+                                <small class="text-danger" x-text="errors[field]"></small>
+                            </template>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="type" class="form-label">Tipo de Produto</label>
-                            <select id="type" name="type" class="form-select">
+                    <div class="row">
+                        <div class="col-md-6" x-data="{ field: 'type' }">
+                            <label class="form-label" :for="field">Tipo</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="simple">Simples</option>
                                 <option value="configurable">Configurable</option>
                                 <option value="virtual">Virtual</option>
                                 <option value="pack">Pack</option>
                             </select>
+                            <template x-if="errors[field]">
+                                <small class="text-danger" x-text="errors[field]"></small>
+                            </template>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="visibility" class="form-label">Visibilidade</label>
-                            <select id="visibility" name="visibility" class="form-select">
+
+                        <div class="col-md-6" x-data="{ field: 'visibility' }">
+                            <label class="form-label" :for="field">Visibilidade</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="both">Catálogo & Pesquisa</option>
                                 <option value="catalog">Só Catálogo</option>
                                 <option value="search">Só Pesquisa</option>
                                 <option value="none">Oculto</option>
                             </select>
+                            <template x-if="errors[field]">
+                                <small class="text-danger" x-text="errors[field]"></small>
+                            </template>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <!-- Produto em destaque -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="is_featured" class="form-label">Produto em Destaque</label>
-                            <div>
-                                <input type="checkbox" id="is_featured" name="is_featured" value="1" switch="none" />
-                                <label for="is_featured" data-on-label="Sim" data-off-label="Não"></label>
+
+
+                    <div class="row">
+                        <!-- Produto em destaque -->
+                        <div class="col-md-6" x-data="{ field: 'is_featured' }">
+                            <div class="mb-2">
+                                <label class="form-label" :for="field">Produto em Destaque</label>
+                                <div>
+                                    <input type="checkbox" :id="field" :name="field" value="1"
+                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }" switch="none" />
+                                    <label :for="field" data-on-label="Sim" data-off-label="Não"></label>
+                                </div>
+                                <template x-if="errors[field]">
+                                    <small class="text-danger" x-text="errors[field]"></small>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Produto novo -->
+                        <div class="col-md-6" x-data="{ field: 'is_new' }">
+                            <div class="mb-2">
+                                <label class="form-label" :for="field">Produto Novo</label>
+                                <div>
+                                    <input type="checkbox" :id="field" :name="field" value="1"
+                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }" switch="none" />
+                                    <label :for="field" data-on-label="Sim" data-off-label="Não"></label>
+                                </div>
+                                <template x-if="errors[field]">
+                                    <small class="text-danger" x-text="errors[field]"></small>
+                                </template>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Produto novo -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="is_new" class="form-label">Produto Novo</label>
-                            <div>
-                                <input type="checkbox" id="is_new" name="is_new" value="1" switch="none" />
-                                <label for="is_new" data-on-label="Sim" data-off-label="Não"></label>
+                </div>
+            </div>
+            <!-- Inventário -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Inventário e Quantidades</h4>
+                    <p class="card-title-desc">Gestão de stock</p>
+                    <div class="row">
+                        <div class="col-md-6" x-data="{ field: 'stock_qty' }">
+                            <label class="form-label" :for="field">Qtd. em Stock</label>
+                            <input type="number" class="form-control"
+                                   :id="field" :name="field" placeholder="0"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]">
+                                <small class="text-danger" x-text="errors[field]"></small>
+                            </template>
+                        </div>
+                        <div class="col-md-6" x-data="{ field: 'manage_stock' }">
+                            <div class="mb-2">
+                                <label class="form-label" :for="field">Gerir Stock</label>
+                                <div>
+                                    <input type="checkbox" :id="field" :name="field" value="1"
+                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }" switch="none" />
+                                    <label :for="field" data-on-label="Sim" data-off-label="Não"></label>
+                                </div>
+                                <template x-if="errors[field]">
+                                    <small class="text-danger" x-text="errors[field]"></small>
+                                </template>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Inventário  e quantidades</h4>
-                <p class="card-title-desc">Informações de Visibilidade</p>
-                <div class="row">
-                    <!-- Quantidade em stock -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="stock_qty" class="form-label">Qtd. em Stock</label>
-                            <input type="number" class="form-control" id="stock_qty" name="stock_qty" placeholder="0">
-                        </div>
-                    </div>
 
-                    <!-- Gestão de stock -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="manage_stock" class="form-label">Gerir Stock</label>
-                            <div>
-                                <input type="checkbox" id="manage_stock" name="manage_stock" value="1" switch="none">
-                                <label for="manage_stock" data-on-label="Sim" data-off-label="Não"></label>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Etiquetas</h4>
-                <p class="card-title-desc">Etiquetas e identificadaores unicos</p>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-2">
-                            <label for="sku" class="form-label">SKU</label>
-                            <input type="text" class="form-control" id="sku" name="sku" placeholder="ex: PROD12345">
+            <!-- Etiquetas -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Etiquetas</h4>
+                    <p class="card-title-desc">Identificadores únicos</p>
+                    <div class="row">
+                        <div class="col-md-4" x-data="{ field: 'sku' }">
+                            <label class="form-label" :for="field">SKU</label>
+                            <input type="text" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="ex: PROD12345"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-4" x-data="{ field: 'ean' }">
+                            <label class="form-label" :for="field">EAN</label>
+                            <input type="text" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="EAN do produto"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-4" x-data="{ field: 'upc' }">
+                            <label class="form-label" :for="field">UPC</label>
+                            <input type="text" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="UPC do produto"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="mb-2">
-                            <label for="ean" class="form-label">EAN</label>
-                            <input type="text" class="form-control" id="ean" name="ean" placeholder="EAN do produto">
+                    <div class="row">
+                        <div class="col-md-4" x-data="{ field: 'isbn' }">
+                            <label class="form-label" :for="field">ISBN</label>
+                            <input type="text" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="ISBN"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-2">
-                            <label for="upc" class="form-label">UPC</label>
-                            <input type="text" class="form-control" id="upc" name="upc" placeholder="UPC do produto">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-2">
-                            <label for="isbn" class="form-label">ISBN</label>
-                            <input type="text" class="form-control" id="isbn" name="isbn" placeholder="ISBN (para livros)">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-2">
-                            <label for="gtin" class="form-label">GTIN</label>
-                            <input type="text" class="form-control" id="gtin" name="gtin" placeholder="GTIN do produto">
+                        <div class="col-md-4" x-data="{ field: 'gtin' }">
+                            <label class="form-label" :for="field">GTIN</label>
+                            <input type="text" class="form-control"
+                                   :id="field" :name="field"
+                                   placeholder="GTIN do produto"
+                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Fornecedores</h4>
-                <p class="card-title-desc">Informações de fornecedores e marcas</p>
-                <div class="row">
-                    <!-- Fornecedor -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="supplier_id" class="form-label">Fornecedor</label>
-                            <select id="supplier_id" name="supplier_id" class="form-select">
-                                <option value="">-- Selecionar --</option>
-                                <?php if (!empty($suppliers)): ?>
-                                    <?php foreach ($suppliers as $supplier): ?>
-                                        <option value="<?= $supplier['id'] ?>"><?= esc($supplier['name']) ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- Marca -->
-                    <div class="col-md-6">
-                        <div class="mb-2">
-                            <label for="brand_id" class="form-label">Marca</label>
-                            <select id="brand_id" name="brand_id" class="form-select">
-                                <option value="">-- Selecionar --</option>
-                                <?php if (!empty($brands)): ?>
-                                    <?php foreach ($brands as $brand): ?>
-                                        <option value="<?= $brand['id'] ?>"><?= esc($brand['name']) ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">Categorias</h4>
-                <p class="card-title-desc">Informações de fornecedores e marcas</p>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="mb-2">
-                            <label for="category_id" class="form-label">Categoria Base</label>
-                            <select id="category_id" name="category_id" class="form-select">
+            <!-- Fornecedores -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Fornecedores</h4>
+                    <p class="card-title-desc">Informações de fornecedores e marcas</p>
+                    <div class="row">
+                        <div class="col-md-6" x-data="{ field: 'supplier_id' }">
+                            <label class="form-label" :for="field">Fornecedor</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
-                                <?php if (!empty($categories)): ?>
-                                    <?php foreach ($categories as $cat): ?>
-                                        <option value="<?= $cat['id'] ?>"><?= esc($cat['name']) ?></option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                <?php foreach ($suppliers ?? [] as $supplier): ?>
+                                    <option value="<?= $supplier['id'] ?>"><?= esc($supplier['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                        <div class="col-md-6" x-data="{ field: 'brand_id' }">
+                            <label class="form-label" :for="field">Marca</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                <option value="">-- Selecionar --</option>
+                                <?php foreach ($brands ?? [] as $brand): ?>
+                                    <option value="<?= $brand['id'] ?>"><?= esc($brand['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Categorias -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Categorias</h4>
+                    <p class="card-title-desc">Categorias do produto</p>
+                    <div class="row">
+                        <div class="col-md-12" x-data="{ field: 'category_id' }">
+                            <label class="form-label" :for="field">Categoria Base</label>
+                            <select class="form-select" :id="field" :name="field"
+                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                <option value="">-- Selecionar --</option>
+                                <?php foreach ($categories ?? [] as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= esc($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
 
+    <!-- Botão submit -->
+    <div class="mt-3 d-grid">
+        <button type="submit" class="btn btn-primary" :disabled="loading">
+            <span x-show="!loading">Guardar Produto</span>
+            <span x-show="loading">A guardar...</span>
+        </button>
+    </div>
+</form>
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>
@@ -421,5 +518,4 @@ Dashboard
         });
     });
 </script>
-
 <?= $this->endSection() ?>
