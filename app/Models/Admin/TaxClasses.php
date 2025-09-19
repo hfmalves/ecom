@@ -4,7 +4,7 @@ namespace App\Models\Admin;
 
 use CodeIgniter\Model;
 
-class ProductsTaxClasses extends Model
+class TaxClasses  extends Model
 {
     protected $table            = 'tax_classes';
     protected $primaryKey       = 'id';

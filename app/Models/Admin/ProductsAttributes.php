@@ -4,7 +4,7 @@ namespace App\Models\Admin;
 
 use CodeIgniter\Model;
 
-class Attributes extends Model
+class ProductsAttributes extends Model
 {
     protected $table            = 'attributes';
     protected $primaryKey       = 'id';
