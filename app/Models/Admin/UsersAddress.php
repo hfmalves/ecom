@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class UsersAddress extends Model
 {
-    protected $table            = 'user_addresses';
+    protected $table            = 'users_addresses';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

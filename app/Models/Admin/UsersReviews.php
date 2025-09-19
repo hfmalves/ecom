@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class UsersReviews extends Model
 {
-    protected $table            = 'user_reviews';
+    protected $table            = 'users_reviews';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

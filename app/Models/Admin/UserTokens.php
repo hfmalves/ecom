@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class UserTokens extends Model
 {
-    protected $table            = 'user_tokens';
+    protected $table            = 'users_tokens';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

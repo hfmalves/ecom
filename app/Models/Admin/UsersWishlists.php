@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class UsersWishlists extends Model
 {
-    protected $table            = 'user_wishlists';
+    protected $table            = 'users_wishlists';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

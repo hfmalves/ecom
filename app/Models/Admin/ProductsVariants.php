@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class ProductsVariants extends Model
 {
-    protected $table            = 'product_variants';
+    protected $table            = 'products_variants';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

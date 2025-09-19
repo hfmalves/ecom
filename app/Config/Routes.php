@@ -14,15 +14,27 @@ $routes->group('/', ['namespace' => 'App\Controllers\Website'], function ($route
 });
 
 // Admin / Backoffice
+// Admin / Backoffice
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
-    // Auth (GET mostra view, POST processa)
-    $routes->match(['get','post'], 'auth/login', 'Auth\Auth::login', ['filter' => 'noauth']);
-    $routes->match(['get','post'], 'auth/register', 'Auth\Register::index', ['filter' => 'noauth']);
-    $routes->match(['get','post'], 'auth/recovery', 'Auth\ForgotPassword::index', ['filter' => 'noauth']);
-    $routes->match(['get','post'], 'auth/reset/(:segment)', 'Auth\ForgotPassword::reset/$1', ['filter' => 'noauth']);
-    $routes->get('auth/logout', 'Auth\Auth::logout', ['filter' => 'auth']);
+
+    // Auth
+    $routes->group('auth', ['namespace' => 'App\Controllers\Admin\Auth'], function ($routes) {
+        $routes->get('login', 'Auth::login', ['filter' => 'noauth']);
+        $routes->post('login', 'Auth::attemptLogin', ['filter' => 'noauth']);
+
+        $routes->get('register', 'Register::index', ['filter' => 'noauth']);
+        $routes->post('register', 'Register::attemptRegister', ['filter' => 'noauth']);
+
+        $routes->get('recovery', 'ForgotPassword::index', ['filter' => 'noauth']);
+        $routes->post('recovery', 'ForgotPassword::sendRecovery', ['filter' => 'noauth']);
+
+        $routes->get('reset/(:segment)', 'ForgotPassword::reset/$1', ['filter' => 'noauth']);
+        $routes->post('reset', 'ForgotPassword::attemptReset', ['filter' => 'noauth']);
+
+        $routes->get('logout', 'Auth::logout', ['filter' => 'auth']);
+    });
 
     // Dashboard
-    $routes->get('/', 'Dashboard::index', ['filter' => 'auth']);
-    $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
+    $routes->get('/', 'Dashboard::index', ['filter' => 'auth']);            // /admin
+    $routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);    // /admin/dashboard
 });

@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class ProductsAttributes extends Model
 {
-    protected $table            = 'attributes';
+    protected $table            = 'products_attributes';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
