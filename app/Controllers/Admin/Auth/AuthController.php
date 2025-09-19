@@ -6,7 +6,7 @@ use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\Admin\Users;
 use App\Models\Admin\UserTokens;
-class Auth extends BaseController
+class AuthController extends BaseController
 {
     protected $users;
     protected $userTokens;

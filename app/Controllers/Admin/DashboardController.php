@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Controllers\Admin\Customers;
+namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class Groups extends BaseController
+class DashboardController extends BaseController
 {
     public function index()
     {
-        //
+        return view('admin/dashboard/index');
     }
 }

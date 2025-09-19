@@ -7,7 +7,7 @@ use App\Models\Admin\Users;
 use App\Models\Admin\UserTokens;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class ForgotPassword extends BaseController
+class ForgotPasswordController extends BaseController
 {
     protected $users;
     protected $userTokens;

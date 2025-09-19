@@ -11,6 +11,11 @@
         <link href="<?= base_url('assets/css/bootstrap.min.css') ?>" id="bootstrap-style" rel="stylesheet" type="text/css" />
         <link href="<?= base_url('assets/css/icons.min.css') ?>" rel="stylesheet" type="text/css" />
         <link href="<?= base_url('assets/css/app.min.css') ?>" id="app-style" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/libs/datatables.net-buttons-bs4/css/buttons.bootstrap4.min.css') ?>" rel="stylesheet" type="text/css" />
+        <link href="<?= base_url('assets/libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') ?>" rel="stylesheet" type="text/css" />
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
+
     </head>
     <body data-sidebar="dark" data-layout-mode="light">
         <div id="layout-wrapper">
@@ -37,8 +42,13 @@
         <script src="<?= base_url('assets/libs/metismenu/metisMenu.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/simplebar/simplebar.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/node-waves/waves.min.js') ?>"></script>
+        <script src="<?= base_url('assets/libs/datatables.net/js/jquery.dataTables.min.js') ?>"></script>
+        <script src="<?= base_url('assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
+        <script src="<?= base_url('assets/js/pages/datatables.init.js') ?>"></script>
         <script src="<?= base_url('assets/js/app.js') ?>"></script>
         <script src="<?= base_url('assets/js/axs_alp.min.js') ?>" defer></script>
-
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
+        <?= $this->renderSection('content-script') ?>
     </body>
 </html>
