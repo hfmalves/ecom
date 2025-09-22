@@ -23,9 +23,9 @@
                         <span>Catálogo</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="<?= base_url('admin/products') ?>">Produtos</a></li>
-                        <li><a href="<?= base_url('admin/categories') ?>">Categorias</a></li>
-                        <li><a href="<?= base_url('admin/attributes') ?>">Atributos</a></li>
+                        <li><a href="<?= base_url('admin/catalog/products') ?>">Produtos</a></li>
+                        <li><a href="<?= base_url('cadmin/atalog/categories') ?>">Categorias</a></li>
+                        <li><a href="<?= base_url('admin/catalog/attributes') ?>">Atributos</a></li>
                     </ul>
                 </li>
 

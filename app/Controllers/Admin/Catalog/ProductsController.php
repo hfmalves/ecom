@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers\Admin\Products;
+namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
 use App\Models\Admin\Products;
@@ -42,7 +42,7 @@ class ProductsController extends BaseController
                     ? date('d/m/Y H:i', strtotime($p['updated_at']))
                     : '—',
                 'actions'  => '
-                    <a href="'.base_url('admin/products/edit/'.$p['id']).'" class="btn btn-sm btn-primary w-100">
+                    <a href="'.base_url('admin/catalog/products/edit/'.$p['id']).'" class="btn btn-sm btn-primary w-100">
                         <i class="mdi mdi-pencil"></i>
                     </a>'
             ];
@@ -52,7 +52,7 @@ class ProductsController extends BaseController
             'products' => $products
         ];
 
-        return view('admin/products/index', $data);
+        return view('admin/catalog/products/index', $data);
     }
     public function edit($id = null)
     {
@@ -66,7 +66,7 @@ class ProductsController extends BaseController
         $data = [
             'product' => $product
         ];
-        return view('admin/products/edit', $data);
+        return view('admin/catalog/products/edit', $data);
     }
     public function update()
     {
