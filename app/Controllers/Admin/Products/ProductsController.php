@@ -71,9 +71,44 @@ class ProductsController extends BaseController
     public function update()
     {
         $data = $this->request->getJSON(true);
+        foreach (['is_new', 'is_featured', 'manage_stock'] as $field) {
+            if (isset($data[$field]) && is_bool($data[$field])) {
+                $data[$field] = $data[$field] ? 1 : 0;
+            }
+        }
+        if (! $this->products->validate($data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->products->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        $id = $data['id'] ?? null;
+        if (! $id || ! $this->products->find($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Produto não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        $this->products->update($id, $data);
+
         return $this->response->setJSON([
             'status'  => 'success',
-            'message' => 'Produto guardado com sucesso!'
+            'message' => 'Produto atualizado com sucesso!',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
         ]);
     }
+
 }

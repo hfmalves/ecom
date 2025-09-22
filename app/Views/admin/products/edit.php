@@ -11,16 +11,21 @@ Dashboard
                 <p class="text-muted mb-0">Ready to jump back in?</p>
             </div>
 
-            <a href="javascript:void(0);" class="btn btn-primary">
-                <i class="bx bx-save align-middle"></i> Guardar
+            <a href="javascript:void(0);"
+               class="btn btn-primary"
+               onclick="console.log('cliquei no botão'); document.getElementById('productForm').dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }))">
+                Guardar
             </a>
+
         </div>
     </div><!--end col-->
 </div><!--end row-->
-<form
+<form id="productForm"
+        x-ref="form"
         x-data="formHandler(
     '<?= base_url('admin/products/update') ?>',
     {
+        id: '<?= esc($product['id']) ?>',
         status: '<?= esc($product['status']) ?>',
         name: '<?= esc($product['name']) ?>',
         slug: '<?= esc($product['slug']) ?>',
@@ -226,7 +231,7 @@ Dashboard
                     <div class="row">
                         <div class="col-md-3" x-data="{ field: 'weight' }">
                             <label class="form-label" :for="field">Peso (kg)</label>
-                            <input type="number" step="0.01" class="form-control"
+                            <input type="text" step="0.01" class="form-control"
                                    :id="field" :name="field"
                                    placeholder="0.00" x-model="form[field]"
                                    :class="{ 'is-invalid': errors[field] }">
@@ -234,7 +239,7 @@ Dashboard
                         </div>
                         <div class="col-md-3" x-data="{ field: 'width' }">
                             <label class="form-label" :for="field">Largura (cm)</label>
-                            <input type="number" step="0.1" class="form-control"
+                            <input type="text" step="0.1" class="form-control"
                                    :id="field" :name="field"
                                    placeholder="0.0" x-model="form[field]"
                                    :class="{ 'is-invalid': errors[field] }">
@@ -242,7 +247,7 @@ Dashboard
                         </div>
                         <div class="col-md-3" x-data="{ field: 'height' }">
                             <label class="form-label" :for="field">Altura (cm)</label>
-                            <input type="number" step="0.1" class="form-control"
+                            <input type="text" step="0.1" class="form-control"
                                    :id="field" :name="field"
                                    placeholder="0.0" x-model="form[field]"
                                    :class="{ 'is-invalid': errors[field] }">
@@ -250,7 +255,7 @@ Dashboard
                         </div>
                         <div class="col-md-3" x-data="{ field: 'length' }">
                             <label class="form-label" :for="field">Comprimento (cm)</label>
-                            <input type="number" step="0.1" class="form-control"
+                            <input type="text" step="0.1" class="form-control"
                                    :id="field" :name="field"
                                    placeholder="0.0" x-model="form[field]"
                                    :class="{ 'is-invalid': errors[field] }">
@@ -302,16 +307,17 @@ Dashboard
 
                         <div class="col-md-6" x-data="{ field: 'visibility' }">
                             <label class="form-label" :for="field">Visibilidade</label>
-                            <select class="form-select" :id="field" :name="field"
-                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <select class="form-select" id="visibility" name="visibility"
+                                    x-model="form.visibility"
+                                    :class="{ 'is-invalid': errors.visibility }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="both">Catálogo & Pesquisa</option>
                                 <option value="catalog">Só Catálogo</option>
                                 <option value="search">Só Pesquisa</option>
                                 <option value="none">Oculto</option>
                             </select>
-                            <template x-if="errors[field]">
-                                <small class="text-danger" x-text="errors[field]"></small>
+                            <template x-if="errors.visibility">
+                                <small class="text-danger" x-text="errors.visibility"></small>
                             </template>
                         </div>
                     </div>
@@ -334,12 +340,19 @@ Dashboard
                         </div>
 
                         <!-- Produto novo -->
+                        <!-- Produto novo -->
                         <div class="col-md-6" x-data="{ field: 'is_new' }">
                             <div class="mb-2">
                                 <label class="form-label" :for="field">Produto Novo</label>
                                 <div>
-                                    <input type="checkbox" :id="field" :name="field" value="1"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }" switch="none" />
+                                    <input type="checkbox"
+                                           :id="field"
+                                           :name="field"
+                                           x-model="form[field]"
+                                           true-value="1"
+                                           false-value="0"
+                                           :class="{ 'is-invalid': errors[field] }"
+                                           switch="none" />
                                     <label :for="field" data-on-label="Sim" data-off-label="Não"></label>
                                 </div>
                                 <template x-if="errors[field]">
@@ -347,6 +360,7 @@ Dashboard
                                 </template>
                             </div>
                         </div>
+
                     </div>
 
                 </div>
@@ -500,6 +514,9 @@ Dashboard
         </button>
     </div>
 </form>
+
+
+
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>

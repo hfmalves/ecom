@@ -66,12 +66,14 @@ class Products extends Model
 
     // Validation
     protected $validationRules = [
+        'id'   => 'permit_empty|is_natural_no_zero',
+        'sku'  => 'required|min_length[2]|max_length[100]|is_unique[products.sku,id,{id}]',
         'ean'  => 'permit_empty|is_unique[products.ean,id,{id}]',
         'upc'  => 'permit_empty|is_unique[products.upc,id,{id}]',
         'isbn' => 'permit_empty|is_unique[products.isbn,id,{id}]',
         'gtin' => 'permit_empty|is_unique[products.gtin,id,{id}]',
-        'name'             => 'required|min_length[2]|max_length[255]',
-        'slug'             => 'required|min_length[2]|max_length[255]',
+        'name' => 'required|min_length[2]|max_length[255]',
+        'slug' => 'required|min_length[2]|max_length[255]',
         'brand_id'         => 'permit_empty|integer',
         'category_id'      => 'permit_empty|integer',
         'cost_price'       => 'permit_empty|decimal',
@@ -85,7 +87,7 @@ class Products extends Model
         'stock_qty'        => 'permit_empty|integer',
         'manage_stock'     => 'permit_empty|in_list[0,1]',
         'type'             => 'permit_empty|string',
-        'visibility'       => 'permit_empty|in_list[visible,hidden]',
+        'visibility' => 'required|in_list[catalog,search,both,none]',
         'weight'           => 'permit_empty|decimal',
         'width'            => 'permit_empty|decimal',
         'height'           => 'permit_empty|decimal',
@@ -94,29 +96,16 @@ class Products extends Model
         'meta_description' => 'permit_empty|max_length[500]',
         'meta_keywords'    => 'permit_empty|max_length[255]',
         'is_featured'      => 'permit_empty|in_list[0,1]',
-        'is_new'           => 'permit_empty|in_list[0,1]',
+        'is_new' => 'permit_empty|in_list[0,1,true,false]',
         'tax_class_id'     => 'permit_empty|integer',
-        'status'           => 'permit_empty|in_list[active,inactive]',
+        'status'           => 'permit_empty|in_list[active,inactive,draft,archived]',
     ];
     protected $validationMessages = [
-        'sku' => [
-            'required'   => 'O SKU é obrigatório.',
-            'min_length' => 'O SKU deve ter pelo menos 2 caracteres.',
-            'max_length' => 'O SKU não pode ter mais de 100 caracteres.',
-            'is_unique'  => 'Este SKU já existe, escolha outro.',
-        ],
-        'ean' => [
-            'is_unique'  => 'Este EAN já existe, escolha outro.',
-        ],
-        'upc' => [
-            'is_unique'  => 'Este UPC já existe, escolha outro.',
-        ],
-        'isbn' => [
-            'is_unique'  => 'Este ISBN já existe, escolha outro.',
-        ],
-        'gtin' => [
-            'is_unique'  => 'Este GTIN já existe, escolha outro.',
-        ],
+        'sku'  => 'required|min_length[2]|max_length[100]|is_unique[products.sku,id,{id}]',
+        'ean'  => 'permit_empty|is_unique[products.ean,id,{id}]',
+        'upc'  => 'permit_empty|is_unique[products.upc,id,{id}]',
+        'isbn' => 'permit_empty|is_unique[products.isbn,id,{id}]',
+        'gtin' => 'permit_empty|is_unique[products.gtin,id,{id}]',
         'name' => [
             'required'   => 'O nome do produto é obrigatório.',
             'min_length' => 'O nome deve ter pelo menos 2 caracteres.',
