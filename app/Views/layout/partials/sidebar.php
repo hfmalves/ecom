@@ -26,6 +26,8 @@
                         <li><a href="<?= base_url('admin/catalog/products') ?>">Produtos</a></li>
                         <li><a href="<?= base_url('admin/catalog/categories') ?>">Categorias</a></li>
                         <li><a href="<?= base_url('admin/catalog/attributes') ?>">Atributos</a></li>
+                        <li><a href="<?= base_url('admin/catalog/suppliers') ?>">Fornecedores</a></li>
+                        <li><a href="<?= base_url('admin/catalog/brands') ?>">Marcas</a></li>
                     </ul>
                 </li>
 

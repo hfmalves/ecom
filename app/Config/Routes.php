@@ -54,6 +54,16 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('edit/(:num)', 'AttributesController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'AttributesController::update');
         });
+        $routes->group('suppliers', function ($routes) {
+            $routes->get('/', 'SuppliersController::index', ['filter' => 'noauth']);
+            $routes->get('edit/(:num)', 'SuppliersController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('update', 'SuppliersController::update');
+        });
+        $routes->group('brands', function ($routes) {
+            $routes->get('/', 'BrandsController::index', ['filter' => 'noauth']);
+            $routes->get('edit/(:num)', 'BrandsController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('update', 'BrandsController::update');
+        });
     });
 
 });
