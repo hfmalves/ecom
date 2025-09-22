@@ -39,9 +39,21 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 
     // Products
     $routes->group('catalog', ['namespace' => 'App\Controllers\Admin\Catalog'], function ($routes) {
-        $routes->get('products', 'ProductsController::index', ['filter' => 'noauth']);
-        $routes->get('products/edit/(:num)', 'ProductsController::edit/$1', ['filter' => 'noauth']);
-        $routes->post('products/update', 'ProductsController::update');
+        $routes->group('products', function ($routes) {
+            $routes->get('/', 'ProductsController::index', ['filter' => 'noauth']);
+            $routes->get('edit/(:num)', 'ProductsController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('update', 'ProductsController::update');
+        });
+        $routes->group('categories', function ($routes) {
+            $routes->get('/', 'CategoriesController::index', ['filter' => 'noauth']);
+            $routes->get('edit/(:num)', 'CategoriesController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('update', 'CategoriesController::update');
+        });
+        $routes->group('attributes', function ($routes) {
+            $routes->get('/', 'AttributesController::index', ['filter' => 'noauth']);
+            $routes->get('edit/(:num)', 'AttributesController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('update', 'AttributesController::update');
+        });
     });
 
 });
