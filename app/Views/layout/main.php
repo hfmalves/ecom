@@ -30,28 +30,37 @@
                         <?= $this->renderSection('content') ?>
                     </div>
                 </div>
-
                 <!-- Footer -->
                 <?= $this->include('layout/partials/footer') ?>
+                <!-- Modal Global -->
+                <div class="modal fade" id="globalModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" id="globalModalDialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="globalModalTitle">Título</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body" id="globalModalBody">Conteúdo inicial...</div>
+                            <div class="modal-footer" id="globalModalFooter"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
         <div class="rightbar-overlay"></div>
         <!-- JS -->
         <!-- Toastr CSS -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-
         <!-- jQuery (mantém só 1 versão, não duas) -->
         <script src="<?= base_url('assets/libs/jquery/jquery.min.js') ?>"></script>
-
         <!-- Bootstrap, plugins -->
         <script src="<?= base_url('assets/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/metismenu/metisMenu.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/simplebar/simplebar.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/node-waves/waves.min.js') ?>"></script>
-
         <!-- Toastr JS -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
         <!-- DataTables -->
         <script src="<?= base_url('assets/libs/datatables.net/js/jquery.dataTables.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/datatables.net-bs4/js/dataTables.bootstrap4.min.js') ?>"></script>
@@ -65,17 +74,12 @@
         <script src="<?= base_url('assets/libs/datatables.net-buttons/js/buttons.html5.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/datatables.net-buttons/js/buttons.print.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/datatables.net-buttons/js/buttons.colVis.min.js') ?>"></script>
-
-
         <!-- O teu app.js (que tem showToast) -->
         <script src="<?= base_url('assets/js/app.js') ?>"></script>
-
         <!-- Alpine -->
         <script src="<?= base_url('assets/js/axs_alp.min.js') ?>" defer></script>
-
         <!-- Summernote -->
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
-
         <?= $this->renderSection('content-script') ?>
 
     </body>

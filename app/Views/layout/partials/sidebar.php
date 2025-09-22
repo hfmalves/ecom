@@ -20,11 +20,10 @@
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-package"></i>
-                        <span>Produtos</span>
+                        <span>Catálogo</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="<?= base_url('admin/products') ?>">Todos os Produtos</a></li>
-                        <li><a href="<?= base_url('admin/products/create') ?>">Adicionar Produto</a></li>
+                        <li><a href="<?= base_url('admin/products') ?>">Produtos</a></li>
                         <li><a href="<?= base_url('admin/categories') ?>">Categorias</a></li>
                         <li><a href="<?= base_url('admin/attributes') ?>">Atributos</a></li>
                     </ul>

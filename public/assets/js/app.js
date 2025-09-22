@@ -142,3 +142,67 @@ function showToast(message, type = "info", title = "") {
     }
 }
 window.showToast = showToast;
+function systemModal() {
+    return {
+        async open(source, size = 'md', entity = null) {
+            try {
+                let content = '';
+
+                if (typeof source === 'string' && source.startsWith('#')) {
+                    let el = document.querySelector(source);
+                    if (!el) throw new Error("Elemento não encontrado: " + source);
+                    content = el.innerHTML;
+                } else if (typeof source === 'string' && source.trim().startsWith('<')) {
+                    content = source;
+                } else {
+                    let res = await fetch(source);
+                    if (!res.ok) throw new Error(res.statusText);
+                    content = await res.text();
+                }
+
+                let wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <div class="modal fade" id="exampleModalDynamic" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered ${this.sizeClass(size)}">
+                            <div class="modal-content">${content}</div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(wrapper);
+
+                let modalEl = wrapper.querySelector('#exampleModalDynamic');
+                let modal = new bootstrap.Modal(modalEl);
+
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    let formEl = wrapper.querySelector('[x-data]');
+                    if (formEl) {
+                        if (entity) {
+                            // EDITAR → envia os dados para Alpine
+                            formEl.dispatchEvent(new CustomEvent('fill-form', { detail: entity }));
+                        } else {
+                            // CRIAR → limpa
+                            formEl.dispatchEvent(new CustomEvent('reset-form'));
+                        }
+                    }
+                });
+
+                modalEl.addEventListener('hidden.bs.modal', () => wrapper.remove());
+
+                modal.show();
+
+            } catch (e) {
+                console.error("Erro ao carregar modal:", e);
+            }
+        },
+
+        sizeClass(size) {
+            if (size === 'sm') return 'modal-sm';
+            if (size === 'lg') return 'modal-lg';
+            if (size === 'xl') return 'modal-xl';
+            return 'modal-md';
+        }
+    }
+}
+
+
+

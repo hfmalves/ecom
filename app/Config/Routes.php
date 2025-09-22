@@ -20,7 +20,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
     $routes->group('auth', ['namespace' => 'App\Controllers\Admin\Auth'], function ($routes) {
         $routes->get('login', 'AuthController::login', ['filter' => 'noauth']);
         $routes->post('login', 'AuthController::attemptLogin', ['filter' => 'noauth']);
-
+        $routes->post('verify2FA', 'Auth::verify2FA', ['filter' => 'noauth']);
         $routes->get('register', 'RegisterController::index', ['filter' => 'noauth']);
         $routes->post('register', 'RegisterController::attemptRegister', ['filter' => 'noauth']);
 
