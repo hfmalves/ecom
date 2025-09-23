@@ -53,11 +53,11 @@ class Suppliers extends Model
     protected $validationRules = [
         'name'           => 'required|min_length[3]|max_length[255]',
         'contact_person' => 'permit_empty|max_length[150]',
-        'legal_number'   => 'permit_empty|max_length[50]',
+        'legal_number'   => 'required|max_length[20]',
         'vat'            => 'permit_empty|max_length[50]',
-        'email'          => 'required|valid_email|max_length[255]|is_unique[suppliers.email,id,{id}]',
+        'email' => 'required|valid_email|max_length[255]|is_unique[suppliers.email]',
         'phone'          => 'permit_empty|max_length[50]',
-        'website'        => 'permit_empty|valid_url_strict|max_length[255]',
+        'website'        => 'permit_empty|max_length[255]',
         'address'        => 'permit_empty|string',
         'country'        => 'permit_empty|max_length[100]',
         'password'       => 'permit_empty|min_length[6]|max_length[255]',
@@ -75,6 +75,10 @@ class Suppliers extends Model
             'required'   => 'O nome do fornecedor é obrigatório.',
             'min_length' => 'O nome deve ter pelo menos 3 caracteres.',
             'max_length' => 'O nome não pode ter mais de 255 caracteres.',
+        ],
+        'legal_number' => [
+            'required'   => 'O nif do fornecedor é obrigatório.',
+            'max_length' => 'O nif não pode ter mais de 20 caracteres.',
         ],
         'email' => [
             'required'   => 'O email é obrigatório.',

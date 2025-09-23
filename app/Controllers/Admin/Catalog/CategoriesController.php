@@ -115,6 +115,4 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
-
-
 }

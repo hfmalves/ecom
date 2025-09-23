@@ -3,96 +3,79 @@
 namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
+use App\Models\Admin\Suppliers;
 use App\Models\Admin\Products;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class SuppliersController extends BaseController
 {
+    protected $suppliers;
     protected $products;
 
     public function __construct()
     {
-        $this->products = new Products(); // model
+        $this->suppliers = new Suppliers();
+        $this->products = new Products();
     }
-
     public function index()
     {
-        $rawProducts = $this->products->findAll();
-
-        // Prepara dados já prontos para a view
-        $products = array_map(function ($p) {
-            return [
-                'id'       => $p['id'],
-                'sku'      => $p['sku'],
-                'name'     => $p['name'],
-                'price'    => number_format($p['base_price'], 2, ',', '.') . ' €',
-                'promo'    => !empty($p['special_price'])
-                    ? '<span class="badge bg-success">'.number_format($p['special_price'], 2, ',', '.').' €</span>'
-                    : '<span class="text-muted">—</span>',
-                'stock'    => $p['manage_stock']
-                    ? $p['stock_qty']
-                    : '<span class="badge bg-info">Ilimitado</span>',
-                'status'   => match($p['status']) {
-                    'active'   => '<span class="badge bg-success">Ativo</span>',
-                    'inactive' => '<span class="badge bg-secondary">Inativo</span>',
-                    'draft'    => '<span class="badge bg-warning text-dark">Rascunho</span>',
-                    default    => '<span class="badge bg-dark">Arquivado</span>',
-                },
-                'type'     => ucfirst($p['type']),
-                'updated'  => !empty($p['updated_at'])
-                    ? date('d/m/Y H:i', strtotime($p['updated_at']))
-                    : '—',
-                'actions'  => '
-                    <a href="'.base_url('admin/catalog/products/edit/'.$p['id']).'" class="btn btn-sm btn-primary w-100">
-                        <i class="mdi mdi-pencil"></i>
-                    </a>'
-            ];
-        }, $rawProducts);
-
+        $suppliers = $this->suppliers->findAll();
         $data = [
-            'products' => $products
+            'suppliers' => $suppliers,
         ];
-
-        return view('admin/catalog/products/index', $data);
+        return view('admin/catalog/suppliers/index', $data);
     }
-    public function edit($id = null)
-    {
-        if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Produto não encontrado');
-        }
-        $product = $this->products->find($id);
-        if (!$product) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
-        }
-        $data = [
-            'product' => $product
-        ];
-        return view('admin/catalog/products/edit', $data);
-    }
-    public function update()
+    public function store()
     {
         $data = $this->request->getJSON(true);
-        foreach (['is_new', 'is_featured', 'manage_stock'] as $field) {
-            if (isset($data[$field]) && is_bool($data[$field])) {
-                $data[$field] = $data[$field] ? 1 : 0;
-            }
+        if (empty($data['status'])) {
+            $data['status'] = 'active';
         }
-        if (! $this->products->validate($data)) {
+        if (! $this->suppliers->insert($data)) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'errors' => $this->products->errors(),
+                'errors' => $this->suppliers->errors(),
                 'csrf'   => [
                     'token' => csrf_token(),
                     'hash'  => csrf_hash(),
                 ],
             ]);
         }
-
-        $id = $data['id'] ?? null;
-        if (! $id || ! $this->products->find($id)) {
+        $id = $this->suppliers->getInsertID();
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'message'  => 'Fornecedor criado com sucesso!',
+            'id'       => $id,
+            'redirect' => base_url('admin/catalog/suppliers/edit/'.$id),
+            'csrf'     => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+    public function edit($id = null)
+    {
+        if ($id === null) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Fornecedor não encontrado');
+        }
+        $supplier = $this->suppliers->find($id);
+        if (!$supplier) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Fornecedor com ID $id não encontrado");
+        }
+        $data = [
+            'supplier' => $supplier
+        ];
+        return view('admin/catalog/suppliers/edit', $data);
+    }
+    public function update()
+    {
+        $data = $this->request->getJSON(true);
+        $data['parent_id'] = null;
+        $id   = $data['id'] ?? null;
+        if (! $id || ! $this->suppliers->find($id)) {
             return $this->response->setJSON([
                 'status'  => 'error',
-                'message' => 'Produto não encontrado.',
+                'message' => 'Categoria não encontrada.',
                 'csrf'    => [
                     'token' => csrf_token(),
                     'hash'  => csrf_hash(),
@@ -100,11 +83,27 @@ class SuppliersController extends BaseController
             ]);
         }
 
-        $this->products->update($id, $data);
+
+        // Corrigir a validação do email para ignorar o registo atual
+        $this->suppliers->setValidationRule(
+            'email',
+            "required|valid_email|max_length[255]|is_unique[suppliers.email,id,{$id}]"
+        );
+
+        if (! $this->suppliers->update($id, $data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->suppliers->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
 
         return $this->response->setJSON([
             'status'  => 'success',
-            'message' => 'Produto atualizado com sucesso!',
+            'message' => 'Categoria atualizada com sucesso!',
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),

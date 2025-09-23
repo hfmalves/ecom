@@ -13,7 +13,7 @@ class SupplierSeeder extends Seeder
 
         $suppliers = [];
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             $suppliers[] = [
                 'name'           => $faker->company,
                 'contact_person' => $faker->name,
