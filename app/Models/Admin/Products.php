@@ -101,11 +101,12 @@ class Products extends Model
         'status'           => 'permit_empty|in_list[active,inactive,draft,archived]',
     ];
     protected $validationMessages = [
-        'sku'  => 'required|min_length[2]|max_length[100]|is_unique[products.sku,id,{id}]',
-        'ean'  => 'permit_empty|is_unique[products.ean,id,{id}]',
-        'upc'  => 'permit_empty|is_unique[products.upc,id,{id}]',
-        'isbn' => 'permit_empty|is_unique[products.isbn,id,{id}]',
-        'gtin' => 'permit_empty|is_unique[products.gtin,id,{id}]',
+        'sku' => [
+            'required'   => 'O SKU é obrigatório.',
+            'min_length' => 'O SKU deve ter pelo menos 2 caracteres.',
+            'max_length' => 'O SKU não pode ter mais de 255 caracteres.',
+            'is_unique'  => 'Já existe um produto com esse SKU.'
+        ],
         'name' => [
             'required'   => 'O nome do produto é obrigatório.',
             'min_length' => 'O nome deve ter pelo menos 2 caracteres.',

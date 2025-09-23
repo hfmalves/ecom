@@ -17,8 +17,6 @@ class ProductsController extends BaseController
     public function index()
     {
         $rawProducts = $this->products->findAll();
-
-        // Prepara dados já prontos para a view
         $products = array_map(function ($p) {
             return [
                 'id'       => $p['id'],
@@ -47,11 +45,9 @@ class ProductsController extends BaseController
                     </a>'
             ];
         }, $rawProducts);
-
         $data = [
             'products' => $products
         ];
-
         return view('admin/catalog/products/index', $data);
     }
     public function edit($id = null)
@@ -110,5 +106,48 @@ class ProductsController extends BaseController
             ],
         ]);
     }
+    public function store()
+    {
+        $data = $this->request->getJSON(true);
+        $data['status'] = 'draft';
+        $data['visibility'] = 'none';
+        $data['base_price'] = '0.0';
+        if (! empty($data['sku']) && ! empty($data['name'])) {
+            $slug = url_title($data['sku'] . '-' . $data['name'], '-', true);
+            $data['slug'] = $slug;
+        }
+        if (! $this->products->validate($data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->products->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $id = $this->products->insert($data);
+        if (! $id) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao criar produto.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Produto criado com sucesso!',
+            'id'      => $id,
+            'redirect' => base_url('admin/catalog/products/edit/'.$id),
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
 
 }

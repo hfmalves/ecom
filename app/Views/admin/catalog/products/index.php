@@ -74,40 +74,47 @@ Dashboard
             <h5 class="modal-title">Criar Produto</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body"
              x-data="{
-                ...formHandler('/api/products/create',
-                  { sku: '', name: '', type: 'simple' },
-                  { resetOnSuccess: true }),
-                loading: true
-             }"
+            ...formHandler('/admin/catalog/products/store',
+              {
+                sku: '',
+                name: '',
+                type: 'simple',
+                <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+              },
+              { resetOnSuccess: true })
+         }"
              x-init="
-                $el.addEventListener('fill-form', e => {
-                    loading = true
-                    Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
-                    $nextTick(() => loading = false)
-                });
-                $el.addEventListener('reset-form', () => {
-                    loading = true
-                    Object.keys(form).forEach(k => form[k] = '')
-                    $nextTick(() => loading = false)
-                });
-             ">
-            <div x-show="loading" x-cloak class="p-4 text-center">
-                <div class="spinner-border text-primary"></div>
-                <p>A carregar…</p>
-            </div>
-            <form x-show="!loading" @submit.prevent="submit()">
+            $el.addEventListener('fill-form', e => {
+              Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
+            });
+            $el.addEventListener('reset-form', () => {
+              Object.keys(form).forEach(k => {
+                if (k !== '<?= csrf_token() ?>') {
+                  form[k] = ''
+                }
+              })
+            });
+            document.addEventListener('csrf-update', e => {
+              form[e.detail.token] = e.detail.hash
+            });
+         ">
+
+            <form @submit.prevent="submit()">
                 <div class="mb-3">
                     <label class="form-label">SKU</label>
-                    <input type="text" class="form-control" name="sku" x-model="form.sku" required>
+                    <input type="text" class="form-control" name="sku" x-model="form.sku">
                     <div class="text-danger small" x-text="errors.sku"></div>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Nome</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name" required>
+                    <input type="text" class="form-control" name="name" x-model="form.name">
                     <div class="text-danger small" x-text="errors.name"></div>
                 </div>
+
                 <div class="mb-3">
                     <label class="form-label">Tipo</label>
                     <select class="form-select" name="type" x-model="form.type">
@@ -119,6 +126,7 @@ Dashboard
                     </select>
                     <div class="text-danger small" x-text="errors.type"></div>
                 </div>
+
                 <div class="modal-footer mt-3">
                     <button type="submit" class="btn btn-primary" :disabled="loading">
                         <span x-show="!loading">Criar Produto</span>
@@ -130,6 +138,4 @@ Dashboard
         </div>
     </div>
 </div>
-
-
 <?= $this->endSection() ?>

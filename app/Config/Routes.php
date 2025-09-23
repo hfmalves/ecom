@@ -42,6 +42,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         $routes->group('products', function ($routes) {
             $routes->get('/', 'ProductsController::index', ['filter' => 'noauth']);
             $routes->get('edit/(:num)', 'ProductsController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('store', 'ProductsController::store');
             $routes->post('update', 'ProductsController::update');
         });
         $routes->group('categories', function ($routes) {
