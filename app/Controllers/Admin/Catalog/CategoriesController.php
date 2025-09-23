@@ -17,7 +17,8 @@ class CategoriesController extends BaseController
 
     public function index()
     {
-        $categories = $this->categories->findAll();
+        $allCategories = $this->categories->orderBy('position', 'ASC')->findAll();
+        $categories = $this->buildTree($allCategories);
 
         $data = [
             'categories' => $categories,
@@ -25,60 +26,22 @@ class CategoriesController extends BaseController
 
         return view('admin/catalog/categories/index', $data);
     }
-    public function edit($id = null)
+    private function buildTree(array $elements, $parentId = null, $level = 0): array
     {
-        if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Produto não encontrado');
-        }
-        $product = $this->products->find($id);
-        if (!$product) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
-        }
-        $data = [
-            'product' => $product
-        ];
-        return view('admin/catalog/products/edit', $data);
-    }
-    public function update()
-    {
-        $data = $this->request->getJSON(true);
-        foreach (['is_new', 'is_featured', 'manage_stock'] as $field) {
-            if (isset($data[$field]) && is_bool($data[$field])) {
-                $data[$field] = $data[$field] ? 1 : 0;
+        $branch = [];
+
+        foreach ($elements as $element) {
+            if ($element['parent_id'] == $parentId) {
+                $element['level'] = $level; // guarda o nível para indentação
+                $children = $this->buildTree($elements, $element['id'], $level + 1);
+                if ($children) {
+                    $element['children'] = $children;
+                }
+                $branch[] = $element;
             }
         }
-        if (! $this->products->validate($data)) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'errors' => $this->products->errors(),
-                'csrf'   => [
-                    'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
-                ],
-            ]);
-        }
 
-        $id = $data['id'] ?? null;
-        if (! $id || ! $this->products->find($id)) {
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Produto não encontrado.',
-                'csrf'    => [
-                    'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
-                ],
-            ]);
-        }
-
-        $this->products->update($id, $data);
-
-        return $this->response->setJSON([
-            'status'  => 'success',
-            'message' => 'Produto atualizado com sucesso!',
-            'csrf'    => [
-                'token' => csrf_token(),
-                'hash'  => csrf_hash(),
-            ],
-        ]);
+        return $branch;
     }
+
 }
