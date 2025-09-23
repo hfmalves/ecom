@@ -19,9 +19,10 @@
         "wildbit/postmark-php": "^7.0"
     },
     "require-dev": {
+        "codeception/module-webdriver": "^4.0",
         "fakerphp/faker": "^1.9",
         "mikey179/vfsstream": "^1.6",
-        "phpunit/phpunit": "^10.5.16"
+        "phpunit/phpunit": "^10.5"
     },
     "autoload": {
         "psr-4": {
