@@ -68,20 +68,22 @@ Dashboard
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
-<div id="formProduct" class="d-none">
+<div id="formCategory" class="d-none">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Criar Produto</h5>
+            <h5 class="modal-title">Editar Categoria</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body"
              x-data="{
-            ...formHandler('/admin/catalog/products/store',
+            ...formHandler('/admin/catalog/categories/update',
               {
-                sku: '',
+                id: '',
                 name: '',
-                type: 'simple',
+                slug: '',
+                position: '',
+                is_active: 1,
                 <?= csrf_token() ?>: '<?= csrf_hash() ?>'
               },
               { resetOnSuccess: true })
@@ -104,33 +106,35 @@ Dashboard
 
             <form @submit.prevent="submit()">
                 <div class="mb-3">
-                    <label class="form-label">SKU</label>
-                    <input type="text" class="form-control" name="sku" x-model="form.sku">
-                    <div class="text-danger small" x-text="errors.sku"></div>
-                </div>
-
-                <div class="mb-3">
                     <label class="form-label">Nome</label>
                     <input type="text" class="form-control" name="name" x-model="form.name">
                     <div class="text-danger small" x-text="errors.name"></div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Tipo</label>
-                    <select class="form-select" name="type" x-model="form.type">
-                        <option value="">-- Selecionar --</option>
-                        <option value="simple">Simples</option>
-                        <option value="configurable">Configurable</option>
-                        <option value="virtual">Virtual</option>
-                        <option value="pack">Pack</option>
+                    <label class="form-label">Slug</label>
+                    <input type="text" class="form-control" name="slug" x-model="form.slug">
+                    <div class="text-danger small" x-text="errors.slug"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Posição</label>
+                    <input type="number" class="form-control" name="position" x-model="form.position">
+                    <div class="text-danger small" x-text="errors.position"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ativo</label>
+                    <select class="form-select" name="is_active" x-model="form.is_active">
+                        <option value="1">Ativo</option>
+                        <option value="0">Inativo</option>
                     </select>
-                    <div class="text-danger small" x-text="errors.type"></div>
                 </div>
 
                 <div class="modal-footer mt-3">
                     <button type="submit" class="btn btn-primary" :disabled="loading">
-                        <span x-show="!loading">Criar Produto</span>
-                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A enviar...</span>
+                        <span x-show="!loading">Guardar Alterações</span>
+                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A guardar...</span>
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
@@ -138,4 +142,5 @@ Dashboard
         </div>
     </div>
 </div>
+
 <?= $this->endSection() ?>
