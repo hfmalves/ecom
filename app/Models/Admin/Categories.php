@@ -43,7 +43,7 @@ class Categories extends Model
     protected $validationRules = [
         'parent_id'       => 'permit_empty|integer',
         'name'            => 'required|min_length[2]|max_length[150]',
-        'slug' => 'required|min_length[2]|max_length[150]|is_unique[categories.slug]',
+        'slug'            => 'required|min_length[2]|max_length[150]|is_unique[categories.slug]',
         'description'     => 'permit_empty|string',
         'image'           => 'permit_empty|max_length[255]',
         'is_active'       => 'required|in_list[0,1]',

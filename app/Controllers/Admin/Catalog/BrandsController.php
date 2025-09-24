@@ -3,96 +3,83 @@
 namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
+use App\Models\Admin\Brands;
 use App\Models\Admin\Products;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class BrandsController extends BaseController
 {
+    protected $brands;
     protected $products;
 
     public function __construct()
     {
-        $this->products = new Products(); // model
+        $this->brands = new Brands();
+        $this->products = new Products();
     }
-
     public function index()
     {
-        $rawProducts = $this->products->findAll();
-
-        // Prepara dados já prontos para a view
-        $products = array_map(function ($p) {
-            return [
-                'id'       => $p['id'],
-                'sku'      => $p['sku'],
-                'name'     => $p['name'],
-                'price'    => number_format($p['base_price'], 2, ',', '.') . ' €',
-                'promo'    => !empty($p['special_price'])
-                    ? '<span class="badge bg-success">'.number_format($p['special_price'], 2, ',', '.').' €</span>'
-                    : '<span class="text-muted">—</span>',
-                'stock'    => $p['manage_stock']
-                    ? $p['stock_qty']
-                    : '<span class="badge bg-info">Ilimitado</span>',
-                'status'   => match($p['status']) {
-                    'active'   => '<span class="badge bg-success">Ativo</span>',
-                    'inactive' => '<span class="badge bg-secondary">Inativo</span>',
-                    'draft'    => '<span class="badge bg-warning text-dark">Rascunho</span>',
-                    default    => '<span class="badge bg-dark">Arquivado</span>',
-                },
-                'type'     => ucfirst($p['type']),
-                'updated'  => !empty($p['updated_at'])
-                    ? date('d/m/Y H:i', strtotime($p['updated_at']))
-                    : '—',
-                'actions'  => '
-                    <a href="'.base_url('admin/catalog/products/edit/'.$p['id']).'" class="btn btn-sm btn-primary w-100">
-                        <i class="mdi mdi-pencil"></i>
-                    </a>'
-            ];
-        }, $rawProducts);
-
+        $brands = $this->brands->findAll();
         $data = [
-            'products' => $products
+            'brands' => $brands,
         ];
-
-        return view('admin/catalog/products/index', $data);
+        return view('admin/catalog/brands/index', $data);
     }
-    public function edit($id = null)
-    {
-        if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Produto não encontrado');
-        }
-        $product = $this->products->find($id);
-        if (!$product) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
-        }
-        $data = [
-            'product' => $product
-        ];
-        return view('admin/catalog/products/edit', $data);
-    }
-    public function update()
+    public function store()
     {
         $data = $this->request->getJSON(true);
-        foreach (['is_new', 'is_featured', 'manage_stock'] as $field) {
-            if (isset($data[$field]) && is_bool($data[$field])) {
-                $data[$field] = $data[$field] ? 1 : 0;
-            }
+        if (empty($data['is_active'])) {
+            $data['is_active'] = '1';
         }
-        if (! $this->products->validate($data)) {
+        if (empty($data['slug']) && ! empty($data['name'])) {
+            helper('text'); // garante que o helper está carregado
+            $data['slug'] = url_title(convert_accented_characters($data['name']), '-', true);
+        }
+        if (! $this->brands->insert($data)) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'errors' => $this->products->errors(),
+                'errors' => $this->brands->errors(),
                 'csrf'   => [
                     'token' => csrf_token(),
                     'hash'  => csrf_hash(),
                 ],
             ]);
         }
+        $id = $this->brands->getInsertID();
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'message'  => 'Marca criado com sucesso!',
+            'id'       => $id,
+            'redirect' => base_url('admin/catalog/brands/edit/'.$id),
+            'csrf'     => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+    public function edit($id = null)
+    {
+        if ($id === null) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Marca não encontrado');
+        }
+        $brands = $this->brands->find($id);
+        if (!$brands) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Marca com ID $id não encontrado");
+        }
+        $data = [
+            'brands' => $brands
+        ];
+        return view('admin/catalog/brands/edit', $data);
+    }
+    public function update()
+    {
+        $data = $this->request->getJSON(true);
+        $id   = $data['id'] ?? null;
 
-        $id = $data['id'] ?? null;
-        if (! $id || ! $this->products->find($id)) {
+        if (! $id || ! $this->brands->find($id)) {
             return $this->response->setJSON([
                 'status'  => 'error',
-                'message' => 'Produto não encontrado.',
+                'message' => 'Marca não encontrada.',
                 'csrf'    => [
                     'token' => csrf_token(),
                     'hash'  => csrf_hash(),
@@ -100,15 +87,36 @@ class BrandsController extends BaseController
             ]);
         }
 
-        $this->products->update($id, $data);
+        $this->brands->setValidationRule(
+            'name',
+            "required|min_length[2]|max_length[150]|is_unique[brands.name,id,{$id}]"
+        );
+
+        $this->brands->setValidationRule(
+            'slug',
+            "required|min_length[2]|max_length[150]|is_unique[brands.slug,id,{$id}]"
+        );
+
+        if (! $this->brands->update($id, $data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->brands->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
 
         return $this->response->setJSON([
             'status'  => 'success',
-            'message' => 'Produto atualizado com sucesso!',
+            'message' => 'Marca atualizada com sucesso!',
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
             ],
         ]);
     }
+
+
 }

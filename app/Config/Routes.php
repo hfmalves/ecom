@@ -65,6 +65,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('brands', function ($routes) {
             $routes->get('/', 'BrandsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'BrandsController::store');
             $routes->get('edit/(:num)', 'BrandsController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'BrandsController::update');
         });

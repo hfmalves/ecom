@@ -35,8 +35,8 @@ class Brands  extends Model
 
     // Validation
     protected $validationRules = [
-        'name'        => 'required|min_length[2]|max_length[150]|is_unique[brands.name,id,{id}]',
-        'slug'        => 'required|min_length[2]|max_length[150]|is_unique[brands.slug,id,{id}]',
+        'name'        => 'required|min_length[2]|max_length[150]|is_unique[brands.name]',
+        'slug'        => 'required|min_length[2]|max_length[150]|is_unique[brands.slug]',
         'description' => 'permit_empty|string',
         'logo'        => 'permit_empty|max_length[255]',
         'is_active'   => 'required|in_list[0,1]',
