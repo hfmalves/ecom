@@ -39,8 +39,8 @@ class ProductsAttributes extends Model
 
     // Validation
     protected $validationRules = [
-        'code'         => 'required|min_length[2]|max_length[100]|is_unique[attributes.code,id,{id}]',
-        'name'         => 'required|min_length[2]|max_length[150]|is_unique[attributes.name,id,{id}]',
+        'code'         => 'required|min_length[2]|max_length[100]|is_unique[products_attributes.code]',
+        'name'         => 'required|min_length[2]|max_length[150]|is_unique[products_attributes.name]',
         'type'         => 'required|in_list[text,select,multiselect,boolean,number]',
         'is_required'  => 'required|in_list[0,1]',
         'is_filterable'=> 'required|in_list[0,1]',

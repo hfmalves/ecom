@@ -514,9 +514,6 @@ Dashboard
         </button>
     </div>
 </form>
-
-
-
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>

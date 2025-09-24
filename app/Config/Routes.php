@@ -8,7 +8,7 @@ use CodeIgniter\Router\RouteCollection;
 
 // Website
 $routes->group('/', ['namespace' => 'App\Controllers\Website'], function ($routes) {
-    $routes->get('/', 'HomeController::index');
+    $routes->get('/', 'AuthController::login');
     $routes->get('shop', 'ShopController::index');
     $routes->get('product/(:segment)', 'ProductController::view/$1');
 });

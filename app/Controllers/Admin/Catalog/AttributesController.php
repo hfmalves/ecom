@@ -60,14 +60,14 @@ class AttributesController extends BaseController
         if ($id === null) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Fornecedor não encontrado');
         }
-        $supplier = $this->suppliers->find($id);
+        $supplier = $this->attributes->find($id);
         if (!$supplier) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Fornecedor com ID $id não encontrado");
         }
         $data = [
             'supplier' => $supplier
         ];
-        return view('admin/catalog/suppliers/edit', $data);
+        return view('admin/catalog/attributes/edit', $data);
     }
     public function update()
     {
