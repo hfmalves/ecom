@@ -18,7 +18,7 @@ Dashboard
                     <div class="col-sm-8">
                         <div class="text-sm-end">
                             <button type="button" x-data="systemModal()"
-                                    @click="open('#formProduct', 'md')"
+                                    @click="open('#formAttribute', 'md')"
                                     class="btn btn-primary">
                                 <i class="fa-solid fa-plus me-1"></i> Adicionar
                             </button>
@@ -30,31 +30,32 @@ Dashboard
                     <thead class="table-light">
                     <tr>
                         <th>ID</th>
-                        <th>SKU</th>
+                        <th>Código</th>
                         <th>Nome</th>
-                        <th>Preço</th>
-                        <th>Promoção</th>
-                        <th>Stock</th>
-                        <th>Estado</th>
                         <th>Tipo</th>
-                        <th>Atualizado em</th>
+                        <th>Obrigatório</th>
+                        <th>Filtrável</th>
+                        <th>Criado em</th>
                         <th>Ações</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <?php if (!empty($products)): ?>
-                        <?php foreach ($products as $product): ?>
+                    <?php if (!empty($atributes)): ?>
+                        <?php foreach ($atributes as $atribute): ?>
                             <tr>
-                                <td><?= $product['id'] ?></td>
-                                <td><?= $product['sku'] ?></td>
-                                <td><?= $product['name'] ?></td>
-                                <td><?= $product['price'] ?></td>
-                                <td><?= $product['promo'] ?></td>
-                                <td><?= $product['stock'] ?></td>
-                                <td><?= $product['status'] ?></td>
-                                <td><?= $product['type'] ?></td>
-                                <td><?= $product['updated'] ?></td>
-                                <td><?= $product['actions'] ?></td>
+                                <td><?= $atribute['id'] ?></td>
+                                <td><?= $atribute['code'] ?></td>
+                                <td><?= $atribute['name'] ?></td>
+                                <td><?= $atribute['type'] ?></td>
+                                <td><?= $atribute['is_required'] ?></td>
+                                <td><?= $atribute['is_filterable'] ?></td>
+                                <td><?= $atribute['created_at'] ?></td>
+                                <td>
+                                    <a href="<?= base_url('admin/catalog/attributes/edit/' . $atribute['id']) ?>"
+                                       class="btn btn-sm btn-primary w-100">
+                                        <i class="mdi mdi-pencil"></i>
+                                    </a>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -68,61 +69,91 @@ Dashboard
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
-<div id="formProduct" class="d-none">
+<div id="formAttribute" class="d-none">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Criar Produto</h5>
+            <h5 class="modal-title">Criar Atributo</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body"
              x-data="{
-                ...formHandler('/api/products/create',
-                  { sku: '', name: '', type: 'simple' },
-                  { resetOnSuccess: true }),
-                loading: true
+                ...formHandler('/admin/catalog/attributes/store',
+                  {
+                    code: '',
+                    name: '',
+                    type: 'text',
+                    is_required: '0',
+                    is_filterable: '0',
+                    <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                  },
+                  { resetOnSuccess: true })
              }"
              x-init="
                 $el.addEventListener('fill-form', e => {
-                    loading = true
-                    Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
-                    $nextTick(() => loading = false)
+                  Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
                 });
                 $el.addEventListener('reset-form', () => {
-                    loading = true
-                    Object.keys(form).forEach(k => form[k] = '')
-                    $nextTick(() => loading = false)
+                  Object.keys(form).forEach(k => {
+                    if (k !== '<?= csrf_token() ?>') form[k] = ''
+                  })
+                });
+                document.addEventListener('csrf-update', e => {
+                  form[e.detail.token] = e.detail.hash
                 });
              ">
-            <div x-show="loading" x-cloak class="p-4 text-center">
-                <div class="spinner-border text-primary"></div>
-                <p>A carregar…</p>
-            </div>
-            <form x-show="!loading" @submit.prevent="submit()">
+            <form @submit.prevent="submit()">
+
+                <!-- code -->
                 <div class="mb-3">
-                    <label class="form-label">SKU</label>
-                    <input type="text" class="form-control" name="sku" x-model="form.sku" required>
-                    <div class="text-danger small" x-text="errors.sku"></div>
+                    <label class="form-label">Código *</label>
+                    <input type="text" class="form-control" name="code" x-model="form.code">
+                    <div class="text-danger small" x-text="errors.code"></div>
                 </div>
+
+                <!-- name -->
                 <div class="mb-3">
-                    <label class="form-label">Nome</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name" required>
+                    <label class="form-label">Nome *</label>
+                    <input type="text" class="form-control" name="name" x-model="form.name">
                     <div class="text-danger small" x-text="errors.name"></div>
                 </div>
+
+                <!-- type -->
                 <div class="mb-3">
-                    <label class="form-label">Tipo</label>
+                    <label class="form-label">Tipo *</label>
                     <select class="form-select" name="type" x-model="form.type">
                         <option value="">-- Selecionar --</option>
-                        <option value="simple">Simples</option>
-                        <option value="configurable">Configurable</option>
-                        <option value="virtual">Virtual</option>
-                        <option value="pack">Pack</option>
+                        <option value="text">Texto</option>
+                        <option value="number">Número</option>
+                        <option value="select">Seleção</option>
                     </select>
                     <div class="text-danger small" x-text="errors.type"></div>
                 </div>
+
+                <!-- is_required -->
+                <div class="mb-3">
+                    <label class="form-label">Obrigatório *</label>
+                    <select class="form-select" name="is_required" x-model="form.is_required">
+                        <option value="0">Não</option>
+                        <option value="1">Sim</option>
+                    </select>
+                    <div class="text-danger small" x-text="errors.is_required"></div>
+                </div>
+
+                <!-- is_filterable -->
+                <div class="mb-3">
+                    <label class="form-label">Filtrável *</label>
+                    <select class="form-select" name="is_filterable" x-model="form.is_filterable">
+                        <option value="0">Não</option>
+                        <option value="1">Sim</option>
+                    </select>
+                    <div class="text-danger small" x-text="errors.is_filterable"></div>
+                </div>
+
                 <div class="modal-footer mt-3">
                     <button type="submit" class="btn btn-primary" :disabled="loading">
-                        <span x-show="!loading">Criar Produto</span>
-                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A enviar...</span>
+                        <span x-show="!loading">Guardar</span>
+                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A guardar...</span>
                     </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>

@@ -54,6 +54,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('attributes', function ($routes) {
             $routes->get('/', 'AttributesController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'AttributesController::store');
             $routes->get('edit/(:num)', 'AttributesController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'AttributesController::update');
         });
