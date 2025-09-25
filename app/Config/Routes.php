@@ -57,6 +57,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('store', 'AttributesController::store');
             $routes->get('edit/(:num)', 'AttributesController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'AttributesController::update');
+            $routes->group('value', function ($routes) {
+                $routes->post('store', 'AttributesController::storeValue');
+                $routes->post('update', 'AttributesController::updateValue');
+                $routes->post('update-order', 'AttributesController::updateValueOrder');
+            });
         });
         $routes->group('suppliers', function ($routes) {
             $routes->get('/', 'SuppliersController::index', ['filter' => 'noauth']);
