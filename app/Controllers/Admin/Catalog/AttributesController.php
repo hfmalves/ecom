@@ -13,14 +13,12 @@ class AttributesController extends BaseController
     protected $products;
     protected $attributes;
     protected $attributesValues;
-
     public function __construct()
     {
         $this->products = new Products(); // model
         $this->attributes = new ProductsAttributes();
         $this->attributesValues = new ProductsAttributesValues();
     }
-
     public function index()
     {
         $data = [
@@ -111,10 +109,60 @@ class AttributesController extends BaseController
             ],
         ]);
     }
-
     /*
      * VALUES
      */
+    public function storeValue()
+    {
+        $data = $this->request->getJSON(true);
+        $data['sort_order'] = 0;
+
+        // Verifica duplicados
+        $exists = $this->attributesValues
+            ->where('attribute_id', $data['attribute_id'])
+            ->where('value', $data['value'])
+            ->countAllResults();
+
+        if ($exists > 0) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Já existe um valor igual para este atributo.',
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        if (! $this->attributesValues->insert($data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->attributesValues->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        $id = $this->attributesValues->getInsertID();
+
+        // Regenera o token para o próximo request AJAX
+        csrf_hash(); // garante hash novo
+        $token = csrf_token();
+        $hash  = csrf_hash();
+
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'message'  => 'Elemento do atributo criado com sucesso!',
+            'id'       => $id,
+            'csrf'     => [
+                'token' => $token,
+                'hash'  => $hash,
+            ],
+        ]);
+    }
+
     public function updateValueOrder($id = null)
     {
         if ($id === null) {

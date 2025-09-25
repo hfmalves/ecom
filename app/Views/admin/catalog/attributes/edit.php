@@ -178,8 +178,12 @@ Dashboard
 <div id="createComponent" class="d-none">
     <div class="modal-content"
          x-data="{
-            ...formHandler('/admin/catalog/attributes/store',
-              { name: '', <?= csrf_token() ?>:'<?= csrf_hash() ?>' },
+            ...formHandler('/admin/catalog/attributes/value/store',
+              {
+                value: '',
+                attribute_id: '<?= esc($attribute['id']) ?>',
+                <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+              },
               { resetOnSuccess: true }),
             loading:true
          }"
@@ -190,7 +194,7 @@ Dashboard
             });
             $el.addEventListener('reset-form', () => {
               Object.keys(form).forEach(k => {
-                if (k !== '<?= csrf_token() ?>') form[k] = ''
+                if (k !== '<?= csrf_token() ?>' && k !== 'attribute_id') form[k] = ''
               })
               loading = false
             });
@@ -202,23 +206,19 @@ Dashboard
             <h5 class="modal-title">Criar Elemento do Atributo</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
         <div class="modal-body">
-            <!-- Spinner -->
             <div x-show="loading" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">A carregar...</span>
                 </div>
             </div>
 
-            <!-- Form -->
             <form @submit.prevent="submit()" x-show="!loading" x-cloak>
                 <div class="mb-3">
                     <label class="form-label">Nome *</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name">
-                    <div class="text-danger small" x-text="errors.name"></div>
+                    <input type="text" class="form-control" name="value" x-model="form.value">
+                    <div class="text-danger small" x-text="errors.value"></div>
                 </div>
-
                 <div class="modal-footer mt-3">
                     <button type="submit" class="btn btn-primary" :disabled="loading">
                         <span x-show="!loading">Guardar</span>
@@ -230,6 +230,7 @@ Dashboard
         </div>
     </div>
 </div>
+
 <div id="editComponent" class="d-none">
     <div x-data="{
         ...formHandler('/admin/catalog/attributes/update',
@@ -257,7 +258,6 @@ Dashboard
                     <span class="visually-hidden">A carregar...</span>
                 </div>
             </div>
-
             <form @submit.prevent="submit()" x-show="!loading" x-cloak>
                 <input type="hidden" name="id" x-model="form.id">
 
@@ -300,7 +300,6 @@ Dashboard
             <h5 class="modal-title">Eliminar Elemento do Atributo</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
         <div class="modal-body">
             <!-- Spinner -->
             <div x-show="loading" class="text-center py-4">
@@ -308,11 +307,9 @@ Dashboard
                     <span class="visually-hidden">A carregar...</span>
                 </div>
             </div>
-
             <!-- Form -->
             <form @submit.prevent="submit()" x-show="!loading" x-cloak>
                 <input type="hidden" name="id" x-model="form.id">
-
                 <p class="mb-3">
                     Tem a certeza que deseja eliminar o atributo:
                     <strong x-text="form.name"></strong>?

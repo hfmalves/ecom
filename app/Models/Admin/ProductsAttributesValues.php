@@ -13,11 +13,9 @@ class ProductsAttributesValues extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields = [
-        'product_id',
         'attribute_id',
         'value',
-        'created_at',
-        'updated_at',
+        'sort_order',
     ];
 
 
@@ -33,25 +31,25 @@ class ProductsAttributesValues extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
-
     // Validation
     protected $validationRules = [
-        'product_id'   => 'required|integer',
-        'attribute_id' => 'required|integer',
-        'value'        => 'permit_empty|string',
+        'attribute_id'   => 'required|integer',
+        'value'        => 'required|string',
+        'sort_order'    => 'required|integer',
     ];
 
     protected $validationMessages = [
-        'product_id' => [
-            'required' => 'O campo Product ID é obrigatório.',
-            'integer'  => 'O Product ID deve ser um número inteiro.',
-        ],
         'attribute_id' => [
             'required' => 'O campo Attribute ID é obrigatório.',
             'integer'  => 'O Attribute ID deve ser um número inteiro.',
         ],
         'value' => [
+            'required' => 'O campo naome é obrigatório.',
             'string' => 'O valor deve ser um texto válido.',
+        ],
+        'sort_order' => [
+            'required' => 'A ordenação é obrigatório.',
+            'integer'  => 'A ordenação deve ser um número inteiro.',
         ],
     ];
 
