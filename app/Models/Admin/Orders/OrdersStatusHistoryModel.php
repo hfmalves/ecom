@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Orders;
 
 use CodeIgniter\Model;
 
-class OrdersCarts extends Model
+class OrdersStatusHistoryModel extends Model
 {
-    protected $table            = 'orders_carts';
+    protected $table            = 'orders_status_histories';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['user_id','session_id','created_at','updated_at'];
-
+    protected $allowedFields = ['order_id','status','comment','created_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -30,12 +29,16 @@ class OrdersCarts extends Model
 
     // Validation
     protected $validationRules = [
-        'user_id'    => 'permit_empty|integer',
-        'session_id' => 'required|max_length[100]',
+        'order_id' => 'required|integer',
+        'status'   => 'required|in_list[pending,processing,completed,canceled]',
+        'comment'  => 'permit_empty|string',
     ];
 
     protected $validationMessages = [
-        'session_id' => ['required' => 'A sessão é obrigatória.'],
+        'status' => [
+            'required' => 'O estado é obrigatório.',
+            'in_list'  => 'Estado inválido.'
+        ]
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

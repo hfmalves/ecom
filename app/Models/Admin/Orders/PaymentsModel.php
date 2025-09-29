@@ -1,19 +1,23 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Orders;
 
 use CodeIgniter\Model;
 
-class OrdersShipmentItems extends Model
+class PaymentsModel extends Model
 {
-    protected $table            = 'orders_shipment_items';
+    protected $table            = 'payments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['shipment_id','order_item_id','qty'];
-
+    protected $allowedFields = [
+        'invoice_id',
+        'amount',
+        'method',
+        'paid_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -30,13 +34,27 @@ class OrdersShipmentItems extends Model
 
     // Validation
     protected $validationRules = [
-        'shipment_id'  => 'required|integer',
-        'order_item_id'=> 'required|integer',
-        'qty'          => 'required|integer',
+        'invoice_id' => 'required|integer',
+        'amount'     => 'required|decimal',
+        'method'     => 'required|max_length[50]',
+        'paid_at'    => 'permit_empty|valid_date',
     ];
-
     protected $validationMessages = [
-        'qty' => ['required' => 'A quantidade é obrigatória.'],
+        'invoice_id' => [
+            'required' => 'A fatura associada é obrigatória.',
+            'integer'  => 'O ID da fatura deve ser um número inteiro.',
+        ],
+        'amount' => [
+            'required' => 'O valor do pagamento é obrigatório.',
+            'decimal'  => 'O valor deve ser numérico.',
+        ],
+        'method' => [
+            'required'   => 'O método de pagamento é obrigatório.',
+            'max_length' => 'O método não pode ter mais de 50 caracteres.',
+        ],
+        'paid_at' => [
+            'valid_date' => 'A data de pagamento deve ser válida.',
+        ],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

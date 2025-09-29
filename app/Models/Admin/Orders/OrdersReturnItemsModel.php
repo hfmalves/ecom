@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Orders;
 
 use CodeIgniter\Model;
 
-class OrdersReturnItems extends Model
+class OrdersReturnItemsModel extends Model
 {
     protected $table            = 'ordersreturnitems';
     protected $primaryKey       = 'id';

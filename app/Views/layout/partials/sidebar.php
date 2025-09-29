@@ -47,13 +47,15 @@
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cart"></i>
-                        <span>Encomendas</span>
+                        <span>Vendas</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="<?= base_url('admin/orders') ?>">Todas as Encomendas</a></li>
-                        <li><a href="<?= base_url('admin/transactions') ?>">Transações</a></li>
-                        <li><a href="<?= base_url('admin/invoices') ?>">Faturas</a></li>
-                        <li><a href="<?= base_url('admin/shipments') ?>">Envios</a></li>
+                        <li><a href="<?= base_url('admin/sales/orders') ?>">Encomendas</a></li>
+                        <li><a href="<?= base_url('admin/sales/transactions') ?>">Transações</a></li>
+                        <li><a href="<?= base_url('admin/sales/invoices') ?>">Faturas</a></li>
+                        <li><a href="<?= base_url('admin/sales/shipments') ?>">Envios</a></li>
+                        <li><a href="<?= base_url('admin/sales/returns') ?>">Devoluções</a></li>
+                        <li><a href="<?= base_url('admin/sales/cart') ?>">Carrinhos</a></li>
                     </ul>
                 </li>
 

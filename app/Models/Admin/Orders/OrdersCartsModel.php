@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Orders;
 
 use CodeIgniter\Model;
 
-class OrdersReturns extends Model
+class OrdersCartsModel extends Model
 {
-    protected $table            = 'orders_returns';
+    protected $table            = 'orders_carts';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['order_id','customer_id','reason','status','created_at','updated_at'];
+    protected $allowedFields = ['user_id','session_id','created_at','updated_at'];
 
 
     protected bool $allowEmptyInserts = false;
@@ -29,19 +29,13 @@ class OrdersReturns extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-
     protected $validationRules = [
-        'order_id'   => 'required|integer',
-        'customer_id'=> 'required|integer',
-        'reason'     => 'permit_empty|string',
-        'status'     => 'required|in_list[pending,approved,rejected,received,resolved]',
+        'user_id'    => 'permit_empty|integer',
+        'session_id' => 'required|max_length[100]',
     ];
 
     protected $validationMessages = [
-        'status' => [
-            'required' => 'O estado da devolução é obrigatório.',
-            'in_list'  => 'Estado inválido.'
-        ]
+        'session_id' => ['required' => 'A sessão é obrigatória.'],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

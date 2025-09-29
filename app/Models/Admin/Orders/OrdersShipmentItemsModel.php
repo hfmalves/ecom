@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Orders;
 
 use CodeIgniter\Model;
 
-class OrdersShipments extends Model
+class OrdersShipmentItemsModel extends Model
 {
-    protected $table            = 'orders_shipments';
+    protected $table            = 'orders_shipment_items';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['order_id','tracking_number','carrier','shipped_at','created_at'];
+    protected $allowedFields = ['shipment_id','order_item_id','qty'];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -29,14 +30,13 @@ class OrdersShipments extends Model
 
     // Validation
     protected $validationRules = [
-        'order_id'        => 'required|integer',
-        'tracking_number' => 'permit_empty|max_length[100]',
-        'carrier'         => 'permit_empty|max_length[100]',
-        'shipped_at'      => 'permit_empty|valid_date',
+        'shipment_id'  => 'required|integer',
+        'order_item_id'=> 'required|integer',
+        'qty'          => 'required|integer',
     ];
 
     protected $validationMessages = [
-        'order_id' => ['required' => 'A encomenda é obrigatória.'],
+        'qty' => ['required' => 'A quantidade é obrigatória.'],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

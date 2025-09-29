@@ -1,23 +1,19 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Orders;
 
 use CodeIgniter\Model;
 
-class Payments extends Model
+class OrdersReturnsModel extends Model
 {
-    protected $table            = 'payments';
+    protected $table            = 'orders_returns';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = [
-        'invoice_id',
-        'amount',
-        'method',
-        'paid_at',
-    ];
+    protected $allowedFields = ['order_id','customer_id','reason','status','created_at','updated_at'];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -33,28 +29,19 @@ class Payments extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
+
     protected $validationRules = [
-        'invoice_id' => 'required|integer',
-        'amount'     => 'required|decimal',
-        'method'     => 'required|max_length[50]',
-        'paid_at'    => 'permit_empty|valid_date',
+        'order_id'   => 'required|integer',
+        'customer_id'=> 'required|integer',
+        'reason'     => 'permit_empty|string',
+        'status'     => 'required|in_list[pending,approved,rejected,received,resolved]',
     ];
+
     protected $validationMessages = [
-        'invoice_id' => [
-            'required' => 'A fatura associada é obrigatória.',
-            'integer'  => 'O ID da fatura deve ser um número inteiro.',
-        ],
-        'amount' => [
-            'required' => 'O valor do pagamento é obrigatório.',
-            'decimal'  => 'O valor deve ser numérico.',
-        ],
-        'method' => [
-            'required'   => 'O método de pagamento é obrigatório.',
-            'max_length' => 'O método não pode ter mais de 50 caracteres.',
-        ],
-        'paid_at' => [
-            'valid_date' => 'A data de pagamento deve ser válida.',
-        ],
+        'status' => [
+            'required' => 'O estado da devolução é obrigatório.',
+            'in_list'  => 'Estado inválido.'
+        ]
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
