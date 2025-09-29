@@ -79,6 +79,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
     // ProductsModel
     $routes->group('customers', ['namespace' => 'App\Controllers\Admin\Customers'], function ($routes) {
         $routes->get('/', 'CustumersController::index', ['filter' => 'noauth']);
+        $routes->get('edit/(:num)', 'CustumersController::edit/$1', ['filter' => 'noauth']);
         $routes->group('groups', function ($routes) {
             $routes->get('/', 'CustumersGroupsController::index', ['filter' => 'noauth']);
         });
