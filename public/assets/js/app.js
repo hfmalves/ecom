@@ -6,14 +6,27 @@ function formHandler(endpoint, initForm = {}, options = {}) {
         loading: false,
         step: 'login',
         opts: Object.assign({ redirect: false, resetOnSuccess: false }, options),
+
         refreshCsrf(data) {
             if (data && data.csrf) {
+                // limpa os antigos
                 Object.keys(this.form).forEach(k => {
                     if (k.startsWith('csrf_')) delete this.form[k];
                 });
+                // mete o novo
                 this.form[data.csrf.token] = data.csrf.hash;
+
+                // 🔥 guarda último csrf global
+                window.__lastCsrf = { token: data.csrf.token, hash: data.csrf.hash };
+
+                // 🔥 dispara evento global
+                document.dispatchEvent(new CustomEvent('csrf-update', {
+                    detail: { token: data.csrf.token, hash: data.csrf.hash }
+                }));
             }
         },
+
+
         async submit() {
             this.loading = true;
             this.errors = {};
@@ -29,10 +42,12 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                     },
                     body: JSON.stringify(this.form),
                 });
+
                 const isJSON = (resp.headers.get("content-type") || "").includes("application/json");
                 const data = isJSON ? await resp.json() : {};
                 this.refreshCsrf(data);
-                // 🔹 Caso 1: erros de validação (mostra nos inputs, sem toast)
+
+                // 🔹 Caso 1: erros de validação
                 if (data.status === "error" && data.errors) {
                     this.errors = {};
                     for (const k in data.errors) {
@@ -42,16 +57,19 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                     }
                     return;
                 }
-                // 🔹 Caso 2: erro geral (sem "errors", mas tem message)
+
+                // 🔹 Caso 2: erro geral
                 if (data.status === "error" && data.message) {
                     showToast(data.message, "danger");
                     return;
                 }
+
                 // 🔹 Caso 3: erro HTTP
                 if (!resp.ok) {
                     showToast(`Erro ${resp.status}: ${resp.statusText}`, "danger");
                     return;
                 }
+
                 // 🔹 Sucesso
                 if (data.message) {
                     showToast(data.message, "success");
@@ -85,7 +103,6 @@ function formHandler(endpoint, initForm = {}, options = {}) {
             this.errors = {};
 
             try {
-                // 👇 pega no token do form
                 const csrfKey = Object.keys(this.form).find(k => k.startsWith('csrf_'));
                 const csrfValue = this.form[csrfKey];
 
@@ -93,7 +110,7 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": csrfValue, // agora existe
+                        "X-CSRF-TOKEN": csrfValue,
                     },
                     body: JSON.stringify({
                         email: this.form.email,
@@ -106,11 +123,12 @@ function formHandler(endpoint, initForm = {}, options = {}) {
 
                 const data = await resp.json();
                 this.refreshCsrf(data);
+
                 if (data.status === "success" && data.redirect) {
                     window.location.href = data.redirect;
                 } else if (data.status === "error") {
                     this.errors.code = data.message || "Código inválido.";
-                    showToast(this.errors.code, "danger"); // mostra toast se o código for errado
+                    showToast(this.errors.code, "danger");
                 }
             } catch (e) {
                 showToast("Erro na validação 2FA.", "danger");
@@ -118,9 +136,9 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                 this.loading = false;
             }
         }
-
     };
 }
+
 function showToast(message, type = "info", title = "") {
     if (typeof toastr === "undefined") {
         console.error("Toastr não foi carregado.");
@@ -148,19 +166,21 @@ function systemModal() {
             try {
                 let content = '';
 
+                // Pega conteúdo
                 if (typeof source === 'string' && source.startsWith('#')) {
-                    let el = document.querySelector(source);
+                    const el = document.querySelector(source);
                     if (!el) throw new Error("Elemento não encontrado: " + source);
                     content = el.innerHTML;
                 } else if (typeof source === 'string' && source.trim().startsWith('<')) {
                     content = source;
                 } else {
-                    let res = await fetch(source);
+                    const res = await fetch(source);
                     if (!res.ok) throw new Error(res.statusText);
                     content = await res.text();
                 }
 
-                let wrapper = document.createElement('div');
+                // Cria wrapper
+                const wrapper = document.createElement('div');
                 wrapper.innerHTML = `
                     <div class="modal fade" id="exampleModalDynamic" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered ${this.sizeClass(size)}">
@@ -170,39 +190,56 @@ function systemModal() {
                 `;
                 document.body.appendChild(wrapper);
 
-                let modalEl = wrapper.querySelector('#exampleModalDynamic');
-                let modal = new bootstrap.Modal(modalEl);
+                const modalEl = wrapper.querySelector('#exampleModalDynamic');
+                const modal = new bootstrap.Modal(modalEl);
 
                 modalEl.addEventListener('shown.bs.modal', () => {
-                    let formEl = wrapper.querySelector('[x-data]');
-                    if (formEl) {
-                        if (entity) {
-                            // EDITAR → envia os dados para Alpine
-                            formEl.dispatchEvent(new CustomEvent('fill-form', { detail: entity }));
-                        } else {
-                            // CRIAR → limpa
-                            formEl.dispatchEvent(new CustomEvent('reset-form'));
-                        }
+                    const formEl = wrapper.querySelector('[x-data]');
+                    if (!formEl) return;
+
+                    // Preenche/limpa form
+                    if (entity) {
+                        formEl.dispatchEvent(new CustomEvent('fill-form', { detail: entity }));
+                    } else {
+                        formEl.dispatchEvent(new CustomEvent('reset-form'));
                     }
+
+                    // Escuta CSRF update global
+                    document.addEventListener('csrf-update', e => {
+                        if (formEl.__x) formEl.__x.$data.form[e.detail.token] = e.detail.hash;
+                    });
                 });
 
                 modalEl.addEventListener('hidden.bs.modal', () => wrapper.remove());
-
                 modal.show();
 
             } catch (e) {
                 console.error("Erro ao carregar modal:", e);
             }
         },
-
         sizeClass(size) {
             if (size === 'sm') return 'modal-sm';
             if (size === 'lg') return 'modal-lg';
             if (size === 'xl') return 'modal-xl';
             return 'modal-md';
         }
-    }
+    };
 }
 
+function csrfHandler(form) {
+    // fallback imediato ao abrir
+    if (window.__lastCsrf) {
+        Object.keys(form).forEach(k => { if (k.startsWith('csrf_')) delete form[k] });
+        form[window.__lastCsrf.token] = window.__lastCsrf.hash;
+    }
 
+    // ouvir futuros updates
+    document.addEventListener('csrf-update', e => {
+        Object.keys(form).forEach(k => { if (k.startsWith('csrf_')) delete form[k] });
+        form[e.detail.token] = e.detail.hash;
+
+        // debug opcional
+        console.log("CSRF atualizado para:", e.detail);
+    });
+}
 

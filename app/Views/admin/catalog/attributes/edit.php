@@ -175,157 +175,104 @@ Dashboard
         </div>
     </div>
 </form>
+<!-- Create -->
 <div id="createComponent" class="d-none">
     <div class="modal-content"
-         x-data="{
-            ...formHandler('/admin/catalog/attributes/value/store',
-              {
-                value: '',
-                attribute_id: '<?= esc($attribute['id']) ?>',
-                <?= csrf_token() ?>:'<?= csrf_hash() ?>'
-              },
-              { resetOnSuccess: true }),
-            loading:true
-         }"
-         x-init="
-            $el.addEventListener('fill-form', e => {
-              Object.entries(e.detail).forEach(([k, v]) => { if (k in form) form[k] = v })
-              loading = false
-            });
-            $el.addEventListener('reset-form', () => {
-              Object.keys(form).forEach(k => {
-                if (k !== '<?= csrf_token() ?>' && k !== 'attribute_id') form[k] = ''
-              })
-              loading = false
-            });
-            document.addEventListener('csrf-update', e => {
-              form[e.detail.token] = e.detail.hash
-            });
-         ">
+         x-data="formHandler('/admin/catalog/attributes/value/store', {
+             value: '',
+             attribute_id: '<?= esc($attribute['id']) ?>',
+             <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+         }, { resetOnSuccess: true })"
+         x-init="csrfHandler(form)">
         <div class="modal-header">
-            <h5 class="modal-title">Criar Elemento do Atributo</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title">Criar Elemento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-            <div x-show="loading" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">A carregar...</span>
-                </div>
-            </div>
-
-            <form @submit.prevent="submit()" x-show="!loading" x-cloak>
+            <form @submit.prevent="submit()">
                 <div class="mb-3">
-                    <label class="form-label">Nome *</label>
-                    <input type="text" class="form-control" name="value" x-model="form.value">
+                    <label>Nome *</label>
+                    <input type="text" class="form-control" x-model="form.value">
                     <div class="text-danger small" x-text="errors.value"></div>
                 </div>
-                <div class="modal-footer mt-3">
-                    <button type="submit" class="btn btn-primary" :disabled="loading">
+                <div class="modal-footer">
+                    <button class="btn btn-primary" :disabled="loading">
                         <span x-show="!loading">Guardar</span>
                         <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A guardar...</span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Edit -->
 <div id="editComponent" class="d-none">
-    <div x-data="{
-        ...formHandler('/admin/catalog/attributes/update',
-          { id:'', name:'', sort_order:'', <?= csrf_token() ?>:'<?= csrf_hash() ?>' }),
-        loading:true
-      }"
+    <div class="modal-content"
+         x-data="formHandler('/admin/catalog/attributes/value/update', {
+           id:'', name:'', sort_order:'',
+           <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+       })"
          x-init="
-         $el.addEventListener('fill-form', e => {
-           Object.entries(e.detail).forEach(([k, v]) => { if (k in form) form[k] = v })
-           loading = false
-         });
-         $el.addEventListener('reset-form', () => {
-           Object.keys(form).forEach(k => form[k] = '');
-           loading = false
-         });
+         csrfHandler(form);
+         $el.addEventListener('fill-form', e => { Object.assign(form, e.detail) });
        ">
         <div class="modal-header">
-            <h5 class="modal-title">Editar Elemento do Atributo</h5>
+            <h5 class="modal-title">Editar Elemento</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-
         <div class="modal-body">
-            <div x-show="loading" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">A carregar...</span>
-                </div>
-            </div>
-            <form @submit.prevent="submit()" x-show="!loading" x-cloak>
-                <input type="hidden" name="id" x-model="form.id">
-
+            <form @submit.prevent="submit()">
+                <input type="hidden" x-model="form.id">
                 <div class="mb-3">
-                    <label class="form-label">Nome *</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name">
+                    <label>Nome *</label>
+                    <input type="text" class="form-control" x-model="form.name">
                     <div class="text-danger small" x-text="errors.name"></div>
                 </div>
-
                 <div class="mb-3">
-                    <label class="form-label">Ordem</label>
-                    <input type="number" class="form-control" name="sort_order" x-model="form.sort_order">
+                    <label>Ordem</label>
+                    <input type="number" class="form-control" x-model="form.sort_order">
                 </div>
-
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+                    <button class="btn btn-primary">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-<div id="deleteComponent" class="d-none">
-    <div x-data="{
-        ...formHandler('/admin/catalog/attributes/delete',
-          { id:'', name:'', <?= csrf_token() ?>:'<?= csrf_hash() ?>' }),
-        loading:true
-      }"
-         x-init="
-         $el.addEventListener('fill-form', e => {
-           Object.entries(e.detail).forEach(([k, v]) => { if (k in form) form[k] = v })
-           loading = false
-         });
-         $el.addEventListener('reset-form', () => {
-           Object.keys(form).forEach(k => form[k] = '');
-           loading = false
-         });
-       ">
-        <div class="modal-header">
-            <h5 class="modal-title">Eliminar Elemento do Atributo</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <!-- Spinner -->
-            <div x-show="loading" class="text-center py-4">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">A carregar...</span>
-                </div>
-            </div>
-            <!-- Form -->
-            <form @submit.prevent="submit()" x-show="!loading" x-cloak>
-                <input type="hidden" name="id" x-model="form.id">
-                <p class="mb-3">
-                    Tem a certeza que deseja eliminar o atributo:
-                    <strong x-text="form.name"></strong>?
-                </p>
 
-                <div class="modal-footer mt-3">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger" :disabled="loading">
-                        <span x-show="!loading">Eliminar</span>
-                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A eliminar...</span>
-                    </button>
-                </div>
-            </form>
+<!-- Delete -->
+<!-- Delete -->
+<div class="modal fade" id="deleteComponent" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content"
+             x-data="formHandler('/admin/catalog/attributes/value/delete', {
+                 id:'', name:'',
+                 <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+             })"
+             x-init="
+                csrfHandler(form);
+                $el.addEventListener('fill-form', e => { Object.assign(form, e.detail) });
+             ">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar Elemento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="submit()">
+                    <input type="hidden" x-model="form.id">
+                    <p>Tem a certeza que deseja eliminar <strong x-text="form.name"></strong>?</p>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+
+
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>

@@ -163,6 +163,73 @@ class AttributesController extends BaseController
         ]);
     }
 
+    public function updateValue()
+    {
+        $data = $this->request->getJSON(true);
+        $id   = $data['id'] ?? null;
+        if (! $id || ! $this->attributesValues->find($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Valor de atributo não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        if (! $this->attributesValues->update($id, $data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->attributesValues->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Elemento do atributo atualizado com sucesso!',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+    public function deleteValue()
+    {
+        $data = $this->request->getJSON(true);
+        $id   = $data['id'] ?? null;
+        if (! $id || ! $this->attributesValues->find($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Valor de atributo não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        if (! $this->attributesValues->delete($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao eliminar o valor do atributo.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'     => 'success',
+            'message'    => 'Valor de atributo eliminado com sucesso!',
+            'modalClose' => true, // 👈 força fechar modal
+            'csrf'       => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
     public function updateValueOrder($id = null)
     {
         if ($id === null) {
