@@ -35,4 +35,96 @@ class CustumersGroupsController extends BaseController
         ];
         return view('admin/customers/groups/index', $data);
     }
+    public function store()
+    {
+        $data = $this->request->getJSON(true);
+        if (! $this->customerGroupModel->insert($data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->customerGroupModel->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Grupo de cliente criado com sucesso!',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+    public function update()
+    {
+        $data = $this->request->getJSON(true);
+        $id   = $data['id'] ?? null;
+        if (! $id || ! $this->customerGroupModel->find($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Grupo de cliente não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        if (! $this->customerGroupModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->customerGroupModel->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Grupo de cliente atualizado com sucesso!',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+    public function delete()
+    {
+        $data = $this->request->getJSON(true);
+        $id   = $data['id'] ?? null;
+        if (! $id || ! $this->customerGroupModel->find($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Grupo de cliente não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        if (! $this->customerGroupModel->delete($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao eliminar o grupo de cliente.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'     => 'success',
+            'message'    => 'Grupo de cliente eliminado com sucesso!',
+            'modalClose' => true, // força fechar modal
+            'csrf'       => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
 }

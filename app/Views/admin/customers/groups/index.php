@@ -18,9 +18,9 @@ Dashboard
                     <div class="col-sm-8">
                         <div class="text-sm-end">
                             <button type="button" x-data="systemModal()"
-                                    @click="open('#formSupplier', 'md')"
+                                    @click="open('#createCustomerGroup', 'md')"
                                     class="btn btn-primary">
-                                <i class="fa-solid fa-plus me-1"></i> Adicionar
+                                <i class="mdi mdi-plus me-1"></i> Adicionar Grupo
                             </button>
                         </div>
                     </div><!-- end col-->
@@ -58,11 +58,42 @@ Dashboard
                                                 : '<span class="badge bg-danger w-100">Inativo</span>' ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="<?= base_url('admin/customers/groups/edit/' . $g['id']) ?>"
-                                           class="btn btn-sm btn-primary">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </a>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="mdi mdi-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <button type="button" x-data="systemModal()"
+                                                            @click="open('#editCustomerGroup', 'md', {
+                                                                id: '<?= $g['id'] ?>',
+                                                                name: '<?= esc($g['name']) ?>',
+                                                                description: '<?= esc($g['description']) ?>',
+                                                                discount_percent: '<?= $g['discount_percent'] ?>',
+                                                                min_order_value: '<?= $g['min_order_value'] ?>',
+                                                                max_order_value: '<?= $g['max_order_value'] ?>',
+                                                                is_default: '<?= $g['is_default'] ?>',
+                                                                status: '<?= $g['status'] ?>'
+                                                            })"
+                                                            class="dropdown-item">
+                                                        <i class="mdi mdi-pencil font-size-16 text-success me-1"></i> Editar
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button type="button" x-data="systemModal()"
+                                                            @click="open('#deleteCustomerGroup', 'md', {
+                                                                id: '<?= $g['id'] ?>',
+                                                                name: '<?= esc($g['name']) ?>'
+                                                            })"
+                                                            class="dropdown-item">
+                                                        <i class="mdi mdi-trash-can font-size-16 text-danger me-1"></i> Eliminar
+                                                    </button>
+                                                </li>
+
+                                            </ul>
+                                        </div>
                                     </td>
+
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
@@ -73,73 +104,180 @@ Dashboard
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
-<div id="formSupplier" class="d-none">
-    <div class="modal-content">
+<!-- Create -->
+<div id="createCustomerGroup" class="d-none">
+    <div class="modal-content"
+         x-data="formHandler('/admin/customers/groups/store', {
+             name: '',
+             description: '',
+             discount_percent: '',
+             min_order_value: '',
+             max_order_value: '',
+             is_default: '0',
+             status: 'active',
+             <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+         }, { resetOnSuccess: true })"
+         x-init="csrfHandler(form)">
         <div class="modal-header">
-            <h5 class="modal-title">Criar Fornecedor</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title">Criar Grupo de Cliente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-
-        <div class="modal-body"
-             x-data="{
-                ...formHandler('/admin/catalog/suppliers/store',
-                  {
-                    id: '',
-                    name: '',
-                    legal_number: '',
-                    email: '',
-                    status: 'active',
-                    <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-                  },
-                  { resetOnSuccess: true })
-             }"
-             x-init="
-                $el.addEventListener('fill-form', e => {
-                  Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
-                });
-                $el.addEventListener('reset-form', () => {
-                  Object.keys(form).forEach(k => {
-                    if (k !== '<?= csrf_token() ?>') form[k] = ''
-                  })
-                });
-                document.addEventListener('csrf-update', e => {
-                  form[e.detail.token] = e.detail.hash
-                });
-             ">
-
+        <div class="modal-body">
             <form @submit.prevent="submit()">
-                <!-- Nome -->
                 <div class="mb-3">
-                    <label class="form-label">Nome *</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name">
+                    <label>Nome *</label>
+                    <input type="text" class="form-control" x-model="form.name">
                     <div class="text-danger small" x-text="errors.name"></div>
                 </div>
-
-                <!-- Número Legal -->
                 <div class="mb-3">
-                    <label class="form-label">Número Legal *</label>
-                    <input type="text" class="form-control" name="legal_number" x-model="form.legal_number">
-                    <div class="text-danger small" x-text="errors.legal_number"></div>
+                    <label>Descrição</label>
+                    <textarea class="form-control" x-model="form.description"></textarea>
                 </div>
-
-                <!-- Email -->
                 <div class="mb-3">
-                    <label class="form-label">Email *</label>
-                    <input type="email" class="form-control" name="email" x-model="form.email">
-                    <div class="text-danger small" x-text="errors.email"></div>
+                    <label>Desconto (%)</label>
+                    <input type="number" step="0.01" class="form-control" x-model="form.discount_percent">
                 </div>
-
-                <div class="modal-footer mt-3">
-                    <button type="submit" class="btn btn-primary" :disabled="loading">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Mínimo Encomenda</label>
+                        <input type="number" step="0.01" class="form-control" x-model="form.min_order_value">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Máximo Encomenda</label>
+                        <input type="number" step="0.01" class="form-control" x-model="form.max_order_value">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Padrão</label>
+                        <select class="form-select" x-model="form.is_default">
+                            <option value="0">Não</option>
+                            <option value="1">Sim</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>Status</label>
+                        <select class="form-select" x-model="form.status">
+                            <option value="active">Ativo</option>
+                            <option value="inactive">Inativo</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" :disabled="loading">
                         <span x-show="!loading">Guardar</span>
                         <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A guardar...</span>
                     </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Edit -->
+<div id="editCustomerGroup" class="d-none">
+    <div class="modal-content"
+         x-data="formHandler('/admin/customers/groups/update', {
+           id:'',
+           name:'',
+           description:'',
+           discount_percent:'',
+           min_order_value:'',
+           max_order_value:'',
+           is_default:'0',
+           status:'active',
+           <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+       })"
+         x-init="
+           csrfHandler(form);
+           $el.addEventListener('fill-form', e => { Object.assign(form, e.detail) });
+       ">
+        <div class="modal-header">
+            <h5 class="modal-title">Editar Grupo de Cliente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <form @submit.prevent="submit()">
+                <input type="hidden" x-model="form.id">
+
+                <div class="mb-3">
+                    <label>Nome *</label>
+                    <input type="text" class="form-control" x-model="form.name">
+                    <div class="text-danger small" x-text="errors.name"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label>Descrição</label>
+                    <textarea class="form-control" x-model="form.description"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label>Desconto (%)</label>
+                    <input type="number" step="0.01" class="form-control" x-model="form.discount_percent">
+                </div>
+
+                <div class="mb-3">
+                    <label>Mínimo Encomenda</label>
+                    <input type="number" step="0.01" class="form-control" x-model="form.min_order_value">
+                </div>
+
+                <div class="mb-3">
+                    <label>Máximo Encomenda</label>
+                    <input type="number" step="0.01" class="form-control" x-model="form.max_order_value">
+                </div>
+
+                <div class="mb-3">
+                    <label>Padrão</label>
+                    <select class="form-select" x-model="form.is_default">
+                        <option value="0">Não</option>
+                        <option value="1">Sim</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Status</label>
+                    <select class="form-select" x-model="form.status">
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete -->
+<div id="deleteCustomerGroup" class="d-none">
+    <div class="modal-content"
+         x-data="formHandler('/admin/customers/groups/delete', {
+             id:'', name:'',
+             <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+         })"
+         x-init="
+            csrfHandler(form);
+            $el.addEventListener('fill-form', e => { Object.assign(form, e.detail) });
+         ">
+        <div class="modal-header">
+            <h5 class="modal-title">Eliminar Grupo de Cliente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <form @submit.prevent="submit()">
+                <input type="hidden" x-model="form.id">
+                <p>Tem a certeza que deseja eliminar <strong x-text="form.name"></strong>?</p>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" :disabled="loading">
+                        <span x-show="!loading">Eliminar</span>
+                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A eliminar...</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <?= $this->endSection() ?>
