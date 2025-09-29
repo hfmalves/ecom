@@ -4,14 +4,23 @@ namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
 use App\Models\Admin\Products;
+use App\Models\Admin\Suppliers;
+use App\Models\Admin\Brands;
+use App\Models\Admin\Categories;
 
 class ProductsController extends BaseController
 {
     protected $products;
+    protected $suppliers;
+    protected $brands;
+    protected $categories;
 
     public function __construct()
     {
-        $this->products = new Products(); // model
+        $this->products = new Products();
+        $this->suppliers = new Suppliers();
+        $this->brands = new Brands();
+        $this->categories = new Categories();
     }
 
     public function index()
@@ -60,6 +69,9 @@ class ProductsController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
         }
         $data = [
+            'suppliers' => $this->suppliers->findAll(),
+            'brands' => $this->brands->findAll(),
+            'categories' => $this->categories->findAll(),
             'product' => $product
         ];
         return view('admin/catalog/products/edit', $data);
