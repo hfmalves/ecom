@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Catalog;
 
 use CodeIgniter\Model;
 
-class ProductsCategories extends Model
+class ProductsVariantsAttributes extends Model
 {
-    protected $table            = 'products_categories';
+    protected $table            = 'products_variant_attributes';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields = [
-        'product_id',
-        'category_id',
+        'variant_id',
+        'attribute_value_id'
     ];
-
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -25,7 +24,7 @@ class ProductsCategories extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = true;
+    protected $useTimestamps = false;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -33,19 +32,20 @@ class ProductsCategories extends Model
 
     // Validation
     protected $validationRules = [
-        'product_id'  => 'required|integer',
-        'category_id' => 'required|integer',
+        'variant_id'        => 'required|integer',
+        'attribute_value_id'=> 'required|integer',
     ];
     protected $validationMessages = [
-        'product_id' => [
-            'required' => 'O campo Product ID é obrigatório.',
-            'integer'  => 'O Product ID deve ser um número inteiro.',
+        'variant_id' => [
+            'required' => 'O campo Variant ID é obrigatório.',
+            'integer'  => 'O Variant ID deve ser um número inteiro.',
         ],
-        'category_id' => [
-            'required' => 'O campo Category ID é obrigatório.',
-            'integer'  => 'O Category ID deve ser um número inteiro.',
+        'attribute_value_id' => [
+            'required' => 'O campo Attribute Value ID é obrigatório.',
+            'integer'  => 'O Attribute Value ID deve ser um número inteiro.',
         ],
     ];
+
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

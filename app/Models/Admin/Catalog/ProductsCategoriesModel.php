@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Catalog;
 
 use CodeIgniter\Model;
 
-class ProductsAttributesValues extends Model
+class ProductsCategoriesModel extends Model
 {
-    protected $table            = 'products_attribute_values';
+    protected $table            = 'products_categories';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields = [
-        'attribute_id',
-        'value',
-        'sort_order',
+        'product_id',
+        'category_id',
     ];
 
 
@@ -31,28 +30,22 @@ class ProductsAttributesValues extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
+
     // Validation
     protected $validationRules = [
-        'attribute_id'   => 'required|integer',
-        'value'        => 'required|string',
-        'sort_order'    => 'required|integer',
+        'product_id'  => 'required|integer',
+        'category_id' => 'required|integer',
     ];
-
     protected $validationMessages = [
-        'attribute_id' => [
-            'required' => 'O campo Attribute ID é obrigatório.',
-            'integer'  => 'O Attribute ID deve ser um número inteiro.',
+        'product_id' => [
+            'required' => 'O campo Product ID é obrigatório.',
+            'integer'  => 'O Product ID deve ser um número inteiro.',
         ],
-        'value' => [
-            'required' => 'O campo naome é obrigatório.',
-            'string' => 'O valor deve ser um texto válido.',
-        ],
-        'sort_order' => [
-            'required' => 'A ordenação é obrigatório.',
-            'integer'  => 'A ordenação deve ser um número inteiro.',
+        'category_id' => [
+            'required' => 'O campo Category ID é obrigatório.',
+            'integer'  => 'O Category ID deve ser um número inteiro.',
         ],
     ];
-
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

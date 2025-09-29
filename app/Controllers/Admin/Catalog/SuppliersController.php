@@ -3,9 +3,8 @@
 namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\Suppliers;
-use App\Models\Admin\Products;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\Admin\Catalog\ProductsModel;
+use App\Models\Admin\Catalog\SuppliersModel;
 
 class SuppliersController extends BaseController
 {
@@ -14,8 +13,8 @@ class SuppliersController extends BaseController
 
     public function __construct()
     {
-        $this->suppliers = new Suppliers();
-        $this->products = new Products();
+        $this->suppliers = new SuppliersModel();
+        $this->products = new ProductsModel();
     }
     public function index()
     {

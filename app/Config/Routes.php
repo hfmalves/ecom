@@ -37,7 +37,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
     $routes->get('/', 'Dashboard::index', ['filter' => 'auth']);            // /admin
     $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);    // /admin/dashboard
 
-    // Products
+    // ProductsModel
     $routes->group('catalog', ['namespace' => 'App\Controllers\Admin\Catalog'], function ($routes) {
         $routes->group('products', function ($routes) {
             $routes->get('/', 'ProductsController::index', ['filter' => 'noauth']);
@@ -76,7 +76,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'BrandsController::update');
         });
     });
-    // Products
+    // ProductsModel
     $routes->group('customers', ['namespace' => 'App\Controllers\Admin\Customers'], function ($routes) {
         $routes->get('/', 'CustumersController::index', ['filter' => 'noauth']);
         $routes->group('groups', function ($routes) {

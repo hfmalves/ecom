@@ -8,7 +8,7 @@ class RenameAllEcommerceTables extends Migration
 {
     public function up()
     {
-        // Products
+        // ProductsModel
         $this->forge->renameTable('attributes', 'products_attributes');
         $this->forge->renameTable('attribute_values', 'products_attribute_values');
         $this->forge->renameTable('product_variants', 'products_variants');
@@ -39,7 +39,7 @@ class RenameAllEcommerceTables extends Migration
 
     public function down()
     {
-        // Revert Products
+        // Revert ProductsModel
         $this->forge->renameTable('products_attributes', 'attributes');
         $this->forge->renameTable('products_attribute_values', 'attribute_values');
         $this->forge->renameTable('products_variants', 'product_variants');

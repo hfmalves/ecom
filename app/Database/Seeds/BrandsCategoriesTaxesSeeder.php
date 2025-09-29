@@ -8,7 +8,7 @@ class BrandsCategoriesTaxesSeeder extends Seeder
 {
     public function run()
     {
-        // === Brands ===
+        // === BrandsModel ===
         $brands = [
             ['name' => 'Nike', 'slug' => 'nike', 'description' => 'Marca global de calçado e vestuário desportivo', 'logo' => 'brands/nike.png'],
             ['name' => 'Adidas', 'slug' => 'adidas', 'description' => 'Equipamentos e calçado desportivo', 'logo' => 'brands/adidas.png'],
@@ -23,7 +23,7 @@ class BrandsCategoriesTaxesSeeder extends Seeder
         ];
         $this->db->table('brands')->insertBatch($brands);
 
-        // === Categories (hierarquia simples) ===
+        // === CategoriesModel (hierarquia simples) ===
         $categories = [
             // Top-level
             ['id' => 1, 'parent_id' => null, 'name' => 'Homem', 'slug' => 'homem', 'description' => 'Produtos masculinos'],

@@ -3,10 +3,10 @@
 namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\Products;
-use App\Models\Admin\Suppliers;
-use App\Models\Admin\Brands;
-use App\Models\Admin\Categories;
+use App\Models\Admin\Catalog\BrandsModel;
+use App\Models\Admin\Catalog\ProductsModel;
+use App\Models\Admin\Catalog\SuppliersModel;
+use App\Models\Admin\Catalog\CategoriesModel;
 
 class ProductsController extends BaseController
 {
@@ -17,10 +17,10 @@ class ProductsController extends BaseController
 
     public function __construct()
     {
-        $this->products = new Products();
-        $this->suppliers = new Suppliers();
-        $this->brands = new Brands();
-        $this->categories = new Categories();
+        $this->products = new ProductsModel();
+        $this->suppliers = new SuppliersModel();
+        $this->brands = new BrandsModel();
+        $this->categories = new CategoriesModel();
     }
 
     public function index()

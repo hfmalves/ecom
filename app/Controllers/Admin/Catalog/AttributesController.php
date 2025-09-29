@@ -3,10 +3,9 @@
 namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\Products;
-use App\Models\Admin\ProductsAttributes;
-use App\Models\Admin\ProductsAttributesValues;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\Admin\Catalog\ProductsModel;
+use App\Models\Admin\Catalog\ProductsAttributesModel;
+use App\Models\Admin\Catalog\ProductsAttributesValuesModel;
 
 class AttributesController extends BaseController
 {
@@ -15,9 +14,9 @@ class AttributesController extends BaseController
     protected $attributesValues;
     public function __construct()
     {
-        $this->products = new Products(); // model
-        $this->attributes = new ProductsAttributes();
-        $this->attributesValues = new ProductsAttributesValues();
+        $this->products = new ProductsModel(); // model
+        $this->attributes = new ProductsAttributesModel();
+        $this->attributesValues = new ProductsAttributesValuesModel();
     }
     public function index()
     {

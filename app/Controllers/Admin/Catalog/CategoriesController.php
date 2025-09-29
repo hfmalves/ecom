@@ -3,9 +3,8 @@
 namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\Categories;
-use App\Models\Admin\Products;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\Admin\Catalog\CategoriesModel;
+use App\Models\Admin\Catalog\ProductsModel;
 
 class CategoriesController extends BaseController
 {
@@ -14,8 +13,8 @@ class CategoriesController extends BaseController
 
     public function __construct()
     {
-        $this->categories = new Categories();
-        $this->products = new Products();
+        $this->categories = new CategoriesModel();
+        $this->products = new ProductsModel();
     }
     public function index()
     {

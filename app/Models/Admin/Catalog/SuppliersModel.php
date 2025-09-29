@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Catalog;
 
 use CodeIgniter\Model;
 
-class Suppliers extends Model
+class SuppliersModel extends Model
 {
     protected $table            = 'suppliers';
     protected $primaryKey       = 'id';
