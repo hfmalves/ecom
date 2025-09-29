@@ -96,6 +96,20 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('/', 'OrdersCartController::index', ['filter' => 'noauth']);
         });
     });
+    $routes->group('marketing', ['namespace' => 'App\Controllers\Admin\Marketing'], function ($routes) {
+        $routes->group('coupons', function ($routes) {
+            $routes->get('/', 'CouponsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('campaigns', function ($routes) {
+            $routes->get('/', 'CampaignsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('catalog-rules', function ($routes) {
+            $routes->get('/', 'PriceRulesCatalogController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('cart-rules', function ($routes) {
+            $routes->get('/', 'CartRulesController::index', ['filter' => 'noauth']);
+        });
+    });
 
 
 });
