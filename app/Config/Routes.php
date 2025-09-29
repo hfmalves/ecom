@@ -81,6 +81,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         $routes->get('/', 'CustumersController::index', ['filter' => 'noauth']);
         $routes->get('edit/(:num)', 'CustumersController::edit/$1', ['filter' => 'noauth']);
         $routes->post('store', 'CustumersController::store');
+        $routes->post('update', 'CustumersController::update');
         $routes->group('groups', function ($routes) {
             $routes->get('/', 'CustumersGroupsController::index', ['filter' => 'noauth']);
         });

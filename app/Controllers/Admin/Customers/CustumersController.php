@@ -46,11 +46,13 @@ class CustumersController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Cliente não encontrado');
         }
         $customer = $this->customerModel->find($id);
+        $groups = $this->customerGroupModel->findAll();
         if (!$customer) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Client com ID $id não encontrado");
         }
         $data = [
-            'customer' => $customer
+            'customer' => $customer,
+            'costumers_group' => $groups
         ];
         return view('admin/customers/edit', $data);
     }
@@ -89,6 +91,55 @@ class CustumersController extends BaseController
             ],
         ]);
     }
-
+    public function update()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID do cliente não enviado.',
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $id = $data['id'];
+        unset($data['id']); // não precisamos mandar o id para update()
+        // Só hash se vier password
+        if (! empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        } else {
+            unset($data['password']);
+        }
+        // defaults
+        $data['is_active']   = $data['is_active']   ?? 1;
+        $data['is_verified'] = $data['is_verified'] ?? 0;
+        $data['login_2step'] = $data['login_2step'] ?? 0;
+        // regra dinâmica para update (ignora o email do próprio cliente)
+        $this->customerModel->setValidationRule(
+            'email',
+            "required|valid_email|is_unique[customers.email,id,{$id}]"
+        );
+        if (! $this->customerModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->customerModel->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'message'  => 'Cliente atualizado com sucesso!',
+            'id'       => $id,
+            'csrf'     => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
 
 }
