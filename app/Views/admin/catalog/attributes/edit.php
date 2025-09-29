@@ -205,8 +205,6 @@ Dashboard
         </div>
     </div>
 </div>
-
-<!-- Edit -->
 <div id="editComponent" class="d-none">
     <div class="modal-content"
          x-data="formHandler('/admin/catalog/attributes/value/update', {
@@ -240,9 +238,6 @@ Dashboard
         </div>
     </div>
 </div>
-
-<!-- Delete -->
-<!-- Delete -->
 <div class="modal fade" id="deleteComponent" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content"
@@ -270,9 +265,6 @@ Dashboard
         </div>
     </div>
 </div>
-
-
-
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>
@@ -280,54 +272,53 @@ Dashboard
         return {
             rows: rows,
             draggingIndex: null,
-
             dragStart(index, event) {
                 this.draggingIndex = index;
                 event.dataTransfer.effectAllowed = 'move';
                 event.dataTransfer.setData('text/plain', index);
             },
-
             dragOver(index, event) {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = 'move';
             },
-
             async drop(index, event) {
                 const draggedIndex = this.draggingIndex;
                 if (draggedIndex === null || draggedIndex === index) return;
-
-                // mover item no array
                 const draggedItem = this.rows[draggedIndex];
                 this.rows.splice(draggedIndex, 1);
                 this.rows.splice(index, 0, draggedItem);
                 this.draggingIndex = null;
 
-                // guardar automaticamente
+                // preparar dados
                 const data = this.rows.map((row, i) => ({
                     id: row.id,
                     sort_order: i + 1
                 }));
-
                 try {
-                    const response = await fetch('<?= base_url('admin/catalog/attributes/values/update-order') ?>', {
-                        method: 'POST',
+                    const csrf = window.__lastCsrf || { token: "<?= csrf_token() ?>", hash: "<?= csrf_hash() ?>" };
+                    const response = await fetch("<?= base_url('/admin/catalog/attributes/value/update-order') ?>", {
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/json',
-                            '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
+                            "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({rows: data})
+                        body: JSON.stringify({
+                            rows: data,
+                            [csrf.token]: csrf.hash   // 👈 token vai no body
+                        })
                     });
-
                     const result = await response.json();
-                    if (!result.success) {
-                        console.error('Erro ao guardar a ordem');
+                    if (result.csrf) {
+                        window.__lastCsrf = result.csrf;
+                        document.dispatchEvent(new CustomEvent("csrf-update", { detail: result.csrf }));
+                    }
+                    if (result.status !== "success") {
+                        console.error("Erro ao guardar a ordem", result);
                     }
                 } catch (err) {
-                    console.error('Erro de rede ao guardar a ordem', err);
+                    console.error("Erro de rede ao guardar a ordem", err);
                 }
             }
         }
     }
-
 </script>
 <?= $this->endSection() ?>

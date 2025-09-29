@@ -230,19 +230,52 @@ class AttributesController extends BaseController
             ],
         ]);
     }
-    public function updateValueOrder($id = null)
+    public function updateValueOrder()
     {
-        if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Fornecedor não encontrado');
+        $data = $this->request->getJSON(true);
+        $rows = $data['rows'] ?? [];
+        if (empty($rows) || ! is_array($rows)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Dados inválidos para atualização da ordem.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
         }
-        $attribute = $this->attributes->find($id);
-        if (!$attribute) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Fornecedor com ID $id não encontrado");
+        foreach ($rows as $row) {
+            $id         = $row['id'] ?? null;
+            $sort_order = $row['sort_order'] ?? null;
+            if (! $id || ! $this->attributesValues->find($id)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => "Valor de atributo com ID {$id} não encontrado.",
+                    'csrf'    => [
+                        'token' => csrf_token(),
+                        'hash'  => csrf_hash(),
+                    ],
+                ]);
+            }
+            if (! $this->attributesValues->update($id, ['sort_order' => (int) $sort_order])) {
+                return $this->response->setJSON([
+                    'status' => 'error',
+                    'errors' => $this->attributesValues->errors(),
+                    'csrf'   => [
+                        'token' => csrf_token(),
+                        'hash'  => csrf_hash(),
+                    ],
+                ]);
+            }
         }
-        $data = [
-            'attribute' => $attribute,
-            'attributesValues' => $this->attributesValues->where('attribute_id', $attribute['id'])->orderBy('sort_order','ASC')->findAll(),
-        ];
-        return view('admin/catalog/attributes/edit', $data);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Ordem dos valores atualizada com sucesso!',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
     }
+
 }
