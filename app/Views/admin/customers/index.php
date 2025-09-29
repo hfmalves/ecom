@@ -18,7 +18,7 @@ Dashboard
                     <div class="col-sm-8">
                         <div class="text-sm-end">
                             <button type="button" x-data="systemModal()"
-                                    @click="open('#formSupplier', 'md')"
+                                    @click="open('#formCustomer', 'md')"
                                     class="btn btn-primary">
                                 <i class="fa-solid fa-plus me-1"></i> Adicionar
                             </button>
@@ -69,27 +69,31 @@ Dashboard
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
-<div id="formSupplier" class="d-none">
+<div id="formCustomer" class="d-none">
     <div class="modal-content">
         <div class="modal-header">
-            <h5 class="modal-title">Criar Fornecedor</h5>
+            <h5 class="modal-title">Criar Cliente</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body"
              x-data="{
-                ...formHandler('/admin/catalog/suppliers/store',
+                ...formHandler('/admin/customers/store',
                   {
                     id: '',
+                    group_id: '',
                     name: '',
-                    legal_number: '',
                     email: '',
-                    status: 'active',
+                    password: '',
+                    phone: '',
+                    is_active: '',
+                    is_verified: '',
+                    login_2step: '',
                     <?= csrf_token() ?>: '<?= csrf_hash() ?>'
                   },
                   { resetOnSuccess: true })
              }"
-             x-init="
+                         x-init="
                 $el.addEventListener('fill-form', e => {
                   Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
                 });
@@ -101,28 +105,85 @@ Dashboard
                 document.addEventListener('csrf-update', e => {
                   form[e.detail.token] = e.detail.hash
                 });
-             ">
-
+            ">
             <form @submit.prevent="submit()">
                 <!-- Nome -->
-                <div class="mb-3">
-                    <label class="form-label">Nome *</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name">
-                    <div class="text-danger small" x-text="errors.name"></div>
+                <div class="row mb-3">
+                    <div class="col-md-12" x-data="{ field: 'email' }">
+                        <label class="form-label">Nome *</label>
+                        <input type="text" class="form-control" name="name" x-model="form.name">
+                        <div class="text-danger small" x-text="errors.name"></div>
+                    </div>
+                </div>
+                <!-- Email e Telefone -->
+                <div class="row mb-3">
+                    <div class="col-md-6" x-data="{ field: 'email' }">
+                        <label class="form-label" :for="field">Email *</label>
+                        <input type="email" class="form-control" :id="field" :name="field" x-model="form[field]">
+                        <div class="text-danger small" x-text="errors[field]"></div>
+                    </div>
+                    <div class="col-md-6" x-data="{ field: 'phone' }">
+                        <label class="form-label" :for="field">Contato *</label>
+                        <input type="text" class="form-control" :id="field" :name="field" x-model="form[field]">
+                        <div class="text-danger small" x-text="errors[field]"></div>
+                    </div>
+                </div>
+                <!-- Grupo, Ativo, Verificado, 2FA -->
+                <div class="row mb-3">
+                    <div class="col-md-6" x-data="{ field: 'group_id' }">
+                        <label class="form-label" :for="field">Grupo do Cliente</label>
+                        <select class="form-select" :id="field" :name="field"
+                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <option value="">-- Selecionar --</option>
+                            <?php foreach ($costumers_group ?? [] as $costumer_group): ?>
+                                <option value="<?= $costumer_group['id'] ?>"><?= esc($costumer_group['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <template x-if="errors[field]">
+                            <small class="text-danger" x-text="errors[field]"></small>
+                        </template>
+                    </div>
+
+                    <div class="col-md-6" x-data="{ field: 'is_active' }">
+                        <label class="form-label" :for="field">Ativo</label>
+                        <select class="form-select" :id="field" :name="field"
+                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <option value="">-- Selecionar --</option>
+                            <option value="1">Sim</option>
+                            <option value="0">Não</option>
+                        </select>
+                        <template x-if="errors[field]">
+                            <small class="text-danger" x-text="errors[field]"></small>
+                        </template>
+                    </div>
                 </div>
 
-                <!-- Número Legal -->
-                <div class="mb-3">
-                    <label class="form-label">Número Legal *</label>
-                    <input type="text" class="form-control" name="legal_number" x-model="form.legal_number">
-                    <div class="text-danger small" x-text="errors.legal_number"></div>
-                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6" x-data="{ field: 'is_verified' }">
+                        <label class="form-label" :for="field">Verificado</label>
+                        <select class="form-select" :id="field" :name="field"
+                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <option value="">-- Selecionar --</option>
+                            <option value="1">Sim</option>
+                            <option value="0">Não</option>
+                        </select>
+                        <template x-if="errors[field]">
+                            <small class="text-danger" x-text="errors[field]"></small>
+                        </template>
+                    </div>
 
-                <!-- Email -->
-                <div class="mb-3">
-                    <label class="form-label">Email *</label>
-                    <input type="email" class="form-control" name="email" x-model="form.email">
-                    <div class="text-danger small" x-text="errors.email"></div>
+                    <div class="col-md-6" x-data="{ field: 'login_2step' }">
+                        <label class="form-label" :for="field">Login em 2 Passos</label>
+                        <select class="form-select" :id="field" :name="field"
+                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                            <option value="">-- Selecionar --</option>
+                            <option value="1">Sim</option>
+                            <option value="0">Não</option>
+                        </select>
+                        <template x-if="errors[field]">
+                            <small class="text-danger" x-text="errors[field]"></small>
+                        </template>
+                    </div>
                 </div>
 
                 <div class="modal-footer mt-3">
@@ -133,9 +194,8 @@ Dashboard
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
-
-
 <?= $this->endSection() ?>
