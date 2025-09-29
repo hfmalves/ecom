@@ -76,5 +76,12 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'BrandsController::update');
         });
     });
+    // Products
+    $routes->group('customers', ['namespace' => 'App\Controllers\Admin\Customers'], function ($routes) {
+        $routes->get('/', 'CustumersController::index', ['filter' => 'noauth']);
+        $routes->group('groups', function ($routes) {
+            $routes->get('/', 'CustumersGroupsController::index', ['filter' => 'noauth']);
+        });
+    });
 
 });
