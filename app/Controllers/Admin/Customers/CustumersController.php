@@ -39,4 +39,18 @@ class CustumersController extends BaseController
         ];
         return view('admin/customers/index', $data);
     }
+    public function edit($id = null)
+    {
+        if ($id === null) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Cliente não encontrado');
+        }
+        $customer = $this->customerModel->find($id);
+        if (!$customer) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Client com ID $id não encontrado");
+        }
+        $data = [
+            'customer' => $customer
+        ];
+        return view('admin/customers/edit', $data);
+    }
 }
