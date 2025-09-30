@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class OrdersShipmentItemsModel extends Model
+class OrdersCartItems extends Model
 {
-    protected $table            = 'orders_shipment_items';
+    protected $table            = 'orders_cart_items';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['shipment_id','order_item_id','qty'];
-
+    protected $allowedFields = ['cart_id','product_id','variant_id','qty','price','created_at','updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -30,13 +29,16 @@ class OrdersShipmentItemsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'shipment_id'  => 'required|integer',
-        'order_item_id'=> 'required|integer',
-        'qty'          => 'required|integer',
+        'cart_id'    => 'required|integer',
+        'product_id' => 'required|integer',
+        'variant_id' => 'permit_empty|integer',
+        'qty'        => 'required|integer',
+        'price'      => 'required|decimal',
     ];
 
     protected $validationMessages = [
         'qty' => ['required' => 'A quantidade é obrigatória.'],
+        'price' => ['required' => 'O preço é obrigatório.'],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

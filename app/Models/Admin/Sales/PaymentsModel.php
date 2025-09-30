@@ -1,18 +1,23 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class OrdersCartItems extends Model
+class PaymentsModel extends Model
 {
-    protected $table            = 'orders_cart_items';
+    protected $table            = 'payments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['cart_id','product_id','variant_id','qty','price','created_at','updated_at'];
+    protected $allowedFields = [
+        'invoice_id',
+        'amount',
+        'method',
+        'paid_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -29,16 +34,27 @@ class OrdersCartItems extends Model
 
     // Validation
     protected $validationRules = [
-        'cart_id'    => 'required|integer',
-        'product_id' => 'required|integer',
-        'variant_id' => 'permit_empty|integer',
-        'qty'        => 'required|integer',
-        'price'      => 'required|decimal',
+        'invoice_id' => 'required|integer',
+        'amount'     => 'required|decimal',
+        'method'     => 'required|max_length[50]',
+        'paid_at'    => 'permit_empty|valid_date',
     ];
-
     protected $validationMessages = [
-        'qty' => ['required' => 'A quantidade é obrigatória.'],
-        'price' => ['required' => 'O preço é obrigatório.'],
+        'invoice_id' => [
+            'required' => 'A fatura associada é obrigatória.',
+            'integer'  => 'O ID da fatura deve ser um número inteiro.',
+        ],
+        'amount' => [
+            'required' => 'O valor do pagamento é obrigatório.',
+            'decimal'  => 'O valor deve ser numérico.',
+        ],
+        'method' => [
+            'required'   => 'O método de pagamento é obrigatório.',
+            'max_length' => 'O método não pode ter mais de 50 caracteres.',
+        ],
+        'paid_at' => [
+            'valid_date' => 'A data de pagamento deve ser válida.',
+        ],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

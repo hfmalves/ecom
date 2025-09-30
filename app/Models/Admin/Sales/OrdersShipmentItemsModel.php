@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class OrdersReturnItemsModel extends Model
+class OrdersShipmentItemsModel extends Model
 {
-    protected $table            = 'ordersreturnitems';
+    protected $table            = 'orders_shipment_items';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['rma_request_id','order_item_id','qty_returned','status','created_at','updated_at'];
+    protected $allowedFields = ['shipment_id','order_item_id','qty'];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -29,14 +30,13 @@ class OrdersReturnItemsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'rma_request_id' => 'required|integer',
-        'order_item_id'  => 'required|integer',
-        'qty_returned'   => 'required|integer',
-        'status'         => 'required|in_list[pending,approved,rejected,received,resolved]',
+        'shipment_id'  => 'required|integer',
+        'order_item_id'=> 'required|integer',
+        'qty'          => 'required|integer',
     ];
 
     protected $validationMessages = [
-        'qty_returned' => ['required' => 'A quantidade devolvida é obrigatória.'],
+        'qty' => ['required' => 'A quantidade é obrigatória.'],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

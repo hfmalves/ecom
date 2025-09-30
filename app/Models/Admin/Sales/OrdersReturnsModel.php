@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class OrdersStatusHistoryModel extends Model
+class OrdersReturnsModel extends Model
 {
-    protected $table            = 'orders_status_histories';
+    protected $table            = 'orders_returns';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['order_id','status','comment','created_at'];
+    protected $allowedFields = ['order_id','customer_id','reason','status','created_at','updated_at'];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -28,15 +29,17 @@ class OrdersStatusHistoryModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
+
     protected $validationRules = [
-        'order_id' => 'required|integer',
-        'status'   => 'required|in_list[pending,processing,completed,canceled]',
-        'comment'  => 'permit_empty|string',
+        'order_id'   => 'required|integer',
+        'customer_id'=> 'required|integer',
+        'reason'     => 'permit_empty|string',
+        'status'     => 'required|in_list[pending,approved,rejected,received,resolved]',
     ];
 
     protected $validationMessages = [
         'status' => [
-            'required' => 'O estado é obrigatório.',
+            'required' => 'O estado da devolução é obrigatório.',
             'in_list'  => 'Estado inválido.'
         ]
     ];

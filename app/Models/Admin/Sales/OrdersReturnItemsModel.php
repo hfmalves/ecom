@@ -1,23 +1,18 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class PaymentsModel extends Model
+class OrdersReturnItemsModel extends Model
 {
-    protected $table            = 'payments';
+    protected $table            = 'ordersreturnitems';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = [
-        'invoice_id',
-        'amount',
-        'method',
-        'paid_at',
-    ];
+    protected $allowedFields = ['rma_request_id','order_item_id','qty_returned','status','created_at','updated_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -34,27 +29,14 @@ class PaymentsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'invoice_id' => 'required|integer',
-        'amount'     => 'required|decimal',
-        'method'     => 'required|max_length[50]',
-        'paid_at'    => 'permit_empty|valid_date',
+        'rma_request_id' => 'required|integer',
+        'order_item_id'  => 'required|integer',
+        'qty_returned'   => 'required|integer',
+        'status'         => 'required|in_list[pending,approved,rejected,received,resolved]',
     ];
+
     protected $validationMessages = [
-        'invoice_id' => [
-            'required' => 'A fatura associada é obrigatória.',
-            'integer'  => 'O ID da fatura deve ser um número inteiro.',
-        ],
-        'amount' => [
-            'required' => 'O valor do pagamento é obrigatório.',
-            'decimal'  => 'O valor deve ser numérico.',
-        ],
-        'method' => [
-            'required'   => 'O método de pagamento é obrigatório.',
-            'max_length' => 'O método não pode ter mais de 50 caracteres.',
-        ],
-        'paid_at' => [
-            'valid_date' => 'A data de pagamento deve ser válida.',
-        ],
+        'qty_returned' => ['required' => 'A quantidade devolvida é obrigatória.'],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

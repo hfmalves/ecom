@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class OrdersShipmentsModel extends Model
+class OrdersStatusHistoryModel extends Model
 {
-    protected $table            = 'orders_shipments';
+    protected $table            = 'orders_status_histories';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['order_id','tracking_number','carrier','shipped_at','created_at'];
+    protected $allowedFields = ['order_id','status','comment','created_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -29,14 +29,16 @@ class OrdersShipmentsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'order_id'        => 'required|integer',
-        'tracking_number' => 'permit_empty|max_length[100]',
-        'carrier'         => 'permit_empty|max_length[100]',
-        'shipped_at'      => 'permit_empty|valid_date',
+        'order_id' => 'required|integer',
+        'status'   => 'required|in_list[pending,processing,completed,canceled]',
+        'comment'  => 'permit_empty|string',
     ];
 
     protected $validationMessages = [
-        'order_id' => ['required' => 'A encomenda é obrigatória.'],
+        'status' => [
+            'required' => 'O estado é obrigatório.',
+            'in_list'  => 'Estado inválido.'
+        ]
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

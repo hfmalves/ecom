@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Models\Admin\Orders;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class OrdersCartsModel extends Model
+class OrdersShipmentsModel extends Model
 {
-    protected $table            = 'orders_carts';
+    protected $table            = 'orders_shipments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['user_id','session_id','created_at','updated_at'];
-
+    protected $allowedFields = ['order_id','tracking_number','carrier','shipped_at','created_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -30,12 +29,14 @@ class OrdersCartsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'user_id'    => 'permit_empty|integer',
-        'session_id' => 'required|max_length[100]',
+        'order_id'        => 'required|integer',
+        'tracking_number' => 'permit_empty|max_length[100]',
+        'carrier'         => 'permit_empty|max_length[100]',
+        'shipped_at'      => 'permit_empty|valid_date',
     ];
 
     protected $validationMessages = [
-        'session_id' => ['required' => 'A sessão é obrigatória.'],
+        'order_id' => ['required' => 'A encomenda é obrigatória.'],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
