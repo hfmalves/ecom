@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Config\shipping;
 
 use CodeIgniter\Model;
 
-class ShippingMethods extends Model
+class ShippingMethodsModel extends Model
 {
     protected $table            = 'shipping_methods';
     protected $primaryKey       = 'id';

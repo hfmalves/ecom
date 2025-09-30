@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Config\payments;
 
 use CodeIgniter\Model;
 
-class PaymentMethods extends Model
+class PaymentMethodsModel extends Model
 {
     protected $table            = 'payment_methods';
     protected $primaryKey       = 'id';

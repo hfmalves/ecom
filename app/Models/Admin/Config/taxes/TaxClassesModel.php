@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models\Admin;
+namespace App\Models\Admin\Config\taxes;
 
 use CodeIgniter\Model;
 
-class TaxClasses  extends Model
+class TaxClassesModel  extends Model
 {
     protected $table            = 'tax_classes';
     protected $primaryKey       = 'id';
