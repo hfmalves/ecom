@@ -4,7 +4,7 @@ namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class Orders extends Model
+class OrdersModel extends Model
 {
     protected $table            = 'orders';
     protected $primaryKey       = 'id';

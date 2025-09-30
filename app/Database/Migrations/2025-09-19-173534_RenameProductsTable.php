@@ -16,7 +16,7 @@ class RenameAllEcommerceTables extends Migration
         $this->forge->renameTable('product_categories', 'products_categories');
         $this->forge->renameTable('images', 'products_images');
 
-        // Orders
+        // OrdersModel
         $this->forge->renameTable('shipments', 'orders_shipments');
         $this->forge->renameTable('shipment_items', 'orders_shipment_items');
         $this->forge->renameTable('rma_requests', 'orders_returns');
@@ -47,7 +47,7 @@ class RenameAllEcommerceTables extends Migration
         $this->forge->renameTable('products_categories', 'product_categories');
         $this->forge->renameTable('products_images', 'images');
 
-        // Revert Orders
+        // Revert OrdersModel
         $this->forge->renameTable('orders_shipments', 'shipments');
         $this->forge->renameTable('orders_shipment_items', 'shipment_items');
         $this->forge->renameTable('orders_returns', 'rma_requests');

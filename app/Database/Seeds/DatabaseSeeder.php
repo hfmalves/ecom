@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call('ReviewsSeeder');           // reviews de produtos
         $this->call('WishlistsSeeder');         // wishlists
 
-        // Orders & fluxo
+        // OrdersModel & fluxo
         $this->call('OrderSeeder');             // orders + order_items
         $this->call('OrderStatusHistorySeeder');// histórico de estados
         $this->call('ShipmentSeeder');          // shipments
