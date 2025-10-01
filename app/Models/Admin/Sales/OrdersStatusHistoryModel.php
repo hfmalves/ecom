@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class OrdersStatusHistoryModel extends Model
 {
-    protected $table            = 'orders_status_histories';
+    protected $table            = 'orders_status_history';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

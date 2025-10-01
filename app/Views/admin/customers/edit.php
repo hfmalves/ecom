@@ -201,7 +201,6 @@ Dashboard
             </div>
         </div>
     </div>
-
 </form>
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>

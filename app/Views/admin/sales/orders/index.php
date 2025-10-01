@@ -30,16 +30,15 @@ Dashboard
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Cliente</th>
-                                    <th>Morada Env.</th>
-                                    <th>Morada Fac.</th>
                                     <th>Status</th>
+                                    <th>Cliente</th>
+                                    <th>Morada</th>
+                                    <th>Pais</th>
                                     <th>Artigos</th>
                                     <th>Total</th>
                                     <th>Desconto</th>
-                                    <th>Imposto</th>
-                                    <th>Método de Pagamento</th>
-                                    <th>Método de Envio</th>
+                                    <th>Terminal </th>
+                                    <th>Envio</th>
                                     <th>Criada em</th>
                                     <th>Ações</th>
                                 </tr>
@@ -48,37 +47,47 @@ Dashboard
                             <?php if (!empty($orders)): ?>
                                 <?php foreach ($orders as $o): ?>
                                     <tr>
-                                        <td><?= esc($o['user']['name'] ?? 'Sem cliente') ?></td>
-                                        <td>
-                                            <?= esc($o['billing_address']['city'] ?? '-') ?><br>
-                                            <?= esc($o['billing_address']['postcode'] ?? '-') ?>
-                                        </td>
-                                        <td>
-                                            <?= esc($o['shipping_address']['city'] ?? '-') ?><br>
-                                            <?= esc($o['shipping_address']['postcode'] ?? '-') ?>
-                                        </td>
                                         <td>
                                             <?php
                                             $statusLabels = [
-                                                    'pending'    => 'Pendente',
-                                                    'processing' => 'Em processamento',
-                                                    'completed'  => 'Concluída',
-                                                    'canceled'   => 'Cancelada',
-                                                    'refunded'   => 'Reembolsada'
+                                                'pending'    => 'Pendente',
+                                                'processing' => 'Em processamento',
+                                                'completed'  => 'Concluída',
+                                                'canceled'   => 'Cancelada',
+                                                'refunded'   => 'Reembolsada'
                                             ];
                                             echo $statusLabels[$o['status']] ?? $o['status'];
                                             ?>
                                         </td>
+                                        <td>
+                                            <?= esc($o['user']['name'] ?? 'Sem cliente') ?><br>
+                                            <?= esc($o['user']['email'] ?? 'Sem cliente') ?>
+                                        </td>
+                                        <td>
+                                          <?= esc($o['billing_address']['street'] ?? '-') ?>
+                                            <br   <?= esc($o['billing_address']['postcode'] ?? '-') ?>
+                                        </td>
+                                        <td>
+                                            <?= esc($o['billing_address']['country'] ?? '-') ?>
+                                            <?= esc($o['billing_address']['city'] ?? '-') ?>
+                                        </td>
                                         <td><?= esc($o['total_items']) ?></td>
                                         <td><?= number_format($o['grand_total'], 2, ',', ' ') ?> €</td>
                                         <td><?= number_format($o['total_discount'], 2, ',', ' ') ?> €</td>
-                                        <td><?= number_format($o['total_tax'], 2, ',', ' ') ?> €</td>
                                         <td><?= esc($o['payment_method']['name'] ?? '-') ?></td>
-                                        <td><?= esc($o['shipping_method']['name'] ?? '-') ?></td>
-                                        <td><?= date('d/m/Y H:i', strtotime($o['created_at'])) ?></td>
                                         <td>
-                                            <a href="<?= base_url('admin/sales/orders/view/'.$o['id']) ?>" class="btn btn-sm btn-primary">Ver</a>
-                                            <a href="<?= base_url('admin/sales/orders/edit/'.$o['id']) ?>" class="btn btn-sm btn-warning">Editar</a>
+                                            <?= esc($o['shipping_method']['name'] ?? '-') ?><br>
+                                            <?php if (!empty($o['shipments'])): ?>
+                                                <?php foreach ($o['shipments'] as $s): ?>
+                                                    <?= esc($s['tracking_number'] ?? '-') ?><br>
+                                                <?php endforeach ?>
+                                            <?php else: ?>
+                                                -
+                                            <?php endif ?>
+                                        </td>
+                                        <td><?= date('d/m/Y', strtotime($o['created_at'])) ?></td>
+                                        <td>
+                                            <a href="<?= base_url('admin/sales/orders/edit/'.$o['id']) ?>" class="btn btn-sm btn-primary w-100">Ver</a>
                                         </td>
                                     </tr>
                                 <?php endforeach ?>
