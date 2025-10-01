@@ -5,76 +5,123 @@ namespace App\Database\Seeds;
 use CodeIgniter\Database\Seeder;
 use Faker\Factory;
 
-class OrdersSeeder extends Seeder
+class OrderSeeder extends Seeder
 {
     public function run()
     {
         $faker = Factory::create('pt_PT');
 
-        // 🔥 limpa só os items (deixa as orders quietas)
+        // 🔥 Limpa tabelas na ordem certa
+        $this->db->query('SET FOREIGN_KEY_CHECKS = 0;');
         $this->db->table('orders_items')->truncate();
+        $this->db->table('orders')->truncate();
+        $this->db->table('shipping_methods')->truncate();
+        $this->db->table('payment_methods')->truncate();
+        $this->db->query('SET FOREIGN_KEY_CHECKS = 1;');
 
-        // busca todas as orders existentes
-        $orders = $this->db->table('orders')->get()->getResultArray();
+        // 🔹 Shipping Methods
+        $shippingMethods = [
+            ['code' => 'ctt', 'name' => 'CTT Expresso', 'created_at' => date('Y-m-d H:i:s')],
+            ['code' => 'ups', 'name' => 'UPS',          'created_at' => date('Y-m-d H:i:s')],
+            ['code' => 'dhl', 'name' => 'DHL',          'created_at' => date('Y-m-d H:i:s')],
+        ];
+        $this->db->table('shipping_methods')->insertBatch($shippingMethods);
 
-        foreach ($orders as $order) {
-            $orderId = $order['id'];
+        // 🔹 Payment Methods
+        $paymentMethods = [
+            ['code' => 'multibanco', 'name' => 'Multibanco', 'created_at' => date('Y-m-d H:i:s')],
+            ['code' => 'mbway',      'name' => 'MBWay',      'created_at' => date('Y-m-d H:i:s')],
+            ['code' => 'paypal',     'name' => 'PayPal',     'created_at' => date('Y-m-d H:i:s')],
+            ['code' => 'visa',       'name' => 'Visa',       'created_at' => date('Y-m-d H:i:s')],
+        ];
+        $this->db->table('payment_methods')->insertBatch($paymentMethods);
 
-            // 1. decide a quantidade total (random 1 a 20)
-            $totalUnits = $faker->numberBetween(1, 20);
+        // 🔹 Buscar IDs reais
+        $shippingIds = array_column(
+            $this->db->table('shipping_methods')->select('id')->get()->getResultArray(),
+            'id'
+        );
+        $paymentIds = array_column(
+            $this->db->table('payment_methods')->select('id')->get()->getResultArray(),
+            'id'
+        );
 
-            // 2. decide quantos produtos diferentes (máx. 3)
+        // 🔹 Dados de referência
+        $customers = $this->db->table('customers')->get()->getResultArray();
+        $addresses = $this->db->table('customers_addresses')->get()->getResultArray();
+        $products  = $this->db->table('products')->get()->getResultArray();
+
+        if (empty($customers) || empty($addresses) || empty($products)) {
+            echo "⚠️ Não há customers, addresses ou products suficientes para gerar orders.\n";
+            return;
+        }
+
+        $statuses = ['pending','processing','completed','canceled','refunded'];
+
+        // 🔹 Criar 100 orders
+        for ($i = 1; $i <= 100; $i++) {
+            $customer   = $faker->randomElement($customers);
+            $userAddrs  = array_filter($addresses, fn($a) => $a['customer_id'] == $customer['id']);
+            if (empty($userAddrs)) continue;
+
+            $billing  = $faker->randomElement($userAddrs);
+            $shipping = $faker->randomElement($userAddrs);
+
+            $orderData = [
+                'customer_id'         => $customer['id'],
+                'status'              => $faker->randomElement($statuses),
+                'billing_address_id'  => $billing['id'],
+                'shipping_address_id' => $shipping['id'],
+                'shipping_method_id'  => $faker->randomElement($shippingIds),
+                'payment_method_id'   => $faker->randomElement($paymentIds),
+                'created_at'          => $faker->dateTimeBetween('-3 months', 'now')->format('Y-m-d H:i:s'),
+                'updated_at'          => null,
+            ];
+            $this->db->table('orders')->insert($orderData);
+            $orderId = $this->db->insertID();
+
+            // 🔹 Itens para esta order
+            $totalUnits  = $faker->numberBetween(1, 20);
             $numProducts = min($totalUnits, $faker->numberBetween(1, 3));
 
-            $orderItems = [];
             $subtotal   = 0;
             $unitsLeft  = $totalUnits;
+            $orderItems = [];
 
-            // 3. cria os items com base no totalUnits
             for ($j = 1; $j <= $numProducts; $j++) {
-                $productId = $faker->numberBetween(1, 50); // assume 50 produtos na tabela
+                $product = $faker->randomElement($products);
+                $price   = (float) $product['base_price_tax'];
 
-                $product = $this->db->table('products')
-                    ->select('base_price_tax')
-                    ->where('id', $productId)
-                    ->get()
-                    ->getRowArray();
-
-                $price = $product ? (float) $product['base_price_tax'] : 0;
-
-                // se for o último produto, leva o resto
                 if ($j === $numProducts) {
                     $qty = $unitsLeft;
                 } else {
                     $qty = $faker->numberBetween(1, $unitsLeft - ($numProducts - $j));
                 }
-
                 $unitsLeft -= $qty;
-                $lineTotal  = $price * $qty;
+
+                $lineTotal = $price * $qty;
+                $subtotal += $lineTotal;
 
                 $orderItems[] = [
                     'order_id'   => $orderId,
                     'cart_id'    => null,
-                    'product_id' => $productId,
+                    'product_id' => $product['id'],
                     'variant_id' => null,
                     'qty'        => $qty,
                     'price'      => $price,
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => null,
                 ];
-
-                $subtotal += $lineTotal;
             }
 
-            // insere os items na tabela
+            // insere items
             $this->db->table('orders_items')->insertBatch($orderItems);
 
-            // 4. recalcula totais da order
-            $tax      = $subtotal * 0.23; // IVA fixo 23%
-            $discount = ($faker->boolean(20)) ? $subtotal * 0.1 : 0; // 20% chance de 10% desconto
+            // recalcula totais
+            $tax      = $subtotal * 0.23;
+            $discount = ($faker->boolean(20)) ? $subtotal * 0.1 : 0;
             $grand    = $subtotal + $tax - $discount;
 
-            // 5. atualiza a ordem
             $this->db->table('orders')
                 ->where('id', $orderId)
                 ->update([
@@ -85,8 +132,9 @@ class OrdersSeeder extends Seeder
                     'updated_at'     => date('Y-m-d H:i:s'),
                 ]);
 
-            // opcional: mostrar progresso no terminal
             echo "Ordem #{$orderId} → {$totalUnits} unidades, {$numProducts} produtos, total {$grand}€\n";
         }
+
+        echo "✅ Foram geradas 100 orders com items + shipping_methods + payment_methods!\n";
     }
 }
