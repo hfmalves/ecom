@@ -19,6 +19,7 @@ use App\Models\Admin\Customers\CustomerAddressModel;
 use App\Models\Admin\Config\payments\PaymentMethodsModel;
 use App\Models\Admin\Config\shipping\ShippingMethodsModel;
 
+use App\Models\Admin\Catalog\ProductsVariantsModel;
 
 
 
@@ -36,12 +37,14 @@ class OrdersController extends BaseController
     protected $ordersShipmentsModel;
     protected $ordersShipmentItemsModel;
     protected $ordersStatusHistoryModel;
+    protected $productsVariantsModel;
 
     public function __construct()
     {
         $this->ordersModel = new OrdersModel();
         $this->ordersItemsModel = new OrdersItemsModel();
         $this->productsModel = new ProductsModel();
+        $this->productsVariantsModel = new ProductsVariantsModel();
         $this->customerModel = new CustomerModel();
         $this->customerAddressModel = new CustomerAddressModel();
         $this->paymentMethodsModel = new PaymentMethodsModel();
@@ -49,6 +52,7 @@ class OrdersController extends BaseController
         $this->ordersShipmentsModel = new OrdersShipmentsModel();
         $this->ordersShipmentItemsModel = new OrdersShipmentItemsModel();
         $this->ordersStatusHistoryModel = new OrdersStatusHistoryModel();
+
     }
 
     public function index()
@@ -58,7 +62,7 @@ class OrdersController extends BaseController
         $shipMethods = $this->shippingMethodsModel->findAll();
         $payMethods  = $this->paymentMethodsModel->findAll();
         $maps = [
-            'user_id'             => array_column($customers, null, 'id'),
+            'customer_id'         => array_column($customers, null, 'id'),
             'billing_address_id'  => array_column($addresses, null, 'id'),
             'shipping_address_id' => array_column($addresses, null, 'id'),
             'shipping_method_id'  => array_column($shipMethods, null, 'id'),
@@ -82,15 +86,22 @@ class OrdersController extends BaseController
         }
         foreach ($orders as &$o) {
             foreach ($maps as $field => $map) {
-                $key = str_replace('_id', '', $field);
-                $o[$key] = $map[$o[$field]] ?? ['name' => 'N/A'];
+                if ($field === 'customer_id') {
+                    $o['user'] = $map[$o['customer_id']] ?? ['name' => 'N/A', 'email' => ''];
+                } else {
+                    $key = str_replace('_id', '', $field);
+                    $o[$key] = $map[$o[$field]] ?? ['name' => 'N/A'];
+                }
             }
+
             $o['shipments']      = $mapShipments[$o['id']] ?? [];
             $o['status_history'] = $mapStatusHistory[$o['id']] ?? [];
+
             foreach ($o['shipments'] as &$s) {
                 $s['items'] = $mapShipmentItems[$s['id']] ?? [];
             }
         }
+
         return view('admin/sales/orders/index', [
             'orders' => $orders
         ]);
@@ -104,16 +115,26 @@ class OrdersController extends BaseController
         if (!$order) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Encomenda #$id não encontrada");
         }
-        $order['user']             = $this->customerModel->find($order['user_id']);
+        $order['user']             = $this->customerModel->find($order['customer_id']);
         $order['billing_address']  = $this->customerAddressModel->find($order['billing_address_id']);
         $order['shipping_address'] = $this->customerAddressModel->find($order['shipping_address_id']);
         $order['payment_method']   = $this->paymentMethodsModel->find($order['payment_method_id']);
         $order['shipping_method']  = $this->shippingMethodsModel->find($order['shipping_method_id']);
-
-        // Itens da encomenda usando a propriedade
-        $order['items'] = $this->ordersItemsModel
+        $items = $this->ordersItemsModel
             ->where('order_id', $id)
             ->findAll();
+        foreach ($items as &$item) {
+            $product = $this->productsModel->find($item['product_id']);
+            $item['product_name'] = $product['name'] ?? 'Produto #'.$item['product_id'];
+
+            if (!empty($item['variant_id'])) {
+                $variant = $this->productsVariantsModel->find($item['variant_id']);
+                $item['variant_name'] = $variant['sku'] ?? 'Variante #'.$item['variant_id'];
+            } else {
+                $item['variant_name'] = '-';
+            }
+        }
+        $order['items'] = $items;
         $shipments = $this->ordersShipmentsModel->where('order_id', $id)->findAll();
         foreach ($shipments as &$s) {
             $s['items'] = $this->ordersShipmentItemsModel
@@ -129,6 +150,7 @@ class OrdersController extends BaseController
             'order' => $order,
         ]);
     }
+
 
 
 }

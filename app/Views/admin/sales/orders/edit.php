@@ -61,22 +61,13 @@ Dashboard
                                 <?php
                                 $subtotal = 0;
                                 foreach ($order['items'] as $idx => $item):
-                                    $product = model(\App\Models\Admin\Catalog\ProductsModel::class)->find($item['product_id']);
-                                    $productName = $product['name'] ?? 'Produto #'.$item['product_id'];
-
-                                    $variantName = '-';
-                                    if (!empty($item['variant_id'])) {
-                                        $variant = model(\App\Models\Admin\Catalog\ProductVariantsModel::class)->find($item['variant_id']);
-                                        $variantName = $variant['name'] ?? 'Variante #'.$item['variant_id'];
-                                    }
-
                                     $lineTotal = $item['qty'] * $item['price'];
                                     $subtotal += $lineTotal;
                                     ?>
                                     <tr>
                                         <td><?= $idx + 1 ?></td>
-                                        <td><?= esc($productName) ?></td>
-                                        <td><?= esc($variantName) ?></td>
+                                        <td><?= esc($item['product_name']) ?></td>
+                                        <td><?= esc($item['variant_name']) ?></td>
                                         <td><?= esc($item['qty']) ?></td>
                                         <td><?= number_format($item['price'], 2, ',', ' ') ?> €</td>
                                         <td><?= number_format($lineTotal, 2, ',', ' ') ?> €</td>
