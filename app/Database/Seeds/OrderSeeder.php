@@ -102,13 +102,11 @@ class OrderSeeder extends Seeder
 
                 $this->db->table('orders_items')->insert([
                     'order_id'   => $orderId,
+                    'cart_id'    => null, // ou um valor válido se cart_id for NOT NULL
                     'product_id' => $product['id'],
                     'variant_id' => $variant['id'] ?? null,
                     'qty'        => $qty,
-                    'price'      => $price,      // sem imposto
-                    'price_tax'  => $priceTax,   // com imposto
-                    'discount'   => $discount,
-                    'row_total'  => $rowTotal,
+                    'price'      => $price,
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => null,
                 ]);
