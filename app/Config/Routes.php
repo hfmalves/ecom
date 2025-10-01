@@ -84,8 +84,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         $routes->group('transactions', function ($routes) {
             $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);
         });
-        $routes->group('invoices', function ($routes) {
-            $routes->get('/', 'InvoicesController::index', ['filter' => 'noauth']);
+        $routes->group('financial_documents', function ($routes) {
+            $routes->get('/', 'FinancialDocumentsController::index', ['filter' => 'noauth']);
         });
         $routes->group('shipments', function ($routes) {
             $routes->get('/', 'OrdersShipmentsController::index', ['filter' => 'noauth']);

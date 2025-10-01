@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Admin\Sales;
 
 use CodeIgniter\Model;
 
-class InvoicesModel extends Model
+class FinancialDocumentsModel extends Model
 {
-    protected $table            = 'invoices';
+    protected $table            = 'financial_documents';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

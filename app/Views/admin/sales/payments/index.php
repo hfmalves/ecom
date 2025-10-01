@@ -30,20 +30,89 @@ Dashboard
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
                             <thead class="table-light">
                             <tr>
-                                <th>Grupo</th>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Telefone</th>
-                                <th>Ativo</th>
-                                <th>Verificado</th>
+                                <th>#</th>
+                                <th>Documento</th>
+                                <th>Cliente</th>
+                                <th>Valor</th>
+                                <th>Método</th>
+                                <th>Transação</th>
+                                <th>Referência</th>
+                                <th>Câmbio</th>
+                                <th>Estado</th>
+                                <th>Data Pagamento</th>
                                 <th>Ações</th>
                             </tr>
                             </thead>
                             <tbody>
+                            <?php if (!empty($payments)): ?>
+                                <?php foreach ($payments as $p): ?>
+                                    <?php $doc      = $p['invoice'] ?? []; // financial_document ligado ?>
+                                    <?php $customer = $p['customer'] ?? []; ?>
+                                    <tr>
+                                        <td><?= esc($p['id']) ?></td>
+
+                                        <!-- Documento (tipo + nº + série) -->
+                                        <td>
+                                            <strong><?= ucfirst($doc['type'] ?? '-') ?></strong><br>
+                                            <?= esc($doc['invoice_number'] ?? 'N/A') ?>
+                                            <small>(Série <?= esc($doc['series'] ?? '-') ?>)</small>
+                                        </td>
+
+                                        <!-- Cliente -->
+                                        <td>
+                                            <?= esc($customer['name'] ?? 'Sem cliente') ?><br>
+                                            <small><?= esc($customer['email'] ?? '') ?></small>
+                                        </td>
+
+                                        <!-- Valor -->
+                                        <td>
+                                            <?= number_format($p['amount'] ?? 0, 2, ',', ' ') ?>
+                                            <?= esc($p['currency'] ?? 'EUR') ?>
+                                        </td>
+
+                                        <!-- Método -->
+                                        <td><?= esc($p['method'] ?? '-') ?></td>
+
+                                        <!-- Transaction ID -->
+                                        <td><?= esc($p['transaction_id'] ?? '-') ?></td>
+
+                                        <!-- Referência -->
+                                        <td><?= esc($p['reference'] ?? '-') ?></td>
+
+                                        <!-- Câmbio -->
+                                        <td><?= esc($p['exchange_rate'] ?? '1.0000') ?></td>
+
+                                        <!-- Estado -->
+                                        <td>
+                                            <?php
+                                            $statusLabels = [
+                                                'pending'  => '<span class="badge bg-warning">Pendente</span>',
+                                                'paid'     => '<span class="badge bg-success">Pago</span>',
+                                                'failed'   => '<span class="badge bg-danger">Falhou</span>',
+                                                'refunded' => '<span class="badge bg-info">Reembolsado</span>',
+                                                'partial'  => '<span class="badge bg-secondary">Parcial</span>',
+                                            ];
+                                            echo $statusLabels[$p['status']] ?? '<span class="badge bg-light text-dark">N/A</span>';
+                                            ?>
+                                        </td>
+
+                                        <!-- Data pagamento -->
+                                        <td>
+                                            <?= !empty($p['paid_at']) ? date('d/m/Y H:i', strtotime($p['paid_at'])) : '-' ?>
+                                        </td>
+
+                                        <!-- Ações -->
+                                        <td>
+                                            <a href="<?= base_url('admin/sales/payments/view/'.$p['id']) ?>"
+                                               class="btn btn-sm btn-primary">Ver</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach ?>
+                            <?php endif; ?>
                             </tbody>
                         </table>
-
                     </div>
+
                 </div>
             </div>
         </div>

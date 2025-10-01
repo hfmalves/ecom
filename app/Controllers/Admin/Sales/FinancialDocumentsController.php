@@ -9,15 +9,16 @@ use App\Models\Admin\Config\payments\PaymentMethodsModel;
 use App\Models\Admin\Config\shipping\ShippingMethodsModel;
 use App\Models\Admin\Customers\CustomerAddressModel;
 use App\Models\Admin\Customers\CustomerModel;
+use App\Models\Admin\Sales\FinancialDocumentsModel;
 use App\Models\Admin\Sales\OrdersItemsModel;
 use App\Models\Admin\Sales\OrdersModel;
 use App\Models\Admin\Sales\OrdersShipmentItemsModel;
 use App\Models\Admin\Sales\OrdersShipmentsModel;
 use App\Models\Admin\Sales\OrdersStatusHistoryModel;
 use App\Models\Admin\Sales\PaymentsModel;
-use App\Models\Admin\Sales\FinancialDocumentsModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
-class PaymentsController extends BaseController
+class FinancialDocumentsController extends BaseController
 {
     protected $ordersModel;
     protected $ordersItemsModel;
@@ -72,7 +73,7 @@ class PaymentsController extends BaseController
                 }
             }
         }
-        return view('admin/sales/payments/index', [
+        return view('admin/sales/invoices/index', [
             'payments' => $payments
         ]);
     }
