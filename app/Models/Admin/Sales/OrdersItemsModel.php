@@ -12,13 +12,17 @@ class OrdersItemsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [
+    protected $allowedFields = [
         'order_id',
         'cart_id',
         'product_id',
         'variant_id',
         'qty',
-        'price',
+        'price',       // sem imposto
+        'price_tax',   // com imposto
+        'discount',
+        'subtotal',
+        'row_total',   // valor final do item (qty * (price_tax - discount))
         'created_at',
         'updated_at'
     ];
@@ -26,7 +30,14 @@ class OrdersItemsModel extends Model
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
 
-    protected array $casts = [];
+    protected array $casts = [
+        'qty'        => 'integer',
+        'price'      => 'float',
+        'price_tax'  => 'float',
+        'discount'   => 'float',
+        'subtotal'   => 'float',
+        'row_total'  => 'float',
+    ];
     protected array $castHandlers = [];
 
     // Dates
@@ -41,27 +52,29 @@ class OrdersItemsModel extends Model
         'order_id'   => 'required|integer',
         'product_id' => 'required|integer',
         'qty'        => 'required|integer|greater_than[0]',
-        'price'      => 'required|decimal'
+        'price'      => 'required|decimal',
+        'price_tax'  => 'permit_empty|decimal',
+        'discount'   => 'permit_empty|decimal',
     ];
 
     protected $validationMessages = [
         'order_id' => [
             'required' => 'A ordem é obrigatória',
-            'integer'  => 'O ID da ordem deve ser um número'
+            'integer'  => 'O ID da ordem deve ser um número',
         ],
         'product_id' => [
             'required' => 'O produto é obrigatório',
-            'integer'  => 'O ID do produto deve ser um número'
+            'integer'  => 'O ID do produto deve ser um número',
         ],
         'qty' => [
             'required'     => 'A quantidade é obrigatória',
             'integer'      => 'A quantidade tem de ser um número',
-            'greater_than' => 'A quantidade tem de ser pelo menos 1'
+            'greater_than' => 'A quantidade tem de ser pelo menos 1',
         ],
         'price' => [
             'required' => 'O preço é obrigatório',
-            'decimal'  => 'O preço tem de ser um número decimal válido'
-        ]
+            'decimal'  => 'O preço tem de ser um número decimal válido',
+        ],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

@@ -12,7 +12,18 @@ class OrdersCartsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['user_id','session_id','created_at','updated_at'];
+    protected $allowedFields = [
+        'customer_id',
+        'user_id',
+        'session_id',
+        'status',
+        'total_items',
+        'total_value',
+        'abandoned_at',
+        'converted_order_id',
+        'created_at',
+        'updated_at'
+    ];
 
 
     protected bool $allowEmptyInserts = false;
@@ -30,12 +41,22 @@ class OrdersCartsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'user_id'    => 'permit_empty|integer',
-        'session_id' => 'required|max_length[100]',
+        'customer_id'        => 'permit_empty|integer',
+        'user_id'            => 'permit_empty|integer',
+        'session_id'         => 'required|max_length[100]',
+        'status'             => 'required|in_list[active,abandoned,converted]',
+        'total_items'        => 'numeric',
+        'total_value'        => 'numeric',
+        'converted_order_id' => 'permit_empty|integer',
     ];
 
     protected $validationMessages = [
-        'session_id' => ['required' => 'A sessão é obrigatória.'],
+        'session_id' => [
+            'required' => 'A sessão é obrigatória.',
+        ],
+        'status' => [
+            'in_list' => 'O estado deve ser active, abandoned ou converted.',
+        ],
     ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
