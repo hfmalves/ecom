@@ -4,7 +4,7 @@ namespace App\Models\Admin\Marketing;
 
 use CodeIgniter\Model;
 
-class CouponUsages extends Model
+class CouponsUsages extends Model
 {
     protected $table            = 'coupon_usages';
     protected $primaryKey       = 'id';
@@ -17,6 +17,11 @@ class CouponUsages extends Model
         'user_id',
         'order_id',
         'used_at',
+        'discount_value',
+        'status',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     protected bool $allowEmptyInserts = false;

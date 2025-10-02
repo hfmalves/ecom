@@ -17,9 +17,22 @@ class Coupons extends Model
         'type',
         'value',
         'max_uses',
+        'max_uses_per_customer',
+        'min_order_value',
+        'max_order_value',
+        'max_orders',
+        'customer_id',
+        'customer_group_id',
+        'scope',
+        'stackable',
+        'is_active',
+        'description',
         'expires_at',
         'created_at',
+        'updated_at',
+        'deleted_at',
     ];
+
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
 
