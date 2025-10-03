@@ -66,7 +66,6 @@ class BulkCouponsSeeder extends Seeder
                 'stackable' => $faker->boolean(30) ? 1 : 0,
                 'is_active' => $isActive,
                 'description' => $faker->sentence(),
-                'expires_at' => $expires,
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt,
             ];
