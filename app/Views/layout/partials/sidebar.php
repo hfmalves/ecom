@@ -90,22 +90,57 @@
                 </li>
 
                 <!-- Relatórios -->
+                <!-- Relatórios -->
                 <li class="menu-title">Relatórios</li>
+
                 <li>
-                    <a href="<?= base_url('admin/reports') ?>" class="waves-effect">
-                        <i class="bx bx-bar-chart"></i>
+                    <a href="javascript:void(0);" class="has-arrow waves-effect">
+                        <i class="bx bx-bar-chart-alt-2"></i>
                         <span>Relatórios</span>
                     </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="<?= base_url('admin/reports/sales') ?>">Vendas</a></li>
+                        <li><a href="<?= base_url('admin/reports/products') ?>">Produtos</a></li>
+                        <li><a href="<?= base_url('admin/reports/customers') ?>">Clientes</a></li>
+                        <li><a href="<?= base_url('admin/reports/carts') ?>">Carrinhos</a></li>
+                        <li><a href="<?= base_url('admin/reports/marketing') ?>">Marketing</a></li>
+                        <li><a href="<?= base_url('admin/reports/finance') ?>">Financeiro</a></li>
+                        <li><a href="<?= base_url('admin/reports/geography') ?>">Geografia</a></li>
+                    </ul>
                 </li>
+
 
                 <!-- Configurações -->
                 <li class="menu-title">Configurações</li>
+
                 <li>
-                    <a href="<?= base_url('admin/settings') ?>" class="waves-effect">
+                    <a href="javascript:void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>
                         <span>Configurações</span>
                     </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="<?= base_url('admin/settings/general') ?>">Geral</a></li>
+                        <li><a href="<?= base_url('admin/settings/taxes') ?>">Impostos</a></li>
+                        <li><a href="<?= base_url('admin/settings/payments') ?>">Pagamentos</a></li>
+                        <li><a href="<?= base_url('admin/settings/shipping') ?>">Envios</a></li>
+                        <li><a href="<?= base_url('admin/settings/currencies') ?>">Moedas</a></li>
+                        <li><a href="<?= base_url('admin/settings/users') ?>">Utilizadores & Permissões</a></li>
+                        <li><a href="<?= base_url('admin/settings/integrations') ?>">Integrações</a></li>
+                        <li><a href="<?= base_url('admin/settings/notifications') ?>">Notificações</a></li>
+                        <!-- Extras para ficar completo -->
+                        <li><a href="<?= base_url('admin/settings/catalog') ?>">Catálogo</a></li>
+                        <li><a href="<?= base_url('admin/settings/customers') ?>">Clientes</a></li>
+                        <li><a href="<?= base_url('admin/settings/emails') ?>">Emails Transacionais</a></li>
+                        <li><a href="<?= base_url('admin/settings/seo') ?>">SEO & URLs</a></li>
+                        <li><a href="<?= base_url('admin/settings/security') ?>">Segurança & Registos</a></li>
+                        <li><a href="<?= base_url('admin/settings/languages') ?>">Idiomas & Localização</a></li>
+                        <li><a href="<?= base_url('admin/settings/cache') ?>">Performance & Cache</a></li>
+                        <li><a href="<?= base_url('admin/settings/system') ?>">Sistema & Logs Técnicos</a></li>
+                        <li><a href="<?= base_url('admin/settings/legal') ?>">Informação Legal</a></li>
+                    </ul>
                 </li>
+
+
 
             </ul>
         </div>
