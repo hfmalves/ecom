@@ -28,18 +28,66 @@ Dashboard
                 <div class="col-sm-12">
                     <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
-                            <thead class="table-light">
+                            <thead>
                             <tr>
-                                <th>Grupo</th>
+                                <th>ID</th>
                                 <th>Nome</th>
-                                <th>Email</th>
-                                <th>Telefone</th>
-                                <th>Ativo</th>
-                                <th>Verificado</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                                <th>Datas</th>
+                                <th>Status</th>
+                                <th>Categorias</th>
+                                <th>Produtos</th>
+                                <th>Grupos</th>
                                 <th>Ações</th>
                             </tr>
                             </thead>
                             <tbody>
+                            <?php if (! empty($rules)): ?>
+                                <?php foreach ($rules as $rule): ?>
+                                    <tr>
+                                        <td><?= esc($rule['id']) ?></td>
+                                        <td><?= esc($rule['name']) ?></td>
+                                        <td><?= esc($rule['discount_type']) ?></td>
+                                        <td><?= esc($rule['discount_value']) ?></td>
+                                        <td>
+                                            <?= esc($rule['start_date']) ?> <br>
+                                            <?= esc($rule['end_date']) ?>
+                                        </td>
+                                        <td><?= $rule['status'] ? 'Ativo' : 'Inativo' ?></td>
+                                        <td>
+                                            <?php foreach ($rule['categories'] as $cat): ?>
+                                                <span class="badge bg-primary">Cat ID: <?= esc($cat['category_id']) ?></span><br>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td>
+                                            <?php foreach ($rule['products'] as $prod): ?>
+                                                <span class="badge bg-success">Prod ID: <?= esc($prod['product_id']) ?></span><br>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td>
+                                            <?php foreach ($rule['groups'] as $grp): ?>
+                                                <span class="badge bg-info">Group ID: <?= esc($grp['customer_group_id']) ?></span><br>
+                                            <?php endforeach; ?>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="<?= site_url('admin/marketing/catalog-rules/edit/' . $rule['id']) ?>"
+                                                   class="btn btn-sm btn-warning">
+                                                    <i class="fa-solid fa-pen"></i> Editar
+                                                </a>
+                                                <a href="<?= site_url('admin/marketing/catalog-rules/delete/' . $rule['id']) ?>"
+                                                   class="btn btn-sm btn-danger"
+                                                   onclick="return confirm('Tem a certeza que deseja eliminar esta regra?')">
+                                                    <i class="fa-solid fa-trash"></i> Apagar
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="9" class="text-center">Nenhuma regra encontrada.</td></tr>
+                            <?php endif; ?>
                             </tbody>
                         </table>
 
