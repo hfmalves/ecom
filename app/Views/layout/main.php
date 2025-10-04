@@ -54,7 +54,7 @@
             </div>
         </div>
         <div class="rightbar-overlay"></div>
-
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
         <!-- Core JS -->
         <script src="<?= base_url('assets/libs/jquery/jquery.min.js') ?>"></script>
         <script src="<?= base_url('assets/libs/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>

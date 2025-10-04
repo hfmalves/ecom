@@ -170,6 +170,16 @@ function systemModal() {
                 if (typeof source === 'string' && source.startsWith('#')) {
                     const el = document.querySelector(source);
                     if (!el) throw new Error("Elemento não encontrado: " + source);
+
+                    // ⚡ Adiciona isto:
+                    // Destroi qualquer Select2 antes de clonar o HTML, para não duplicar
+                    $(el).find('.select2-hidden-accessible').each(function () {
+                        if ($(this).data('select2')) {
+                            $(this).select2('destroy');
+                        }
+                    });
+
+                    // Continua igual
                     content = el.innerHTML;
                 } else if (typeof source === 'string' && source.trim().startsWith('<')) {
                     content = source;
@@ -243,3 +253,22 @@ function csrfHandler(form) {
     });
 }
 
+// -----------------------------
+// Select2 Global for all modals
+// -----------------------------
+document.addEventListener('shown.bs.modal', function (event) {
+    const modal = $(event.target);
+
+    // Remove instâncias anteriores do Select2
+    modal.find('.select2-hidden-accessible').each(function () {
+        if ($(this).data('select2')) {
+            $(this).select2('destroy');
+        }
+    });
+
+    // Inicializa Select2 em todos os selects dentro do modal
+    modal.find('select').select2({
+        dropdownParent: modal,
+        width: '100%'
+    });
+});

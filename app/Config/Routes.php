@@ -152,7 +152,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('taxes', ['namespace' => 'App\Controllers\Admin\Configurations\Taxes'], function ($routes) {
             $routes->get('/', 'TaxesController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'TaxesController::store', ['filter' => 'noauth']);
+            $routes->post('update', 'TaxesController::update', ['filter' => 'noauth']);
+            $routes->post('delete', 'TaxesController::delete', ['filter' => 'noauth']);
         });
+
         $routes->group('payments', ['namespace' => 'App\Controllers\Admin\Configurations\Payments'], function ($routes) {
             $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);
         });
