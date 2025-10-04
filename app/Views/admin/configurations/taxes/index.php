@@ -162,7 +162,7 @@
                 </div>
                 <div class="mb-3">
                     <label>Ativo *</label>
-                    <select class="form-select" x-model="form.is_active">
+                    <select class="form-select select2" x-model="form.is_active">
                         <option value="1">Sim</option>
                         <option value="0">Não</option>
                     </select>
@@ -189,22 +189,14 @@
          })"
          x-init="
     csrfHandler(form);
-
-    // Sincroniza Select2 com Alpine
     $nextTick(() => {
         const select = $root.querySelector('.select2');
         $(select).select2();
-
-        // Atualiza Alpine quando o Select2 muda
         $(select).on('change', () => {
             form.country_id = $(select).val();
         });
-
-        // Quando o modal recebe dados (preenche o form)
         $el.addEventListener('fill-form', e => {
             Object.assign(form, e.detail);
-
-            // Garante que o Select2 mostra o valor correto ao abrir o modal
             $nextTick(() => {
                 $(select).val(form.country_id).trigger('change');
             });
@@ -248,7 +240,7 @@
 
                 <div class="mb-3">
                     <label>Ativo *</label>
-                    <select class="form-select" x-model="form.is_active">
+                    <select class="form-select select2" x-model="form.is_active">
                         <option value="1">Sim</option>
                         <option value="0">Não</option>
                     </select>
