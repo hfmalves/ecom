@@ -28,18 +28,39 @@ Dashboard
                 <div class="col-sm-12">
                     <div class="table-responsive">
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
-                            <thead class="table-light">
+                            <thead>
                             <tr>
-                                <th>Grupo</th>
+                                <th>#</th>
                                 <th>Nome</th>
-                                <th>Email</th>
-                                <th>Telefone</th>
-                                <th>Ativo</th>
-                                <th>Verificado</th>
-                                <th>Ações</th>
+                                <th>Tipo Desconto</th>
+                                <th>Valor</th>
+                                <th>Início</th>
+                                <th>Fim</th>
+                                <th>Status</th>
                             </tr>
                             </thead>
                             <tbody>
+                            <?php if (!empty($campaigns)): ?>
+                                <?php foreach ($campaigns as $c): ?>
+                                    <tr>
+                                        <td><?= esc($c['id']) ?></td>
+                                        <td><?= esc($c['name']) ?></td>
+                                        <td><?= esc($c['discount_type']) ?></td>
+                                        <td><?= esc($c['discount_value']) ?></td>
+                                        <td><?= esc($c['start_date']) ?></td>
+                                        <td><?= esc($c['end_date']) ?></td>
+                                        <td>
+                            <span class="badge <?= $c['status'] === 'active' ? 'bg-success' : 'bg-secondary' ?>">
+                                <?= esc(ucfirst($c['status'])) ?>
+                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Nenhuma campanha encontrada.</td>
+                                </tr>
+                            <?php endif; ?>
                             </tbody>
                         </table>
 
