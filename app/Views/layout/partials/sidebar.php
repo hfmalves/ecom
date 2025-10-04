@@ -1,21 +1,16 @@
 <div class="vertical-menu">
     <div data-simplebar class="h-100">
-
         <!--- Sidemenu -->
         <div id="sidebar-menu">
-
             <!-- Left Menu Start -->
             <ul class="metismenu list-unstyled" id="side-menu">
-
                 <li class="menu-title">Loja Online</li>
-
                 <li class="mm-active">
                     <a href="<?= base_url('admin/dashboard') ?>" class="waves-effect active">
                         <i class="bx bx-home-circle"></i>
                         <span>Painel</span>
                     </a>
                 </li>
-
                 <!-- Produtos -->
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
@@ -30,7 +25,6 @@
                         <li><a href="<?= base_url('admin/catalog/brands') ?>">Marcas</a></li>
                     </ul>
                 </li>
-
                 <!-- Clientes -->
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
@@ -42,7 +36,6 @@
                         <li><a href="<?= base_url('admin/customers/groups') ?>">Grupos de Clientes</a></li>
                     </ul>
                 </li>
-
                 <!-- Encomendas -->
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
@@ -58,7 +51,6 @@
                         <li><a href="<?= base_url('admin/sales/cart') ?>">Carrinhos</a></li>
                     </ul>
                 </li>
-
                 <!-- Campanhas / Marketing -->
                 <li class="menu-title">Campanhas</li>
                 <li>
@@ -73,26 +65,8 @@
                         <li><a href="<?= base_url('admin/marketing/cart-rules') ?>">Regras de Carrinho</a></li>
                     </ul>
                 </li>
-
-                <!-- Website -->
-                <li class="menu-title">Conteúdos</li>
-                <li>
-                    <a href="<?= base_url('admin/slides') ?>" class="waves-effect">
-                        <i class="bx bx-slideshow"></i>
-                        <span>Slides</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="<?= base_url('admin/product-groups') ?>" class="waves-effect">
-                        <i class="bx bx-grid-alt"></i>
-                        <span>Blocos de Produtos</span>
-                    </a>
-                </li>
-
-                <!-- Relatórios -->
                 <!-- Relatórios -->
                 <li class="menu-title">Relatórios</li>
-
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-bar-chart-alt-2"></i>
@@ -105,7 +79,11 @@
                         <li><a href="<?= base_url('admin/reports/carts') ?>">Carrinhos</a></li>
                         <li><a href="<?= base_url('admin/reports/marketing') ?>">Marketing</a></li>
                         <li><a href="<?= base_url('admin/reports/finance') ?>">Financeiro</a></li>
+                        <li><a href="<?= base_url('admin/reports/shipping') ?>">Envios</a></li>
+                        <li><a href="<?= base_url('admin/reports/payments') ?>">Pagamentos</a></li>
+                        <li><a href="<?= base_url('admin/reports/inventory') ?>">Estoque</a></li>
                         <li><a href="<?= base_url('admin/reports/geography') ?>">Geografia</a></li>
+                        <li><a href="<?= base_url('admin/reports/coupons') ?>">Cupons & Promoções</a></li>
                     </ul>
                 </li>
 

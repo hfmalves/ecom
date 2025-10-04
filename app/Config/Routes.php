@@ -111,7 +111,41 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('/', 'CartRulesController::index', ['filter' => 'noauth']);
         });
     });
-
+    $routes->group('reports', function ($routes) {
+        $routes->group('sales', ['namespace' => 'App\Controllers\Admin\Reports\Sales'], function ($routes) {
+            $routes->get('/', 'SalesController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('products', ['namespace' => 'App\Controllers\Admin\Reports\Products'], function ($routes) {
+            $routes->get('/', 'ProductsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('customers', ['namespace' => 'App\Controllers\Admin\Reports\Customers'], function ($routes) {
+            $routes->get('/', 'CustomersController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('carts', ['namespace' => 'App\Controllers\Admin\Reports\Carts'], function ($routes) {
+            $routes->get('/', 'CartsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('marketing', ['namespace' => 'App\Controllers\Admin\Reports\Marketing'], function ($routes) {
+            $routes->get('/', 'MarketingController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('finance', ['namespace' => 'App\Controllers\Admin\Reports\Finance'], function ($routes) {
+            $routes->get('/', 'FinanceController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('shipping', ['namespace' => 'App\Controllers\Admin\Reports\Shipping'], function ($routes) {
+            $routes->get('/', 'ShippingController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('payments', ['namespace' => 'App\Controllers\Admin\Reports\Payments'], function ($routes) {
+            $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('inventory', ['namespace' => 'App\Controllers\Admin\Reports\Inventory'], function ($routes) {
+            $routes->get('/', 'InventoryController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('geography', ['namespace' => 'App\Controllers\Admin\Reports\Geography'], function ($routes) {
+            $routes->get('/', 'GeographyController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('coupons', ['namespace' => 'App\Controllers\Admin\Reports\Coupons'], function ($routes) {
+            $routes->get('/', 'CouponsController::index', ['filter' => 'noauth']);
+        });
+    });
     $routes->group('settings', function ($routes) {
         $routes->group('general', ['namespace' => 'App\Controllers\Admin\Configurations\General'], function ($routes) {
             $routes->get('/', 'GeneralController::index', ['filter' => 'noauth']);
