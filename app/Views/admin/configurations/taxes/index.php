@@ -30,8 +30,11 @@
                             <th>Nome</th>
                             <th>Taxa (%)</th>
                             <th>País</th>
+                            <th>Moeda</th>
+                            <th>Indicativo</th>
+                            <th>ISO3</th>
                             <th>Ativo</th>
-                            <th>Criado em</th>
+                            <th>Alterado em</th>
                             <th>Ações</th>
                         </tr>
                         </thead>
@@ -42,15 +45,18 @@
                                     <td><?= esc($tax['id']) ?></td>
                                     <td><?= esc($tax['name']) ?></td>
                                     <td><?= esc($tax['rate']) ?></td>
-                                    <td><?= esc($tax['country']) ?></td>
+                                    <td><?= esc($tax['country_name']) ?> - <?= esc($tax['country_code']) ?></td>
+                                    <td><?= esc($tax['country_currency']) ?></td>
+                                    <td><?= esc($tax['country_phone_code']) ?></td>
+                                    <td><?= esc($tax['country_iso3']) ?></td>
                                     <td>
                                         <?php if ($tax['is_active']): ?>
-                                            <span class="badge bg-success">Ativo</span>
+                                            <span class="badge bg-success w-100">Ativo</span>
                                         <?php else: ?>
-                                            <span class="badge bg-secondary">Inativo</span>
+                                            <span class="badge bg-secondary w-100">Inativo</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= esc($tax['created_at'] ?? '—') ?></td>
+                                    <td><?= esc($tax['updated_at'] ?? '—') ?></td>
                                     <td>
                                         <div class="dropdown">
                                             <a href="#" class="dropdown-toggle card-drop" data-bs-toggle="dropdown" aria-expanded="false">
@@ -63,7 +69,7 @@
                                                                 id: '<?= $tax['id'] ?>',
                                                                 name: '<?= $tax['name'] ?>',
                                                                 rate: '<?= $tax['rate'] ?>',
-                                                                country: '<?= $tax['country'] ?>',
+                                                                country_id: '<?= $tax['country_id'] ?>',
                                                                 is_active: '<?= $tax['is_active'] ?>'
                                                             })"
                                                             class="dropdown-item">
@@ -81,6 +87,7 @@
                                                     </button>
                                                 </li>
                                             </ul>
+
                                         </div>
                                     </td>
 
@@ -101,13 +108,27 @@
 <div id="createTax" class="d-none">
     <div class="modal-content"
          x-data="formHandler('/admin/settings/taxes/store', {
-             name: '',
-             rate: '',
-             country: '',
-             is_active: 1,
-             <?= csrf_token() ?>:'<?= csrf_hash() ?>'
+            name: '',
+            rate: '',
+            country_id: '',
+            is_active: 1,
+            <?= csrf_token() ?>:'<?= csrf_hash() ?>'
          }, { resetOnSuccess: true })"
-         x-init="csrfHandler(form)">
+         x-init="
+            csrfHandler(form);
+
+            // Espera o DOM renderizar o select
+            $nextTick(() => {
+                const select = $root.querySelector('.select2');
+                $(select).select2();
+
+                // Quando o select2 muda, atualiza o Alpine manualmente
+                $(select).on('change', () => {
+                    form.country_id = $(select).val();
+                });
+            });
+         ">
+
         <div class="modal-header">
             <h5 class="modal-title">Criar Imposto</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -128,18 +149,17 @@
 
                 <div class="mb-3">
                     <label>País *</label>
-                    <select class="form-select" x-model="form.country">
+                    <select class="form-select select2" x-model="form.country_id">
                         <option value="">Selecione</option>
-                        <option value="PT">Portugal</option>
-                        <option value="ES">Espanha</option>
-                        <option value="FR">França</option>
-                        <option value="DE">Alemanha</option>
-                        <option value="IT">Itália</option>
-                        <option value="BR">Brasil</option>
+                        <?php foreach ($countries as $country): ?>
+                            <option value="<?= esc($country['id']) ?>">
+                                <?= esc($country['name']) ?> (<?= esc($country['code']) ?>)
+                            </option>
+                        <?php endforeach; ?>
                     </select>
-                    <div class="text-danger small" x-text="errors.country"></div>
-                </div>
 
+                    <div class="text-danger small" x-text="errors.country_id"></div>
+                </div>
                 <div class="mb-3">
                     <label>Ativo *</label>
                     <select class="form-select" x-model="form.is_active">
@@ -164,13 +184,33 @@
 <div id="editTax" class="d-none">
     <div class="modal-content"
          x-data="formHandler('/admin/settings/taxes/update', {
-             id:'', name:'', rate:'', country:'', is_active:'',
+             id:'', name:'', rate:'', country_id:'', is_active:'',
              <?= csrf_token() ?>:'<?= csrf_hash() ?>'
          })"
          x-init="
-            csrfHandler(form);
-            $el.addEventListener('fill-form', e => { Object.assign(form, e.detail) });
-         ">
+    csrfHandler(form);
+
+    // Sincroniza Select2 com Alpine
+    $nextTick(() => {
+        const select = $root.querySelector('.select2');
+        $(select).select2();
+
+        // Atualiza Alpine quando o Select2 muda
+        $(select).on('change', () => {
+            form.country_id = $(select).val();
+        });
+
+        // Quando o modal recebe dados (preenche o form)
+        $el.addEventListener('fill-form', e => {
+            Object.assign(form, e.detail);
+
+            // Garante que o Select2 mostra o valor correto ao abrir o modal
+            $nextTick(() => {
+                $(select).val(form.country_id).trigger('change');
+            });
+        });
+    });
+">
         <div class="modal-header">
             <h5 class="modal-title">Editar Imposto</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -178,6 +218,7 @@
         <div class="modal-body">
             <form @submit.prevent="submit()">
                 <input type="hidden" x-model="form.id">
+
                 <div class="mb-3">
                     <label>Nome *</label>
                     <input type="text" class="form-control" x-model="form.name">
@@ -192,15 +233,17 @@
 
                 <div class="mb-3">
                     <label>País *</label>
-                    <select class="form-select" x-model="form.country">
+                    <select class="form-select select2"
+                            name="country_id"
+                            x-model="form.country_id">
                         <option value="">Selecione</option>
-                        <option value="PT">Portugal</option>
-                        <option value="ES">Espanha</option>
-                        <option value="FR">França</option>
-                        <option value="DE">Alemanha</option>
-                        <option value="IT">Itália</option>
-                        <option value="BR">Brasil</option>
+                        <?php foreach ($countries as $country): ?>
+                            <option value="<?= esc($country['id']) ?>">
+                                <?= esc($country['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
+                    <div class="text-danger small" x-text="errors.country_id"></div>
                 </div>
 
                 <div class="mb-3">
@@ -209,6 +252,7 @@
                         <option value="1">Sim</option>
                         <option value="0">Não</option>
                     </select>
+                    <div class="text-danger small" x-text="errors.is_active"></div>
                 </div>
 
                 <div class="modal-footer">
@@ -222,10 +266,11 @@
     </div>
 </div>
 
+
 <!-- Delete Tax -->
 <div id="deleteTax" class="d-none">
     <div class="modal-content"
-         x-data="formHandler('/admin/configurations/taxes/delete', {
+         x-data="formHandler('/admin/settings/taxes/delete', {
              id:'', name:'',
              <?= csrf_token() ?>:'<?= csrf_hash() ?>'
          })"
@@ -251,4 +296,15 @@
 
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
+<script>
+    document.addEventListener('shown.bs.modal', e => {
+        const modal = $(e.target);
+        modal.find('select.select2').each(function () {
+            $(this).select2({
+                dropdownParent: modal,
+                width: '100%'
+            });
+        });
+    });
+</script>
 <?= $this->endSection() ?>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Admin\Configurations\countries;
+namespace App\Models\Admin\Configurations\Countries;
 
 use CodeIgniter\Model;
 

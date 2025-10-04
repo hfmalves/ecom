@@ -256,19 +256,46 @@ function csrfHandler(form) {
 // -----------------------------
 // Select2 Global for all modals
 // -----------------------------
-document.addEventListener('shown.bs.modal', function (event) {
+document.addEventListener('shown.bs.modal', (event) => {
     const modal = $(event.target);
 
-    // Remove instâncias anteriores do Select2
-    modal.find('.select2-hidden-accessible').each(function () {
-        if ($(this).data('select2')) {
-            $(this).select2('destroy');
-        }
-    });
+    setTimeout(() => {
+        modal.find('select.select2').each(function () {
+            const $select = $(this);
 
-    // Inicializa Select2 em todos os selects dentro do modal
-    modal.find('select').select2({
-        dropdownParent: modal,
-        width: '100%'
-    });
+            // Se já estiver inicializado, destrói antes de recriar
+            if ($select.hasClass('select2-hidden-accessible')) {
+                $select.select2('destroy');
+            }
+
+            // Cria o Select2
+            $select.select2({
+                dropdownParent: modal,
+                width: '100%'
+            });
+
+            // DEBUG: mostra nome do campo
+            const field = $select.attr('x-model') || $select.attr('name') || '??';
+            console.log('⚙️ Select2 inicializado para:', field);
+
+            // 🔥 SINCRONIZAÇÃO REAL COM ALPINE 🔥
+            $select.on('change.select2', function () {
+                const value = $(this).val();
+                const model = this.getAttribute('x-model');
+                const alpine = this.closest('[x-data]');
+                if (!model || !alpine || !alpine.__x) return;
+
+                const key = model.replace('form.', '');
+                alpine.__x.$data.form[key] = value;
+                console.log(`🧩 Atualizado: form.${key} = ${value}`);
+            });
+
+            // Força renderização inicial
+            const val = $select.val();
+            if (val) {
+                $select.val(val).trigger('change.select2');
+                console.log('🎯 Valor inicial:', val);
+            }
+        });
+    }, 150);
 });
