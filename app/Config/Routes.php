@@ -112,5 +112,60 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
     });
 
+    $routes->group('settings', function ($routes) {
+        $routes->group('general', ['namespace' => 'App\Controllers\Admin\Configurations\General'], function ($routes) {
+            $routes->get('/', 'GeneralController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('taxes', ['namespace' => 'App\Controllers\Admin\Configurations\Taxes'], function ($routes) {
+            $routes->get('/', 'TaxesController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('payments', ['namespace' => 'App\Controllers\Admin\Configurations\Payments'], function ($routes) {
+            $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('shipping', ['namespace' => 'App\Controllers\Admin\Configurations\Shipping'], function ($routes) {
+            $routes->get('/', 'ShippingController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('currencies', ['namespace' => 'App\Controllers\Admin\Configurations\Currencies'], function ($routes) {
+            $routes->get('/', 'CurrenciesController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('users', ['namespace' => 'App\Controllers\Admin\Configurations\Users'], function ($routes) {
+            $routes->get('/', 'UsersController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('integrations', ['namespace' => 'App\Controllers\Admin\Configurations\Integrations'], function ($routes) {
+            $routes->get('/', 'IntegrationsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('notifications', ['namespace' => 'App\Controllers\Admin\Configurations\Notifications'], function ($routes) {
+            $routes->get('/', 'NotificationsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('catalog', ['namespace' => 'App\Controllers\Admin\Configurations\Catalog'], function ($routes) {
+            $routes->get('/', 'CatalogController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('customers', ['namespace' => 'App\Controllers\Admin\Configurations\Customers'], function ($routes) {
+            $routes->get('/', 'CustomersController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('emails', ['namespace' => 'App\Controllers\Admin\Configurations\Emails'], function ($routes) {
+            $routes->get('/', 'EmailsController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('seo', ['namespace' => 'App\Controllers\Admin\Configurations\Seo'], function ($routes) {
+            $routes->get('/', 'SeoController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('security', ['namespace' => 'App\Controllers\Admin\Configurations\Security'], function ($routes) {
+            $routes->get('/', 'SecurityController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('languages', ['namespace' => 'App\Controllers\Admin\Configurations\Languages'], function ($routes) {
+            $routes->get('/', 'LanguagesController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('cache', ['namespace' => 'App\Controllers\Admin\Configurations\Cache'], function ($routes) {
+            $routes->get('/', 'CacheController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('system', ['namespace' => 'App\Controllers\Admin\Configurations\System'], function ($routes) {
+            $routes->get('/', 'SystemController::index', ['filter' => 'noauth']);
+        });
+        $routes->group('legal', ['namespace' => 'App\Controllers\Admin\Configurations\Legal'], function ($routes) {
+            $routes->get('/', 'LegalController::index', ['filter' => 'noauth']);
+        });
+    });
+
+
 
 });

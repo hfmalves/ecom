@@ -3,12 +3,11 @@
 namespace App\Controllers\Admin\Configurations\Customers;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 
 class CustomersController extends BaseController
 {
     public function index()
     {
-        //
+        return view('admin/configurations/customers/index');
     }
 }
