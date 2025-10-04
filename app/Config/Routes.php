@@ -199,7 +199,4 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('/', 'LegalController::index', ['filter' => 'noauth']);
         });
     });
-
-
-
 });
