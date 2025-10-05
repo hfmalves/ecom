@@ -174,13 +174,16 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'CurrenciesController::update');
             $routes->post('delete', 'CurrenciesController::delete');
         });
-
         $routes->group('users', ['namespace' => 'App\Controllers\Admin\Configurations\Users'], function ($routes) {
             $routes->get('/', 'UsersController::index', ['filter' => 'noauth']);
         });
         $routes->group('integrations', ['namespace' => 'App\Controllers\Admin\Configurations\Integrations'], function ($routes) {
             $routes->get('/', 'IntegrationsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'IntegrationsController::store');
+            $routes->post('update', 'IntegrationsController::update');
+            $routes->post('delete', 'IntegrationsController::delete');
         });
+
         $routes->group('notifications', ['namespace' => 'App\Controllers\Admin\Configurations\Notifications'], function ($routes) {
             $routes->get('/', 'NotificationsController::index', ['filter' => 'noauth']);
         });
