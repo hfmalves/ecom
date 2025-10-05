@@ -9,7 +9,7 @@ Dashboard
         <form id="settingsForm"
               x-ref="form"
               x-data="formHandler(
-                  '<?= base_url('dashboard/update') ?>',
+                  '<?= base_url('admin/settings/general/update') ?>',
                   {
                       id: '<?= esc($settings['id'] ?? '') ?>',
                       site_name: '<?= esc($settings['site_name'] ?? '') ?>',

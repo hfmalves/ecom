@@ -149,6 +149,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
     $routes->group('settings', function ($routes) {
         $routes->group('general', ['namespace' => 'App\Controllers\Admin\Configurations\General'], function ($routes) {
             $routes->get('/', 'GeneralController::index', ['filter' => 'noauth']);
+            $routes->post('update', 'GeneralController::update');
         });
         $routes->group('taxes', ['namespace' => 'App\Controllers\Admin\Configurations\Taxes'], function ($routes) {
             $routes->get('/', 'TaxesController::index', ['filter' => 'noauth']);
