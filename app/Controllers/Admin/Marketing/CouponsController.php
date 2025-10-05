@@ -4,7 +4,7 @@ namespace App\Controllers\Admin\Marketing;
 
 use App\Controllers\BaseController;
 use App\Models\Admin\Marketing\Coupons;
-use App\Models\Admin\Marketing\CouponsUsages;
+use App\Models\Admin\Marketing\CouponsUsagesModel;
 use App\Models\Admin\Marketing\CouponsCategoryModel;
 use App\Models\Admin\Marketing\CouponsCustomerGroupModel;
 use App\Models\Admin\Marketing\CouponsProductModel;
@@ -22,7 +22,7 @@ class CouponsController extends BaseController
     public function __construct()
     {
         $this->coupons = new Coupons();
-        $this->couponsUsages = new CouponsUsages();
+        $this->couponsUsages = new CouponsUsagesModel();
         $this->couponsCategoryModel = new CouponsCategoryModel();
         $this->couponsCustomerGroupModel = new CouponsCustomerGroupModel();
         $this->couponsProductModel = new CouponsProductModel();

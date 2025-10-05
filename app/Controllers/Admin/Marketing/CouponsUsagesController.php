@@ -4,14 +4,14 @@ namespace App\Controllers\Admin\Marketing;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\Admin\Marketing\CouponsUsages;
+use App\Models\Admin\Marketing\CouponsUsagesModel;
 
 class CouponsUsagesController extends BaseController
 {
     protected $couponsUsages;
     public function __construct()
     {
-        $this->couponsUsages = new CouponsUsages();
+        $this->couponsUsages = new CouponsUsagesModel();
     }
     public function index()
     {

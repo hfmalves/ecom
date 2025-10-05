@@ -4,7 +4,7 @@ namespace App\Models\Admin\Marketing;
 
 use CodeIgniter\Model;
 
-class CouponsUsages extends Model
+class CouponsUsagesModel extends Model
 {
     protected $table            = 'coupon_usages';
     protected $primaryKey       = 'id';
