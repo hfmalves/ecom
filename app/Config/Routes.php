@@ -168,10 +168,13 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'ShippingController::update');
             $routes->post('delete', 'ShippingController::delete');
         });
-
         $routes->group('currencies', ['namespace' => 'App\Controllers\Admin\Configurations\Currencies'], function ($routes) {
             $routes->get('/', 'CurrenciesController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'CurrenciesController::store');
+            $routes->post('update', 'CurrenciesController::update');
+            $routes->post('delete', 'CurrenciesController::delete');
         });
+
         $routes->group('users', ['namespace' => 'App\Controllers\Admin\Configurations\Users'], function ($routes) {
             $routes->get('/', 'UsersController::index', ['filter' => 'noauth']);
         });
