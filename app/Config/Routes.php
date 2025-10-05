@@ -162,10 +162,13 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'PaymentsController::update');
             $routes->post('delete', 'PaymentsController::delete');
         });
-
         $routes->group('shipping', ['namespace' => 'App\Controllers\Admin\Configurations\Shipping'], function ($routes) {
             $routes->get('/', 'ShippingController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'ShippingController::store');
+            $routes->post('update', 'ShippingController::update');
+            $routes->post('delete', 'ShippingController::delete');
         });
+
         $routes->group('currencies', ['namespace' => 'App\Controllers\Admin\Configurations\Currencies'], function ($routes) {
             $routes->get('/', 'CurrenciesController::index', ['filter' => 'noauth']);
         });
