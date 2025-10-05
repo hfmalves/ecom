@@ -3,12 +3,12 @@
 namespace App\Controllers\Admin\Configurations\System;
 
 use App\Controllers\BaseController;
-use App\Models\Admin\Configurations\Security\SecurityModel;
+use App\Models\Admin\Configurations\System\SystemLogModel;
 class SystemController extends BaseController
 {
     public function __construct()
     {
-        $this->logs = new SecurityModel();
+        $this->logs = new SystemLogModel();
     }
 
     public function index()
