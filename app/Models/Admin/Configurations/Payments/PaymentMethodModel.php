@@ -6,13 +6,25 @@ use CodeIgniter\Model;
 
 class PaymentMethodModel extends Model
 {
-    protected $table            = 'paymentmethods';
+    protected $table            = 'conf_payments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields = [
+        'parent_id',
+        'provider',
+        'code',
+        'name',
+        'description',
+        'config_json',
+        'is_active',
+        'is_default',
+        'sort_order',
+        'created_at',
+        'updated_at'
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -28,8 +40,21 @@ class PaymentMethodModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
+    protected $validationRules = [
+        'code' => 'required|min_length[2]|max_length[100]',
+        'name' => 'required|min_length[2]|max_length[150]',
+    ];
+
+    protected $validationMessages = [
+        'code' => [
+            'required' => 'O código é obrigatório.',
+            'min_length' => 'O código é demasiado curto.',
+        ],
+        'name' => [
+            'required' => 'O nome é obrigatório.',
+            'min_length' => 'O nome é demasiado curto.',
+        ],
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

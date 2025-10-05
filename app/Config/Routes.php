@@ -156,10 +156,13 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'TaxesController::update');
             $routes->post('delete', 'TaxesController::delete');
         });
-
         $routes->group('payments', ['namespace' => 'App\Controllers\Admin\Configurations\Payments'], function ($routes) {
             $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'PaymentsController::store');
+            $routes->post('update', 'PaymentsController::update');
+            $routes->post('delete', 'PaymentsController::delete');
         });
+
         $routes->group('shipping', ['namespace' => 'App\Controllers\Admin\Configurations\Shipping'], function ($routes) {
             $routes->get('/', 'ShippingController::index', ['filter' => 'noauth']);
         });
