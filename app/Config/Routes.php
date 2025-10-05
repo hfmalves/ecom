@@ -212,7 +212,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('/', 'SecurityController::index', ['filter' => 'noauth']);
         });
         $routes->group('languages', ['namespace' => 'App\Controllers\Admin\Configurations\Languages'], function ($routes) {
+            // Página de listagem de idiomas
             $routes->get('/', 'LanguagesController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'LanguagesController::store');
+            $routes->post('update', 'LanguagesController::update');
+            $routes->post('delete', 'LanguagesController::delete');
         });
         $routes->group('cache', ['namespace' => 'App\Controllers\Admin\Configurations\Cache'], function ($routes) {
             $routes->get('/', 'CacheController::index', ['filter' => 'noauth']);
