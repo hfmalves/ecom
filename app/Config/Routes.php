@@ -198,7 +198,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('emails', ['namespace' => 'App\Controllers\Admin\Configurations\Emails'], function ($routes) {
             $routes->get('/', 'EmailsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'EmailsController::store');
+            $routes->post('update', 'EmailsController::update');
+            $routes->post('delete', 'EmailsController::delete');
         });
+
         $routes->group('seo', ['namespace' => 'App\Controllers\Admin\Configurations\Seo'], function ($routes) {
             $routes->get('/', 'SeoController::index', ['filter' => 'noauth']);
         });
