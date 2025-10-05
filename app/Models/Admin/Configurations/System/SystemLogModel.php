@@ -6,13 +6,13 @@ use CodeIgniter\Model;
 
 class SystemLogModel extends Model
 {
-    protected $table            = 'systemlogs';
+    protected $table            = 'conf_system_logs';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = [        'level', 'message', 'context', 'created_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
