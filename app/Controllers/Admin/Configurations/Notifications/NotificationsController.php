@@ -36,14 +36,14 @@ class NotificationsController extends BaseController
                 'errors' => $this->notifications->errors(),
                 'csrf' => [
                     'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
+                    'hash' => csrf_hash(),
                 ],
             ]);
         }
 
         return $this->response->setJSON([
             'status'  => 'success',
-            'message' => 'Notificação criada com sucesso!',
+            'message' => 'Canal de notificação criado com sucesso!',
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
@@ -59,10 +59,10 @@ class NotificationsController extends BaseController
         if (! $id || ! $this->notifications->find($id)) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Notificação não encontrada.',
+                'message' => 'Canal não encontrado.',
                 'csrf' => [
                     'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
+                    'hash' => csrf_hash(),
                 ],
             ]);
         }
@@ -73,17 +73,17 @@ class NotificationsController extends BaseController
                 'errors' => $this->notifications->errors(),
                 'csrf' => [
                     'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
+                    'hash' => csrf_hash(),
                 ],
             ]);
         }
 
         return $this->response->setJSON([
             'status' => 'success',
-            'message' => 'Notificação atualizada com sucesso!',
+            'message' => 'Canal atualizado com sucesso!',
             'csrf' => [
                 'token' => csrf_token(),
-                'hash'  => csrf_hash(),
+                'hash' => csrf_hash(),
             ],
         ]);
     }
@@ -96,10 +96,10 @@ class NotificationsController extends BaseController
         if (! $id || ! $this->notifications->find($id)) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Notificação não encontrada.',
+                'message' => 'Canal não encontrado.',
                 'csrf' => [
                     'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
+                    'hash' => csrf_hash(),
                 ],
             ]);
         }
@@ -107,21 +107,21 @@ class NotificationsController extends BaseController
         if (! $this->notifications->delete($id)) {
             return $this->response->setJSON([
                 'status' => 'error',
-                'message' => 'Erro ao eliminar a notificação.',
+                'message' => 'Erro ao eliminar o canal.',
                 'csrf' => [
                     'token' => csrf_token(),
-                    'hash'  => csrf_hash(),
+                    'hash' => csrf_hash(),
                 ],
             ]);
         }
 
         return $this->response->setJSON([
             'status' => 'success',
-            'message' => 'Notificação eliminada com sucesso!',
+            'message' => 'Canal eliminado com sucesso!',
             'modalClose' => true,
             'csrf' => [
                 'token' => csrf_token(),
-                'hash'  => csrf_hash(),
+                'hash' => csrf_hash(),
             ],
         ]);
     }

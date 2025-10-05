@@ -12,7 +12,14 @@ class NotificationModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields = [
+        'channel',
+        'provider',
+        'config_json',
+        'status',
+        'created_at',
+        'updated_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -28,8 +35,21 @@ class NotificationModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
+    protected $validationRules = [
+        'channel' => 'required|in_list[Email,SMS,Push]',
+        'provider' => 'required|min_length[2]|max_length[100]',
+    ];
+
+    protected $validationMessages = [
+        'channel' => [
+            'required' => 'O canal é obrigatório.',
+            'in_list' => 'Canal inválido.',
+        ],
+        'provider' => [
+            'required' => 'O provider é obrigatório.',
+            'min_length' => 'O provider é demasiado curto.',
+        ],
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
