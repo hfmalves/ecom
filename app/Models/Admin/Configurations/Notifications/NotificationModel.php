@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class NotificationModel extends Model
 {
-    protected $table            = 'notifications';
+    protected $table            = 'conf_notifications';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

@@ -183,10 +183,13 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'IntegrationsController::update');
             $routes->post('delete', 'IntegrationsController::delete');
         });
-
         $routes->group('notifications', ['namespace' => 'App\Controllers\Admin\Configurations\Notifications'], function ($routes) {
             $routes->get('/', 'NotificationsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'NotificationsController::store');
+            $routes->post('update', 'NotificationsController::update');
+            $routes->post('delete', 'NotificationsController::delete');
         });
+
         $routes->group('catalog', ['namespace' => 'App\Controllers\Admin\Configurations\Catalog'], function ($routes) {
             $routes->get('/', 'CatalogController::index', ['filter' => 'noauth']);
         });
