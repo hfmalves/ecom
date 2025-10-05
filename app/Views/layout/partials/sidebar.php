@@ -110,10 +110,10 @@
                         <li><a href="<?= base_url('admin/settings/customers') ?>">Clientes</a></li>
                         <li><a href="<?= base_url('admin/settings/emails') ?>">Emails Transacionais</a></li>
                         <li><a href="<?= base_url('admin/settings/seo') ?>">SEO & URLs</a></li>
-                        <li><a href="<?= base_url('admin/settings/security') ?>">Segurança & Registos</a></li>
+                        <li><a href="<?= base_url('admin/settings/security') ?>">Segurança</a></li>
                         <li><a href="<?= base_url('admin/settings/languages') ?>">Idiomas & Localização</a></li>
                         <li><a href="<?= base_url('admin/settings/cache') ?>">Performance & Cache</a></li>
-                        <li><a href="<?= base_url('admin/settings/system') ?>">Sistema & Logs Técnicos</a></li>
+                        <li><a href="<?= base_url('admin/settings/system') ?>">Logs Técnicos</a></li>
                         <li><a href="<?= base_url('admin/settings/legal') ?>">Informação Legal</a></li>
                     </ul>
                 </li>

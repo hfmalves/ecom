@@ -3,11 +3,17 @@
 namespace App\Controllers\Admin\Configurations\System;
 
 use App\Controllers\BaseController;
-
+use App\Models\Admin\Configurations\Security\SecurityLogModel;
 class SystemController extends BaseController
 {
+    public function __construct()
+    {
+        $this->logs = new SecurityLogModel();
+    }
+
     public function index()
     {
-        return view('admin/configurations/system/index');
+        $data['logs'] = $this->logs->orderBy('created_at', 'DESC')->findAll();
+        return view('admin/configurations/system/index', $data);
     }
 }
