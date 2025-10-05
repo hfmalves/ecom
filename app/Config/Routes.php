@@ -220,6 +220,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('cache', ['namespace' => 'App\Controllers\Admin\Configurations\Cache'], function ($routes) {
             $routes->get('/', 'CacheController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'CacheController::store');
+            $routes->post('update', 'CacheController::update');
+            $routes->post('delete', 'CacheController::delete');
         });
         $routes->group('system', ['namespace' => 'App\Controllers\Admin\Configurations\System'], function ($routes) {
             $routes->get('/', 'SystemController::index', ['filter' => 'noauth']);
