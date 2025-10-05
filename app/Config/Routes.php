@@ -189,9 +189,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'NotificationsController::update');
             $routes->post('delete', 'NotificationsController::delete');
         });
-
         $routes->group('catalog', ['namespace' => 'App\Controllers\Admin\Configurations\Catalog'], function ($routes) {
             $routes->get('/', 'CatalogController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'CatalogController::store');
+            $routes->post('update', 'CatalogController::update');
+            $routes->post('delete', 'CatalogController::delete');
         });
         $routes->group('customers', ['namespace' => 'App\Controllers\Admin\Configurations\Customers'], function ($routes) {
             $routes->get('/', 'CustomersController::index', ['filter' => 'noauth']);
@@ -202,7 +204,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'EmailsController::update');
             $routes->post('delete', 'EmailsController::delete');
         });
-
         $routes->group('seo', ['namespace' => 'App\Controllers\Admin\Configurations\Seo'], function ($routes) {
             $routes->get('/', 'SeoController::index', ['filter' => 'noauth']);
             $routes->post('update', 'SeoController::update');
