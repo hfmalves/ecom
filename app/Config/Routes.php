@@ -205,6 +205,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 
         $routes->group('seo', ['namespace' => 'App\Controllers\Admin\Configurations\Seo'], function ($routes) {
             $routes->get('/', 'SeoController::index', ['filter' => 'noauth']);
+            $routes->post('update', 'SeoController::update');
         });
         $routes->group('security', ['namespace' => 'App\Controllers\Admin\Configurations\Security'], function ($routes) {
             $routes->get('/', 'SecurityController::index', ['filter' => 'noauth']);
