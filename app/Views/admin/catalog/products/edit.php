@@ -61,6 +61,7 @@ Dashboard
         supplier_id: '<?= esc($product['supplier_id']) ?>',
         brand_id: '<?= esc($product['brand_id']) ?>',
         category_id: '<?= esc($product['category_id']) ?>',
+        attributes: <?= json_encode($attributes) ?>,
         <?= csrf_token() ?>: '<?= csrf_hash() ?>'
     },
 )"
@@ -229,6 +230,47 @@ Dashboard
                     <h4 class="card-title">Dimensões</h4>
                     <p class="card-title-desc">Medidas físicas do produto para envio e logística</p>
                     <div class="row">
+                        <!-- CAMPOS DE PRODUTO SIMPLES -->
+                        <div x-show="form.type === 'simple'" class="mt-4">
+                            <p class="text-muted">Campos específicos para produto simples...</p>
+                            <!-- adiciona aqui os inputs normais -->
+                        </div>
+
+                        <!-- CAMPOS DE PRODUTO CONFIGURÁVEL -->
+                        <div x-show="form.type === 'configurable'" class="mt-4 border-top pt-3">
+                            <h5 class="fw-bold mb-3">Atributos Configuráveis</h5>
+
+                            <h5 class="fw-bold mb-3">Atributos Configuráveis</h5>
+
+                            <template x-for="attr in form.attributes" :key="attr.id">
+                                <div class="mb-3">
+                                    <label class="form-label" x-text="attr.name"></label>
+                                    <select class="form-select" :name="'attribute_' + attr.id">
+                                        <template x-for="val in attr.values" :key="val.id">
+                                            <option :value="val.id" x-text="val.value"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- CAMPOS DE PRODUTO VIRTUAL -->
+                        <div x-show="form.type === 'virtual'" class="mt-4 border-top pt-3">
+                            <p class="text-muted">Configurações para produtos virtuais (downloads, links, etc.)</p>
+                        </div>
+
+                        <!-- CAMPOS DE PACK -->
+                        <div x-show="form.type === 'pack'" class="mt-4 border-top pt-3">
+                            <p class="text-muted">Gestão de produtos que compõem o pack...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Dimensões</h4>
+                    <p class="card-title-desc">Medidas físicas do produto para envio e logística</p>
+                    <div class="row">
                         <div class="col-md-3" x-data="{ field: 'weight' }">
                             <label class="form-label" :for="field">Peso (kg)</label>
                             <input type="text" step="0.01" class="form-control"
@@ -265,6 +307,7 @@ Dashboard
                 </div>
             </div>
         </div>
+
 
         <!-- Coluna lateral -->
         <div class="col-4">

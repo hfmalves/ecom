@@ -7,6 +7,10 @@ use App\Models\Admin\Catalog\BrandsModel;
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\SuppliersModel;
 use App\Models\Admin\Catalog\CategoriesModel;
+use App\Models\Admin\Catalog\ProductsVariantsModel;
+use App\Models\Admin\Catalog\ProductsVariantsAttributes;
+use App\Models\Admin\Catalog\ProductsAttributesModel;
+use App\Models\Admin\Catalog\ProductsAttributesValuesModel;
 
 class ProductsController extends BaseController
 {
@@ -14,6 +18,11 @@ class ProductsController extends BaseController
     protected $suppliers;
     protected $brands;
     protected $categories;
+    protected $productsVariants;
+    protected $productsVariantsAttributes;
+    protected $productsAttributesModel;
+    protected $productsAttributesValues;
+
 
     public function __construct()
     {
@@ -21,6 +30,11 @@ class ProductsController extends BaseController
         $this->suppliers = new SuppliersModel();
         $this->brands = new BrandsModel();
         $this->categories = new CategoriesModel();
+
+        $this->productsVariants = new ProductsVariantsModel();
+        $this->productsVariantsAttributes = new ProductsVariantsAttributes();
+        $this->productsAttributesModel = new ProductsAttributesModel();
+        $this->productsAttributesValues = new ProductsAttributesValuesModel();
     }
 
     public function index()
@@ -64,18 +78,45 @@ class ProductsController extends BaseController
         if ($id === null) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Produto não encontrado');
         }
+
         $product = $this->products->find($id);
         if (!$product) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
         }
+
+        // Carrega atributos se for produto configurável
+        $attributes = [];
+        if ($product['type'] === 'configurable') {
+            $attributes = $this->productsAttributesModel
+                ->select('id, code, name, type')
+                ->orderBy('sort_order', 'ASC')
+                ->findAll();
+
+            foreach ($attributes as &$attr) {
+                $attr['values'] = $this->productsAttributesValues
+                    ->where('attribute_id', $attr['id'])
+                    ->orderBy('sort_order', 'ASC')
+                    ->findAll();
+
+                // 🔧 Limpa valores problemáticos (aspas duplas)
+                foreach ($attr['values'] as &$val) {
+                    $val['value'] = str_replace('"', "'", $val['value']);
+                }
+            }
+        }
+
         $data = [
-            'suppliers' => $this->suppliers->findAll(),
-            'brands' => $this->brands->findAll(),
-            'categories' => $this->categories->findAll(),
-            'product' => $product
+            'suppliers'   => $this->suppliers->findAll(),
+            'brands'      => $this->brands->findAll(),
+            'categories'  => $this->categories->findAll(),
+            'product'     => $product,
+            'attributes'  => $attributes
         ];
+        //dd($data);
         return view('admin/catalog/products/edit', $data);
     }
+
+
     public function update()
     {
         $data = $this->request->getJSON(true);
