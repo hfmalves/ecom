@@ -124,3 +124,19 @@ _modules/*
 
 /results/
 /phpunit*.xml
+#-------------------------
+# DDEV
+#-------------------------
+
+# Diretórios gerados automaticamente
+.ddev/.downloads/
+.ddev/db_snapshots/
+.ddev/ssh-auth/
+.ddev/logs/
+.ddev/homeadditions/
+.ddev/commands/host/mc
+.ddev/commands/host/minio
+
+# Evita ficheiros temporários criados por mutagen/orbstack
+.ddev/.mutagen/
+.ddev/traefik/
