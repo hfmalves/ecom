@@ -61,7 +61,11 @@ Dashboard
         supplier_id: '<?= esc($product['supplier_id']) ?>',
         brand_id: '<?= esc($product['brand_id']) ?>',
         category_id: '<?= esc($product['category_id']) ?>',
-        attributes: <?= json_encode($attributes) ?>,
+        attributes: <?= htmlspecialchars($attributes, ENT_QUOTES, 'UTF-8') ?>,
+        productsVariants: <?= htmlspecialchars($productsVariants, ENT_QUOTES, 'UTF-8') ?>,
+        productsVariantsAttributes: <?= htmlspecialchars($productsVariantsAttributes, ENT_QUOTES, 'UTF-8') ?>,
+
+
         <?= csrf_token() ?>: '<?= csrf_hash() ?>'
     },
 )"
@@ -237,22 +241,89 @@ Dashboard
                         </div>
 
                         <!-- CAMPOS DE PRODUTO CONFIGURÁVEL -->
+                        <!-- CAMPOS DE PRODUTO CONFIGURÁVEL -->
                         <div x-show="form.type === 'configurable'" class="mt-4 border-top pt-3">
-                            <h5 class="fw-bold mb-3">Atributos Configuráveis</h5>
 
                             <h5 class="fw-bold mb-3">Atributos Configuráveis</h5>
 
-                            <template x-for="attr in form.attributes" :key="attr.id">
-                                <div class="mb-3">
-                                    <label class="form-label" x-text="attr.name"></label>
-                                    <select class="form-select" :name="'attribute_' + attr.id">
-                                        <template x-for="val in attr.values" :key="val.id">
-                                            <option :value="val.id" x-text="val.value"></option>
-                                        </template>
-                                    </select>
+                            <!-- ⚙️ Formulário para criar nova variante -->
+                            <div class="border rounded p-3 mb-4">
+                                <h6 class="fw-bold mb-3">Criar Nova Variante</h6>
+
+                                <div class="row g-2">
+                                    <template x-for="attr in form.attributes" :key="attr.id">
+                                        <div class="col-md-3">
+                                            <label class="form-label" x-text="attr.name"></label>
+                                            <select class="form-select" x-model="newVariant.attributes[attr.id]">
+                                                <option value="">-- Selecione --</option>
+                                                <template x-for="val in attr.values" :key="val.id">
+                                                    <option :value="val.id" x-text="val.value"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </template>
                                 </div>
-                            </template>
+                                <div class="row g-2">
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">SKU</label>
+                                        <input type="text" class="form-control" x-model="newVariant.sku">
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Preço</label>
+                                        <input type="number" class="form-control" x-model="newVariant.price" step="0.01">
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Stock</label>
+                                        <input type="number" class="form-control" x-model="newVariant.stock_qty">
+                                    </div>
+
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary w-100" @click="addVariant()">Adicionar Variante</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 🧾 Lista de variantes existentes -->
+                            <div>
+                                <h6 class="fw-bold mb-3">Variantes Existentes</h6>
+
+                                <template x-if="form.productsVariants.length > 0">
+                                    <table class="table table-bordered align-middle">
+                                        <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Preço</th>
+                                            <th>Stock</th>
+                                            <th>Atributos</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <template x-for="variant in form.productsVariants" :key="variant.id ?? variant.sku">
+                                            <tr>
+                                                <td x-text="variant.sku"></td>
+                                                <td x-text="variant.price"></td>
+                                                <td x-text="variant.stock_qty"></td>
+                                                <td>
+                                                    <template x-for="(valName, i) in variant.attribute_names" :key="i">
+                                                        <span class="badge bg-secondary me-1" x-text="valName"></span>
+                                                    </template>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        </tbody>
+                                    </table>
+                                </template>
+
+                                <template x-if="form.productsVariants.length === 0">
+                                    <p class="text-muted">Nenhuma variante registada ainda.</p>
+                                </template>
+                            </div>
+
                         </div>
+
 
                         <!-- CAMPOS DE PRODUTO VIRTUAL -->
                         <div x-show="form.type === 'virtual'" class="mt-4 border-top pt-3">

@@ -84,7 +84,7 @@ class ProductsController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
         }
 
-        // Carrega atributos se for produto configurável
+        // Atributos configuráveis
         $attributes = [];
         if ($product['type'] === 'configurable') {
             $attributes = $this->productsAttributesModel
@@ -98,23 +98,55 @@ class ProductsController extends BaseController
                     ->orderBy('sort_order', 'ASC')
                     ->findAll();
 
-                // 🔧 Limpa valores problemáticos (aspas duplas)
                 foreach ($attr['values'] as &$val) {
                     $val['value'] = str_replace('"', "'", $val['value']);
                 }
             }
+            unset($attr, $val);
         }
 
+        // Variantes
+        $variants = $this->productsVariants->where('product_id', $id)->findAll();
+        $variantAttrs = $this->productsVariantsAttributes->findAll();
+
+        // 🔹 Puxa todos os valores de atributos (id + nome)
+        $allValues = $this->productsAttributesValues
+            ->select('id, value')
+            ->findAll();
+        $mapValues = array_column($allValues, 'value', 'id');
+
+        // Junta os atributos corretos + nomes a cada variante
+        foreach ($variants as &$variant) {
+            $variant['attributes'] = [];
+            $variant['attribute_names'] = [];
+
+            foreach ($variantAttrs as $va) {
+                if ((int)$va['variant_id'] == (int)$variant['id']) {
+                    $valId = (int)$va['attribute_value_id'];
+                    $variant['attributes'][] = $valId;
+                    $variant['attribute_names'][] = $mapValues[$valId] ?? '—';
+                }
+            }
+        }
+        unset($variant);
+
+        // Envia tudo para a view
         $data = [
             'suppliers'   => $this->suppliers->findAll(),
             'brands'      => $this->brands->findAll(),
             'categories'  => $this->categories->findAll(),
             'product'     => $product,
-            'attributes'  => $attributes
+            'attributes'  => json_encode($attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'productsVariants' => json_encode($variants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'productsVariantsAttributes' => json_encode($variantAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
         ];
-        //dd($data);
+
+       // dd($variants); // 🔥 Agora mostra IDs + nomes no dump
         return view('admin/catalog/products/edit', $data);
     }
+
+
+
 
 
     public function update()
