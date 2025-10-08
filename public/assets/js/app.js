@@ -6,27 +6,18 @@ function formHandler(endpoint, initForm = {}, options = {}) {
         loading: false,
         step: 'login',
         opts: Object.assign({ redirect: false, resetOnSuccess: false }, options),
-
         refreshCsrf(data) {
             if (data && data.csrf) {
-                // limpa os antigos
                 Object.keys(this.form).forEach(k => {
                     if (k.startsWith('csrf_')) delete this.form[k];
                 });
-                // mete o novo
                 this.form[data.csrf.token] = data.csrf.hash;
-
-                // 🔥 guarda último csrf global
                 window.__lastCsrf = { token: data.csrf.token, hash: data.csrf.hash };
-
-                // 🔥 dispara evento global
                 document.dispatchEvent(new CustomEvent('csrf-update', {
                     detail: { token: data.csrf.token, hash: data.csrf.hash }
                 }));
             }
         },
-
-
         async submit() {
             this.loading = true;
             this.errors = {};
@@ -42,12 +33,9 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                     },
                     body: JSON.stringify(this.form),
                 });
-
                 const isJSON = (resp.headers.get("content-type") || "").includes("application/json");
                 const data = isJSON ? await resp.json() : {};
                 this.refreshCsrf(data);
-
-                // 🔹 Caso 1: erros de validação
                 if (data.status === "error" && data.errors) {
                     this.errors = {};
                     for (const k in data.errors) {
@@ -57,20 +45,14 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                     }
                     return;
                 }
-
-                // 🔹 Caso 2: erro geral
                 if (data.status === "error" && data.message) {
                     showToast(data.message, "danger");
                     return;
                 }
-
-                // 🔹 Caso 3: erro HTTP
                 if (!resp.ok) {
                     showToast(`Erro ${resp.status}: ${resp.statusText}`, "danger");
                     return;
                 }
-
-                // 🔹 Sucesso
                 if (data.message) {
                     showToast(data.message, "success");
                 }
@@ -97,11 +79,9 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                 this.loading = false;
             }
         },
-
         async submit2FA(urlVerify) {
             this.loading = true;
             this.errors = {};
-
             try {
                 const csrfKey = Object.keys(this.form).find(k => k.startsWith('csrf_'));
                 const csrfValue = this.form[csrfKey];
@@ -120,10 +100,8 @@ function formHandler(endpoint, initForm = {}, options = {}) {
                         )
                     }),
                 });
-
                 const data = await resp.json();
                 this.refreshCsrf(data);
-
                 if (data.status === "success" && data.redirect) {
                     window.location.href = data.redirect;
                 } else if (data.status === "error") {
@@ -165,21 +143,14 @@ function systemModal() {
         async open(source, size = 'md', entity = null) {
             try {
                 let content = '';
-
-                // Pega conteúdo
                 if (typeof source === 'string' && source.startsWith('#')) {
                     const el = document.querySelector(source);
                     if (!el) throw new Error("Elemento não encontrado: " + source);
-
-                    // ⚡ Adiciona isto:
-                    // Destroi qualquer Select2 antes de clonar o HTML, para não duplicar
                     $(el).find('.select2-hidden-accessible').each(function () {
                         if ($(this).data('select2')) {
                             $(this).select2('destroy');
                         }
                     });
-
-                    // Continua igual
                     content = el.innerHTML;
                 } else if (typeof source === 'string' && source.trim().startsWith('<')) {
                     content = source;
@@ -188,8 +159,6 @@ function systemModal() {
                     if (!res.ok) throw new Error(res.statusText);
                     content = await res.text();
                 }
-
-                // Cria wrapper
                 const wrapper = document.createElement('div');
                 wrapper.innerHTML = `
                     <div class="modal fade" id="exampleModalDynamic" tabindex="-1" aria-hidden="true">
@@ -199,27 +168,20 @@ function systemModal() {
                     </div>
                 `;
                 document.body.appendChild(wrapper);
-
                 const modalEl = wrapper.querySelector('#exampleModalDynamic');
                 const modal = new bootstrap.Modal(modalEl);
-
                 modalEl.addEventListener('shown.bs.modal', () => {
                     const formEl = wrapper.querySelector('[x-data]');
                     if (!formEl) return;
-
-                    // Preenche/limpa form
                     if (entity) {
                         formEl.dispatchEvent(new CustomEvent('fill-form', { detail: entity }));
                     } else {
                         formEl.dispatchEvent(new CustomEvent('reset-form'));
                     }
-
-                    // Escuta CSRF update global
                     document.addEventListener('csrf-update', e => {
                         if (formEl.__x) formEl.__x.$data.form[e.detail.token] = e.detail.hash;
                     });
                 });
-
                 modalEl.addEventListener('hidden.bs.modal', () => wrapper.remove());
                 modal.show();
 
@@ -277,8 +239,6 @@ document.addEventListener('shown.bs.modal', (event) => {
             // DEBUG: mostra nome do campo
             const field = $select.attr('x-model') || $select.attr('name') || '??';
             console.log('⚙️ Select2 inicializado para:', field);
-
-            // 🔥 SINCRONIZAÇÃO REAL COM ALPINE 🔥
             $select.on('change.select2', function () {
                 const value = $(this).val();
                 const model = this.getAttribute('x-model');
@@ -299,3 +259,55 @@ document.addEventListener('shown.bs.modal', (event) => {
         });
     }, 150);
 });
+
+// Nome do CSRF
+const csrfName = '<?= csrf_token() ?>';
+
+// Variável de estado para armazenar o token atual
+window.csrfStore = window.csrfStore || {};
+window.csrfStore[csrfName] = document.querySelector(`input[name="${csrfName}"]`)?.value || '';
+
+// Função AJAX segura com CSRF
+window.ajaxRequest = function(url, payload = {}, csrfValue) {
+    // Sempre pega o token mais recente da variável de estado
+    csrfValue = csrfValue || window.csrfStore[csrfName];
+
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfValue
+        },
+        body: JSON.stringify({
+            ...payload,
+            [csrfName]: csrfValue
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            // Atualiza imediatamente o token na variável de estado
+            if (data.csrf) {
+                window.csrfStore[csrfName] = data.csrf;
+
+                // Atualiza todos os inputs CSRF no DOM
+                document.querySelectorAll(`input[name="${csrfName}"]`)
+                    .forEach(input => input.value = data.csrf);
+            }
+
+            if (data.success) {
+                showToast(data.message || 'Operação concluída com sucesso', 'success', '✅ Sucesso');
+            } else {
+                const msg = data.message || 'Erro ao executar operação.';
+                showToast(msg, 'error', '❌ Falha');
+                if (data.errors) console.warn('Detalhes do erro:', data.errors);
+            }
+
+            return data;
+        })
+        .catch(err => {
+            console.error('Erro de rede:', err);
+            showToast('Erro de rede ao executar operação.', 'error', '⚠️ Erro');
+            return { success: false, error: err };
+        });
+};

@@ -15,13 +15,34 @@ class ProductsVariantsModel extends Model
     protected $allowedFields = [
         'product_id',
         'sku',
+        'ean',
+        'upc',
+        'isbn',
+        'gtin',
+        'cost_price',
+        'base_price',
+        'base_price_tax',
+        'special_price',
+        'special_price_start',
+        'special_price_end',
+        'discount_type',
+        'discount_value',
         'price',
         'stock_qty',
+        'manage_stock',
+        'weight',
+        'width',
+        'height',
+        'length',
+        'tax_class_id',
         'image',
         'is_default',
+        'status',
+        'deleted_at',
         'created_at',
         'updated_at',
     ];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -38,8 +59,9 @@ class ProductsVariantsModel extends Model
 
     // Validation
     protected $validationRules = [
+        'id'  => 'required|is_natural_no_zero',
         'product_id' => 'required|integer',
-        'sku'        => 'required|min_length[2]|max_length[100]|is_unique[product_variants.sku,id,{id}]',
+        'sku'        => 'required|min_length[2]|max_length[100]|is_unique[products_variants.sku,id,{id}]',
         'price'      => 'required|decimal',
         'stock_qty'  => 'permit_empty|integer',
         'image'      => 'permit_empty|max_length[255]',

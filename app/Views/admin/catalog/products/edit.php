@@ -21,56 +21,97 @@ Dashboard
     </div><!--end col-->
 </div><!--end row-->
 <form id="productForm"
-        x-ref="form"
-        x-data="formHandler(
-    '<?= base_url('admin/catalog/products/update') ?>',
-    {
-        id: '<?= esc($product['id']) ?>',
-        status: '<?= esc($product['status']) ?>',
-        name: '<?= esc($product['name']) ?>',
-        slug: '<?= esc($product['slug']) ?>',
-        description: '<?= esc($product['description']) ?>',
-        short_description: '<?= esc($product['short_description']) ?>',
-        meta_title: '<?= esc($product['meta_title']) ?>',
-        meta_description: '<?= esc($product['meta_description']) ?>',
-        meta_keywords: '<?= esc($product['meta_keywords']) ?>',
-        cost_price: '<?= esc($product['cost_price']) ?>',
-        base_price: '<?= esc($product['base_price']) ?>',
-        base_price_tax: '<?= esc($product['base_price_tax']) ?>',
-        tax_class_id: '<?= esc($product['tax_class_id']) ?>',
-        discount_type: '<?= esc($product['discount_type']) ?>',
-        discount_value: '<?= esc($product['discount_value']) ?>',
-        special_price: '<?= esc($product['special_price']) ?>',
-        special_price_start: '<?= esc($product['special_price_start']) ?>',
-        special_price_end: '<?= esc($product['special_price_end']) ?>',
-        weight: '<?= esc($product['weight']) ?>',
-        width: '<?= esc($product['width']) ?>',
-        height: '<?= esc($product['height']) ?>',
-        length: '<?= esc($product['length']) ?>',
-        type: '<?= esc($product['type']) ?>',
-        visibility: '<?= esc($product['visibility']) ?>',
-        is_featured: <?= $product['is_featured'] ? 'true' : 'false' ?>,
-        is_new: <?= $product['is_new'] ? 'true' : 'false' ?>,
-        stock_qty: '<?= esc($product['stock_qty']) ?>',
-        manage_stock: <?= $product['manage_stock'] ? 'true' : 'false' ?>,
-        sku: '<?= esc($product['sku']) ?>',
-        ean: '<?= esc($product['ean']) ?>',
-        upc: '<?= esc($product['upc']) ?>',
-        isbn: '<?= esc($product['isbn']) ?>',
-        gtin: '<?= esc($product['gtin']) ?>',
-        supplier_id: '<?= esc($product['supplier_id']) ?>',
-        brand_id: '<?= esc($product['brand_id']) ?>',
-        category_id: '<?= esc($product['category_id']) ?>',
-        attributes: <?= htmlspecialchars($attributes, ENT_QUOTES, 'UTF-8') ?>,
-        productsVariants: <?= htmlspecialchars($productsVariants, ENT_QUOTES, 'UTF-8') ?>,
-        productsVariantsAttributes: <?= htmlspecialchars($productsVariantsAttributes, ENT_QUOTES, 'UTF-8') ?>,
+      x-ref="form"
+      x-data="formHandler(
+          '<?= base_url('admin/catalog/products/update') ?>',
+          {
+              id: '<?= esc($product['id']) ?>',
+              status: '<?= esc($product['status']) ?>',
+              name: '<?= esc($product['name']) ?>',
+              slug: '<?= esc($product['slug']) ?>',
+              description: '<?= esc($product['description']) ?>',
+              short_description: '<?= esc($product['short_description']) ?>',
+              meta_title: '<?= esc($product['meta_title']) ?>',
+              meta_description: '<?= esc($product['meta_description']) ?>',
+              meta_keywords: '<?= esc($product['meta_keywords']) ?>',
+              cost_price: '<?= esc($product['cost_price']) ?>',
+              base_price: '<?= esc($product['base_price']) ?>',
+              base_price_tax: '<?= esc($product['base_price_tax']) ?>',
+              tax_class_id: '<?= esc($product['tax_class_id']) ?>',
+              discount_type: '<?= esc($product['discount_type']) ?>',
+              discount_value: '<?= esc($product['discount_value']) ?>',
+              special_price: '<?= esc($product['special_price']) ?>',
+              special_price_start: '<?= esc($product['special_price_start']) ?>',
+              special_price_end: '<?= esc($product['special_price_end']) ?>',
+              weight: '<?= esc($product['weight']) ?>',
+              width: '<?= esc($product['width']) ?>',
+              height: '<?= esc($product['height']) ?>',
+              length: '<?= esc($product['length']) ?>',
+              type: '<?= esc($product['type']) ?>',
+              visibility: '<?= esc($product['visibility']) ?>',
+              is_featured: <?= $product['is_featured'] ? 'true' : 'false' ?>,
+              is_new: <?= $product['is_new'] ? 'true' : 'false' ?>,
+              stock_qty: '<?= esc($product['stock_qty']) ?>',
+              manage_stock: <?= $product['manage_stock'] ? 'true' : 'false' ?>,
+              sku: '<?= esc($product['sku']) ?>',
+              ean: '<?= esc($product['ean']) ?>',
+              upc: '<?= esc($product['upc']) ?>',
+              isbn: '<?= esc($product['isbn']) ?>',
+              gtin: '<?= esc($product['gtin']) ?>',
+              supplier_id: '<?= esc($product['supplier_id']) ?>',
+              brand_id: '<?= esc($product['brand_id']) ?>',
+              category_id: '<?= esc($product['category_id']) ?>',
+              attributes: <?= htmlspecialchars($attributes, ENT_QUOTES, 'UTF-8') ?>,
+              productsVariants: <?= htmlspecialchars($productsVariants, ENT_QUOTES, 'UTF-8') ?>,
+              productsVariantsAttributes: <?= htmlspecialchars($productsVariantsAttributes, ENT_QUOTES, 'UTF-8') ?>,
+              <?= csrf_token() ?>: '<?= csrf_hash() ?>',
+              updateVariant(variant) {const csrfName = '<?= csrf_token() ?>';
+                const csrfValue = this[csrfName];
 
+    fetch('<?= base_url('admin/catalog/products/variants/update') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfValue
+        },
+        body: JSON.stringify({
+            id: variant.id,
+            sku: variant.sku,
+            cost_price: variant.cost_price,
+            base_price: variant.base_price,
+            base_price_tax: variant.base_price_tax,
+            stock_qty: variant.stock_qty,
+            manage_stock: variant.manage_stock,
+            is_default: variant.is_default,
+            [csrfName]: csrfValue
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`Variante ${variant.sku} atualizada com sucesso`, 'success', 'Sucesso');
+        } else {
+            const msg = data.message || 'Erro ao atualizar variante.';
+            showToast(msg, 'error', '❌ Falha');
+            if (data.errors) console.warn('Detalhes do erro:', data.errors);
+        }
 
-        <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+        // Atualiza o token CSRF para os próximos pedidos
+        if (data.csrf) {
+            this[csrfName] = data.csrf;
+        }
+    })
+    .catch(err => {
+            console.error('Erro de rede:', err);
+            showToast('Erro de rede ao atualizar variante.', 'error', '⚠️ Erro');
+        }); // ❌ TINHAS uma vírgula aqui — remove
     },
-)"
-        @submit.prevent="submit"
->
+
+          }
+      )"
+      @submit.prevent="submit"
+    >
     <div class="row">
         <div class="col-8">
             <!-- Informação Geral -->
@@ -239,97 +280,103 @@ Dashboard
                             <p class="text-muted">Campos específicos para produto simples...</p>
                             <!-- adiciona aqui os inputs normais -->
                         </div>
-
                         <!-- CAMPOS DE PRODUTO CONFIGURÁVEL -->
-                        <!-- CAMPOS DE PRODUTO CONFIGURÁVEL -->
-                        <div x-show="form.type === 'configurable'" class="mt-4 border-top pt-3">
+                        <div x-show="form.type === 'configurable'" class="mt-0 pt-0">
+                            <template x-if="form.productsVariants.length > 0">
+                                <table class="table table-bordered align-middle mt-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th width="15%">SKU</th>
+                                        <th>Preço Custo</th>
+                                        <th>Preço Base</th>
+                                        <th>Preço + IVA</th>
+                                        <th>Stock</th>
+                                        <th>Gerir Stock</th>
+                                        <th>Default</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                    </thead>
 
-                            <h5 class="fw-bold mb-3">Atributos Configuráveis</h5>
-
-                            <!-- ⚙️ Formulário para criar nova variante -->
-                            <div class="border rounded p-3 mb-4">
-                                <h6 class="fw-bold mb-3">Criar Nova Variante</h6>
-
-                                <div class="row g-2">
-                                    <template x-for="attr in form.attributes" :key="attr.id">
-                                        <div class="col-md-3">
-                                            <label class="form-label" x-text="attr.name"></label>
-                                            <select class="form-select" x-model="newVariant.attributes[attr.id]">
-                                                <option value="">-- Selecione --</option>
-                                                <template x-for="val in attr.values" :key="val.id">
-                                                    <option :value="val.id" x-text="val.value"></option>
-                                                </template>
-                                            </select>
-                                        </div>
-                                    </template>
-                                </div>
-                                <div class="row g-2">
-
-                                    <div class="col-md-3">
-                                        <label class="form-label">SKU</label>
-                                        <input type="text" class="form-control" x-model="newVariant.sku">
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label class="form-label">Preço</label>
-                                        <input type="number" class="form-control" x-model="newVariant.price" step="0.01">
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label class="form-label">Stock</label>
-                                        <input type="number" class="form-control" x-model="newVariant.stock_qty">
-                                    </div>
-
-                                    <div class="col-md-3 d-flex align-items-end">
-                                        <button type="button" class="btn btn-primary w-100" @click="addVariant()">Adicionar Variante</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 🧾 Lista de variantes existentes -->
-                            <div>
-                                <h6 class="fw-bold mb-3">Variantes Existentes</h6>
-
-                                <template x-if="form.productsVariants.length > 0">
-                                    <table class="table table-bordered align-middle">
-                                        <thead>
+                                    <tbody>
+                                    <template x-for="(variant, index) in form.productsVariants" :key="variant.id ?? index">
                                         <tr>
-                                            <th>SKU</th>
-                                            <th>Preço</th>
-                                            <th>Stock</th>
-                                            <th>Atributos</th>
+                                            <td>
+                                                <input type="text"
+                                                       class="form-control form-control-sm"
+                                                       x-model="variant.sku"
+                                                       @change="form.updateVariant(variant)">
+                                            </td>
+                                            <td>
+                                                <input type="number"
+                                                       class="form-control form-control-sm"
+                                                       x-model="variant.cost_price"
+                                                       step="0.01"
+                                                       @change="form.updateVariant(variant)">
+                                            </td>
+                                            <td>
+                                                <input type="number"
+                                                       class="form-control form-control-sm"
+                                                       x-model="variant.base_price"
+                                                       step="0.01"
+                                                       @change="form.updateVariant(variant)">
+                                            </td>
+                                            <td>
+                                                <input type="number"
+                                                       class="form-control form-control-sm"
+                                                       x-model="variant.base_price_tax"
+                                                       step="0.01"
+                                                       @change="form.updateVariant(variant)">
+                                            </td>
+                                            <td>
+                                                <input type="number"
+                                                       class="form-control form-control-sm"
+                                                       x-model="variant.stock_qty"
+                                                       :disabled="variant.manage_stock != 1"
+                                                       @change="form.updateVariant(variant)">
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="form-check form-switch d-inline-block">
+                                                    <input type="checkbox"
+                                                           class="form-check-input"
+                                                           :id="'manage_'+index"
+                                                           :checked="variant.manage_stock == 1 || variant.manage_stock === '1'"
+                                                           @change="
+                                                               variant.manage_stock = $event.target.checked ? 1 : 0;
+                                                               form.updateVariant(variant);
+                                                           ">
+                                                </div>
+                                            </td>
+                                            <!-- IS DEFAULT -->
+                                            <td class="text-center">
+                                                <input type="radio"
+                                                       name="default_variant"
+                                                       :id="'default_'+index"
+                                                       :value="variant.sku"
+                                                       :checked="variant.is_default == 1 || variant.is_default === '1'"
+                                                       @change="
+                                                           form.defaultVariantSku = variant.sku;
+                                                           form.productsVariants.forEach(v => v.is_default = (v.sku === variant.sku ? 1 : 0));
+                                                           form.updateVariant(variant);
+                                                       ">
+                                            </td>
+                                            <!-- AÇÕES -->
+                                            <td class="text-center">
+                                                <button type="button"
+                                                        class="btn btn-secondary btn-sm"
+                                                        @click="form.updateVariant(variant)">
+                                                    Guardar
+                                                </button>
+                                            </td>
                                         </tr>
-                                        </thead>
-                                        <tbody>
-                                        <template x-for="variant in form.productsVariants" :key="variant.id ?? variant.sku">
-                                            <tr>
-                                                <td x-text="variant.sku"></td>
-                                                <td x-text="variant.price"></td>
-                                                <td x-text="variant.stock_qty"></td>
-                                                <td>
-                                                    <template x-for="(valName, i) in variant.attribute_names" :key="i">
-                                                        <span class="badge bg-secondary me-1" x-text="valName"></span>
-                                                    </template>
-                                                </td>
-                                            </tr>
-                                        </template>
-                                        </tbody>
-                                    </table>
-                                </template>
-
-                                <template x-if="form.productsVariants.length === 0">
-                                    <p class="text-muted">Nenhuma variante registada ainda.</p>
-                                </template>
-                            </div>
-
+                                    </template>
+                                    </tbody>
+                                </table>
+                            </template>
                         </div>
-
-
                         <!-- CAMPOS DE PRODUTO VIRTUAL -->
                         <div x-show="form.type === 'virtual'" class="mt-4 border-top pt-3">
                             <p class="text-muted">Configurações para produtos virtuais (downloads, links, etc.)</p>
                         </div>
-
                         <!-- CAMPOS DE PACK -->
                         <div x-show="form.type === 'pack'" class="mt-4 border-top pt-3">
                             <p class="text-muted">Gestão de produtos que compõem o pack...</p>
@@ -378,8 +425,6 @@ Dashboard
                 </div>
             </div>
         </div>
-
-
         <!-- Coluna lateral -->
         <div class="col-4">
             <!-- Visibilidade -->
@@ -418,7 +463,6 @@ Dashboard
                                 <small class="text-danger" x-text="errors[field]"></small>
                             </template>
                         </div>
-
                         <div class="col-md-6" x-data="{ field: 'visibility' }">
                             <label class="form-label" :for="field">Visibilidade</label>
                             <select class="form-select" id="visibility" name="visibility"
@@ -435,8 +479,6 @@ Dashboard
                             </template>
                         </div>
                     </div>
-
-
                     <div class="row">
                         <!-- Produto em destaque -->
                         <div class="col-md-6" x-data="{ field: 'is_featured' }">
@@ -452,8 +494,6 @@ Dashboard
                                 </template>
                             </div>
                         </div>
-
-                        <!-- Produto novo -->
                         <!-- Produto novo -->
                         <div class="col-md-6" x-data="{ field: 'is_new' }">
                             <div class="mb-2">
@@ -474,9 +514,7 @@ Dashboard
                                 </template>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
             </div>
             <!-- Inventário -->
@@ -511,7 +549,6 @@ Dashboard
                     </div>
                 </div>
             </div>
-
             <!-- Etiquetas -->
             <div class="card">
                 <div class="card-body">
@@ -563,7 +600,6 @@ Dashboard
                     </div>
                 </div>
             </div>
-
             <!-- Fornecedores -->
             <div class="card">
                 <div class="card-body">
@@ -595,7 +631,6 @@ Dashboard
                     </div>
                 </div>
             </div>
-
             <!-- Categorias -->
             <div class="card">
                 <div class="card-body">
@@ -616,10 +651,8 @@ Dashboard
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-
     <!-- Botão submit -->
     <div class="mt-3 d-grid">
         <button type="submit" class="btn btn-primary" :disabled="loading">
@@ -628,9 +661,6 @@ Dashboard
         </button>
     </div>
 </form>
-
-
-
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>
