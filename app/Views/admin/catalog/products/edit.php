@@ -272,7 +272,7 @@ Dashboard
             <!-- Dimensões -->
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Dimensões</h4>
+                    <h4 class="card-title">Variações de Produto</h4>
                     <p class="card-title-desc">Medidas físicas do produto para envio e logística</p>
                     <div class="row">
                         <!-- CAMPOS DE PRODUTO SIMPLES -->
@@ -362,10 +362,11 @@ Dashboard
                                             <!-- AÇÕES -->
                                             <td class="text-center">
                                                 <button type="button"
-                                                        class="btn btn-secondary btn-sm"
-                                                        @click="form.updateVariant(variant)">
-                                                    Guardar
+                                                        class="btn btn-primary btn-sm"
+                                                        @click="$dispatch('variant-edit', variant)">
+                                                    Editar
                                                 </button>
+
                                             </td>
                                         </tr>
                                     </template>
@@ -449,23 +450,29 @@ Dashboard
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6" x-data="{ field: 'type' }">
-                            <label class="form-label" :for="field">Tipo</label>
-                            <select class="form-select" :id="field" :name="field"
-                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                        <div class="col-md-6">
+                            <label class="form-label" for="type">Tipo</label>
+                            <select class="form-select"
+                                    id="type"
+                                    name="type"
+                                    x-model="form.type"
+                                    :class="{ 'is-invalid': errors.type }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="simple">Simples</option>
                                 <option value="configurable">Configurable</option>
                                 <option value="virtual">Virtual</option>
                                 <option value="pack">Pack</option>
                             </select>
-                            <template x-if="errors[field]">
-                                <small class="text-danger" x-text="errors[field]"></small>
+                            <template x-if="errors.type">
+                                <small class="text-danger" x-text="errors.type"></small>
                             </template>
                         </div>
-                        <div class="col-md-6" x-data="{ field: 'visibility' }">
-                            <label class="form-label" :for="field">Visibilidade</label>
-                            <select class="form-select" id="visibility" name="visibility"
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="visibility">Visibilidade</label>
+                            <select class="form-select"
+                                    id="visibility"
+                                    name="visibility"
                                     x-model="form.visibility"
                                     :class="{ 'is-invalid': errors.visibility }">
                                 <option value="">-- Selecionar --</option>
@@ -479,6 +486,7 @@ Dashboard
                             </template>
                         </div>
                     </div>
+
                     <div class="row">
                         <!-- Produto em destaque -->
                         <div class="col-md-6" x-data="{ field: 'is_featured' }">
@@ -661,6 +669,189 @@ Dashboard
         </button>
     </div>
 </form>
+
+<div x-data="{
+        current: {},
+        modal: null,
+        open(v) {
+            this.current = JSON.parse(JSON.stringify(v));
+            if (!this.modal) {
+                this.modal = new bootstrap.Modal($refs.modal);
+            }
+            this.modal.show();
+        },
+        save() {
+            form.updateVariant(this.current);
+            if (this.modal) this.modal.hide();
+        }
+    }"
+     @variant-edit.window="open($event.detail)">
+
+    <div class="modal fade" tabindex="-1" aria-hidden="true" x-ref="modal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Variante</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label">SKU</label>
+                            <input type="text" class="form-control" x-model="current.sku">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Preço Custo</label>
+                            <input type="number" step="0.01" class="form-control" x-model="current.cost_price">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Preço Base</label>
+                            <input type="number" step="0.01" class="form-control" x-model="current.base_price">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Preço + IVA</label>
+                            <input type="number" step="0.01" class="form-control" x-model="current.base_price_tax">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Stock</label>
+                            <input type="number" class="form-control" x-model="current.stock_qty">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label d-block">Gerir Stock</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       role="switch"
+                                       id="manageStock"
+                                       x-model="current.manage_stock"
+                                       :true-value="1"
+                                       :false-value="0">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Preço Especial</label>
+                            <input type="number" step="0.01" class="form-control" x-model="current.special_price">
+                        </div>
+
+                        <!-- Datas -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Início Preço Especial</label>
+                                <input type="text"
+                                       class="form-control datepicker"
+                                       x-model="current.special_price_start"
+                                       placeholder="Selecione data">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Fim Preço Especial</label>
+                                <input type="text"
+                                       class="form-control datepicker"
+                                       x-model="current.special_price_end"
+                                       placeholder="Selecione data">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo Desconto</label>
+                            <select class="form-select" x-model="current.discount_type">
+                                <option value="">--</option>
+                                <option value="percent">Percentagem</option>
+                                <option value="fixed">Valor Fixo</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Valor Desconto</label>
+                            <input type="number" step="0.01" class="form-control" x-model="current.discount_value">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Peso (kg)</label>
+                            <input type="number" step="0.01" class="form-control" x-model="current.weight">
+                        </div>
+
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo de Desconto</label>
+                                <select class="form-select select2" x-model="current.discount_type">
+                                    <option value="">-- Selecionar --</option>
+                                    <option value="percent">Percentagem</option>
+                                    <option value="fixed">Valor Fixo</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Classe de Imposto</label>
+                                <select class="form-select select2" x-model="current.tax_class_id">
+                                    <option value="">-- Selecionar Classe --</option>
+                                    <option value="1">IVA 23%</option>
+                                    <option value="2">IVA 13%</option>
+                                    <option value="3">Isento</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado</label>
+                            <select class="form-select" x-model="current.status">
+                                <option value="1">Ativo</option>
+                                <option value="0">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label d-block">Default</label>
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="default_variant"
+                                   id="isDefault"
+                                   :checked="current.is_default == 1"
+                                   @change="current.is_default = 1">
+                        </div>
+
+
+
+                        <h6 class="fw-bold">Dimensões</h6>
+                        <p class="text-muted small">Medidas físicas do produto para envio e logística</p>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Peso (kg)</label>
+                                <input type="number" step="0.01" class="form-control" x-model="current.weight">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Largura (cm)</label>
+                                <input type="number" step="0.01" class="form-control" x-model="current.width">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Altura (cm)</label>
+                                <input type="number" step="0.01" class="form-control" x-model="current.height">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Comprimento (cm)</label>
+                                <input type="number" step="0.01" class="form-control" x-model="current.length">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-success" @click="save()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
 <script>

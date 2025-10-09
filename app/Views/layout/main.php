@@ -104,5 +104,6 @@
         <!-- Alpine -->
         <script src="<?= base_url('assets/js/axs_alp.min.js') ?>" defer></script>
         <?= $this->renderSection('content-script') ?>
+
     </body>
 </html>
