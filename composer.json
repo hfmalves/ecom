@@ -27,6 +27,7 @@
         "wildbit/postmark-php": "^7.0"
     },
     "require-dev": {
+        "behat/behat": "^3.25",
         "codeception/module-webdriver": "^4.0",
         "fakerphp/faker": "^1.9",
         "mikey179/vfsstream": "^1.6",
