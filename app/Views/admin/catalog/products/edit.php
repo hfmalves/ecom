@@ -688,157 +688,186 @@ Dashboard
      @variant-edit.window="open($event.detail)">
 
     <div class="modal fade" tabindex="-1" aria-hidden="true" x-ref="modal">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Variante</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
-                    <div class="row g-3">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#labels" role="tab" aria-selected="true">
+                                        <span class="d-block d-sm-none"><i class="fas fa-home"></i></span>
+                                        <span class="d-none d-sm-block">Etiquetas</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#prices" role="tab" aria-selected="false" tabindex="-1">
+                                        <span class="d-block d-sm-none"><i class="far fa-user"></i></span>
+                                        <span class="d-none d-sm-block">Valores de Venda</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#transport" role="tab" aria-selected="false" tabindex="-1">
+                                        <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
+                                        <span class="d-none d-sm-block">Dimenções</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#multimédia" role="tab" aria-selected="false" tabindex="-1">
+                                        <span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
+                                        <span class="d-none d-sm-block">Multimédia</span>
+                                    </a>
+                                </li>
+                            </ul>
 
-                        <div class="col-md-4">
-                            <label class="form-label">SKU</label>
-                            <input type="text" class="form-control" x-model="current.sku">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Preço Custo</label>
-                            <input type="number" step="0.01" class="form-control" x-model="current.cost_price">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Preço Base</label>
-                            <input type="number" step="0.01" class="form-control" x-model="current.base_price">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Preço + IVA</label>
-                            <input type="number" step="0.01" class="form-control" x-model="current.base_price_tax">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Stock</label>
-                            <input type="number" class="form-control" x-model="current.stock_qty">
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label d-block">Gerir Stock</label>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       role="switch"
-                                       id="manageStock"
-                                       x-model="current.manage_stock"
-                                       :true-value="1"
-                                       :false-value="0">
+                            <!-- Tab panes -->
+                            <div class="tab-content p-3 text-muted">
+                                <div class="tab-pane active" id="labels" role="tabpanel">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">SKU</label>
+                                            <input type="text" class="form-control" x-model="current.sku">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-3">
+                                            <label class="form-label">EAN</label>
+                                            <input type="text" class="form-control" x-model="current.ean">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">UPC</label>
+                                            <input type="text" class="form-control" x-model="current.upc">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">ISB</label>
+                                            <input type="text" class="form-control" x-model="current.isb">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">GTIN</label>
+                                            <input type="text" class="form-control" x-model="current.gtin">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="prices" role="tabpanel">
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Preço Custo</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.cost_price">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Preço Base</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.base_price">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Preço + IVA</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.base_price_tax">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Preço Especial</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.special_price">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tipo Desconto</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.discount_type">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Valor Desconto</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.discount_value">
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Desde</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.special_price_start">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Até</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.special_price_end">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="transport" role="tabpanel">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Peso (kg)</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.weight">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Largura (cm)</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.width">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Altura (cm)</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.height">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Comprimento (cm)</label>
+                                            <input type="number" step="0.01" class="form-control" x-model="current.length">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="multimédia" role="tabpanel">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="row">
+                                            <div class="col-lg-4">
+                                                <div>
+                                                    <img src="assets/images/users/avatar-3.jpg" alt="" class="rounded avatar-sm">
+                                                    <p class="mt-2 mb-lg-0"><code>.avatar-sm</code></p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <div>
+                                                    <img src="assets/images/users/avatar-4.jpg" alt="" class="rounded avatar-md">
+                                                    <p class="mt-2  mb-lg-0"><code>.avatar-md</code></p>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <div>
+                                                    <img src="assets/images/users/avatar-5.jpg" alt="" class="rounded avatar-lg">
+                                                    <p class="mt-2 mb-lg-0"><code>.avatar-lg</code></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
                         <div class="col-md-4">
-                            <label class="form-label">Preço Especial</label>
-                            <input type="number" step="0.01" class="form-control" x-model="current.special_price">
-                        </div>
-
-                        <!-- Datas -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Início Preço Especial</label>
-                                <input type="text"
-                                       class="form-control datepicker"
-                                       x-model="current.special_price_start"
-                                       placeholder="Selecione data">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="form-label">Estado</label>
+                                    <select class="form-select" x-model="current.status">
+                                        <option value="1">Ativo</option>
+                                        <option value="0">Inativo</option>
+                                    </select>
+                                </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Fim Preço Especial</label>
-                                <input type="text"
-                                       class="form-control datepicker"
-                                       x-model="current.special_price_end"
-                                       placeholder="Selecione data">
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Tipo Desconto</label>
-                            <select class="form-select" x-model="current.discount_type">
-                                <option value="">--</option>
-                                <option value="percent">Percentagem</option>
-                                <option value="fixed">Valor Fixo</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Valor Desconto</label>
-                            <input type="number" step="0.01" class="form-control" x-model="current.discount_value">
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Peso (kg)</label>
-                            <input type="number" step="0.01" class="form-control" x-model="current.weight">
-                        </div>
-
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Tipo de Desconto</label>
-                                <select class="form-select select2" x-model="current.discount_type">
-                                    <option value="">-- Selecionar --</option>
-                                    <option value="percent">Percentagem</option>
-                                    <option value="fixed">Valor Fixo</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Classe de Imposto</label>
-                                <select class="form-select select2" x-model="current.tax_class_id">
-                                    <option value="">-- Selecionar Classe --</option>
-                                    <option value="1">IVA 23%</option>
-                                    <option value="2">IVA 13%</option>
-                                    <option value="3">Isento</option>
-                                </select>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Stock</label>
+                                    <input type="number" class="form-control" x-model="current.stock_qty">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label d-block">Gerir Stock</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               role="switch"
+                                               id="manageStock"
+                                               x-model="current.manage_stock"
+                                               :true-value="1"
+                                               :false-value="0">
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Estado</label>
-                            <select class="form-select" x-model="current.status">
-                                <option value="1">Ativo</option>
-                                <option value="0">Inativo</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label d-block">Default</label>
-                            <input class="form-check-input"
-                                   type="radio"
-                                   name="default_variant"
-                                   id="isDefault"
-                                   :checked="current.is_default == 1"
-                                   @change="current.is_default = 1">
-                        </div>
-
-
-
-                        <h6 class="fw-bold">Dimensões</h6>
-                        <p class="text-muted small">Medidas físicas do produto para envio e logística</p>
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label class="form-label">Peso (kg)</label>
-                                <input type="number" step="0.01" class="form-control" x-model="current.weight">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Largura (cm)</label>
-                                <input type="number" step="0.01" class="form-control" x-model="current.width">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Altura (cm)</label>
-                                <input type="number" step="0.01" class="form-control" x-model="current.height">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Comprimento (cm)</label>
-                                <input type="number" step="0.01" class="form-control" x-model="current.length">
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 
