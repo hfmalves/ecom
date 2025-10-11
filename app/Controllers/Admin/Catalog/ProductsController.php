@@ -11,6 +11,7 @@ use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsVariantsAttributes;
 use App\Models\Admin\Catalog\ProductsAttributesModel;
 use App\Models\Admin\Catalog\ProductsAttributesValuesModel;
+use App\Models\Admin\Configurations\Taxes\TaxModel;
 
 class ProductsController extends BaseController
 {
@@ -22,6 +23,8 @@ class ProductsController extends BaseController
     protected $productsVariantsAttributes;
     protected $productsAttributesModel;
     protected $productsAttributesValues;
+
+    protected $TaxModel;
 
 
     public function __construct()
@@ -35,6 +38,7 @@ class ProductsController extends BaseController
         $this->productsVariantsAttributes = new ProductsVariantsAttributes();
         $this->productsAttributesModel = new ProductsAttributesModel();
         $this->productsAttributesValues = new ProductsAttributesValuesModel();
+        $this->TaxModel = new TaxModel();
     }
 
     public function index()
@@ -136,6 +140,7 @@ class ProductsController extends BaseController
             'brands'      => $this->brands->findAll(),
             'categories'  => $this->categories->findAll(),
             'product'     => $product,
+            'product_tax'       => $this->TaxModel->findAll(),
             'attributes'  => json_encode($attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'productsVariants' => json_encode($variants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'productsVariantsAttributes' => json_encode($variantAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
@@ -179,7 +184,22 @@ class ProductsController extends BaseController
                 ],
             ]);
         }
-
+        foreach (['special_price_start', 'special_price_end'] as $dateField) {
+            if (!empty($data[$dateField])) {
+                $dt = \DateTime::createFromFormat('d-m-Y', $data[$dateField]);
+                if ($dt) {
+                    $data[$dateField] = $dt->format('Y-m-d 00:00:00');
+                } else {
+                    // Tenta fallback (ISO padrão do input type=date)
+                    $dt = \DateTime::createFromFormat('Y-m-d', $data[$dateField]);
+                    if ($dt) {
+                        $data[$dateField] = $dt->format('Y-m-d 00:00:00');
+                    }
+                }
+            } else {
+                $data[$dateField] = null;
+            }
+        }
         $this->products->update($id, $data);
 
         return $this->response->setJSON([
