@@ -641,6 +641,161 @@ Dashboard
                                 </div>
                             </div>
                         </div>
+                        <!-- SortableJS -->
+                        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+                        <div class="tab-pane fade" id="tab-multimedia" role="tabpanel"
+                             x-data="{
+        images: form.images || [],
+        productId: form.id,
+        uploading: false,
+        deleteId: null,
+        showDelete: false,
+
+        getCsrf() {
+            const match = document.cookie.match(/csrf_cookie_name=([^;]+)/);
+            return match ? decodeURIComponent(match[1]) : null;
+        },
+
+        async addFiles(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            const csrf = this.getCsrf();
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('owner_type', 'product');
+                formData.append('owner_id', this.productId);
+
+                this.uploading = true;
+
+                const res = await fetch('/admin/catalog/products/upload-image', {
+                    method: 'POST',
+                    headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const data = await res.json();
+                this.uploading = false;
+
+                if (data?.path) {
+                    this.images.push({
+                        id: data.id,
+                        url: '/' + data.path,
+                        alt_text: data.alt_text
+                    });
+                }
+            }
+
+            event.target.value = '';
+            form.images = this.images;
+        },
+
+        async confirmDelete(id) {
+            this.deleteId = id;
+            this.showDelete = true;
+        },
+
+        async deleteImage() {
+            if (!this.deleteId) return;
+            const csrf = this.getCsrf();
+
+            await fetch(`/admin/catalog/products/delete-image/${this.deleteId}`, {
+                method: 'DELETE',
+                headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
+                credentials: 'include'
+            });
+
+            this.images = this.images.filter(i => i.id !== this.deleteId);
+            form.images = this.images;
+            this.showDelete = false;
+            this.deleteId = null;
+        },
+
+        async reorderImages() {
+            const order = this.images.map(i => i.id);
+            const csrf = this.getCsrf();
+
+            await fetch('/admin/catalog/products/reorder-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+                },
+                body: JSON.stringify(order),
+                credentials: 'include'
+            });
+        },
+
+        initSortable() {
+            const el = this.$refs.list;
+            Sortable.create(el, {
+                animation: 150,
+                handle: '.drag-handle',
+                onEnd: async evt => {
+                    const moved = this.images.splice(evt.oldIndex, 1)[0];
+                    this.images.splice(evt.newIndex, 0, moved);
+                    form.images = this.images;
+                    await this.reorderImages();
+                }
+            });
+        }
+     }"
+                             x-init="initSortable()">
+
+
+                        <div class="card p-3">
+                                <h4 class="card-title">Imagens</h4>
+                                <p class="card-title-desc">Carregar, ordenar e eliminar imagens.</p>
+
+                                <!-- Upload -->
+                                <input type="file"
+                                       multiple
+                                       accept="image/*"
+                                       class="form-control mb-3"
+                                       @change="addFiles($event)"
+                                       :disabled="uploading">
+
+                                <!-- Lista -->
+                                <div class="d-flex flex-wrap gap-3" x-ref="list">
+                                    <template x-for="(img, index) in images" :key="img.id">
+                                        <div class="position-relative border rounded p-1 bg-light text-center"
+                                             style="width: 120px; height: 140px;">
+                                            <div class="drag-handle position-absolute top-0 start-0 text-muted ps-1" style="cursor: grab;">☰</div>
+                                            <img :src="img.url" class="img-fluid rounded mb-1" style="height: 100px; width: 100%; object-fit: cover;">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Alt" x-model="img.alt_text">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 px-2 py-0"
+                                                    @click="confirmDelete(img.id)">×</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Modal de confirmação -->
+                            <template x-if="showDelete">
+                                <div class="modal fade show d-block bg-dark bg-opacity-50">
+                                    <div class="modal-dialog modal-sm modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Remover Imagem</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Tens a certeza que queres eliminar esta imagem?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-secondary btn-sm" @click="showDelete=false">Cancelar</button>
+                                                <button class="btn btn-danger btn-sm" @click="deleteImage()">Eliminar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+
                         <div class="tab-pane fade" id="tab-meta" role="tabpanel"
                              x-data="{
         fieldTitle: 'meta_title',
@@ -698,8 +853,6 @@ Dashboard
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -1226,10 +1379,42 @@ Dashboard
         </div>
     </div>
 </div>
+<div x-data="{ showDelete: false, deleteId: null }">
+    <template x-if="showDelete">
+        <div class="modal fade show d-block bg-dark bg-opacity-50" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Remover imagem</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Tens a certeza que queres eliminar esta imagem?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary btn-sm" @click="showDelete = false">Cancelar</button>
+                        <button class="btn btn-danger btn-sm"
+                                @click="
+                                    fetch(`/admin/catalog/products/delete-image/${deleteId}`, { method: 'DELETE' })
+                                        .then(() => {
+                                            form.images = form.images.filter(img => img.id !== deleteId);
+                                            showDelete = false;
+                                        });
+                                ">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
 
 
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
+<!-- Plugins js -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="<?= base_url('assets/js/axs_alp.min.js') ?>"></script>
 <script>
     $(document).ready(function() {
         $('#description, #short_description').summernote({

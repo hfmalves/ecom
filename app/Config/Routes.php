@@ -31,6 +31,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('store', 'ProductsController::store');
             $routes->get('edit/(:num)', 'ProductsController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'ProductsController::update');
+
+            $routes->post('upload-image', 'ProductImagesController::upload');
+            $routes->delete('delete-image/(:num)', 'ProductImagesController::delete/$1');
+            $routes->post('reorder-images', 'ProductImagesController::reorder');
+
             $routes->group('variants', function ($routes) {
                 $routes->get('edit/(:num)', 'ProductVariantsController::edit/$1', ['filter' => 'noauth']);
                 $routes->post('update', 'ProductVariantsController::update');
