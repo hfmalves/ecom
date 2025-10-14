@@ -5,6 +5,7 @@ namespace App\Controllers\Admin\Catalog;
 use App\Controllers\BaseController;
 use App\Models\Admin\Catalog\BrandsModel;
 use App\Models\Admin\Catalog\ProductsModel;
+use App\Models\Admin\Catalog\ProductsImagesModel;
 use App\Models\Admin\Catalog\SuppliersModel;
 use App\Models\Admin\Catalog\CategoriesModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
@@ -16,6 +17,7 @@ use App\Models\Admin\Configurations\Taxes\TaxModel;
 class ProductsController extends BaseController
 {
     protected $products;
+    protected $productsImages;
     protected $suppliers;
     protected $brands;
     protected $categories;
@@ -30,6 +32,7 @@ class ProductsController extends BaseController
     public function __construct()
     {
         $this->products = new ProductsModel();
+        $this->productsImages = new ProductsImagesModel();
         $this->suppliers = new SuppliersModel();
         $this->brands = new BrandsModel();
         $this->categories = new CategoriesModel();
@@ -136,6 +139,7 @@ class ProductsController extends BaseController
 
         // Envia tudo para a view
         $data = [
+            'productsImages'   => $this->productsImages->where('owner_id', $id)->findAll(),
             'suppliers'   => $this->suppliers->findAll(),
             'brands'      => $this->brands->findAll(),
             'categories'  => $this->categories->findAll(),
