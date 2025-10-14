@@ -39,6 +39,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->group('variants', function ($routes) {
                 $routes->get('edit/(:num)', 'ProductVariantsController::edit/$1', ['filter' => 'noauth']);
                 $routes->post('update', 'ProductVariantsController::update');
+                $routes->delete('delete/(:num)', 'ProductVariantsController::delete/$1');
             });
         });
         $routes->group('categories', function ($routes) {

@@ -85,13 +85,10 @@ class ProductsController extends BaseController
         if ($id === null) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Produto não encontrado');
         }
-
         $product = $this->products->find($id);
         if (!$product) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Produto com ID $id não encontrado");
         }
-
-        // Atributos configuráveis
         $attributes = [];
         if ($product['type'] === 'configurable') {
             $attributes = $this->productsAttributesModel
@@ -111,18 +108,12 @@ class ProductsController extends BaseController
             }
             unset($attr, $val);
         }
-
-        // Variantes
         $variants = $this->productsVariants->where('product_id', $id)->findAll();
         $variantAttrs = $this->productsVariantsAttributes->findAll();
-
-        // 🔹 Puxa todos os valores de atributos (id + nome)
         $allValues = $this->productsAttributesValues
             ->select('id, value')
             ->findAll();
         $mapValues = array_column($allValues, 'value', 'id');
-
-        // Junta os atributos corretos + nomes a cada variante
         foreach ($variants as &$variant) {
             $variant['attributes'] = [];
             $variant['attribute_names'] = [];
@@ -147,13 +138,8 @@ class ProductsController extends BaseController
             'url'      => '/' . ltrim($img['path'], '/'),
             'alt_text' => $img['alt_text'] ?? '',
         ], $images);
-
-// 🔹 JSON limpo
         $productImagesJson = json_encode($product['images'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-// 🔹 Escapar para HTML (essencial!)
         $productImagesEscaped = htmlspecialchars($productImagesJson, ENT_QUOTES, 'UTF-8');
-
         $data = [
             'suppliers'                   => $this->suppliers->findAll(),
             'brands'                      => $this->brands->findAll(),
@@ -165,16 +151,8 @@ class ProductsController extends BaseController
             'productsVariantsAttributes'  => json_encode($variantAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'productImages'               => $productImagesEscaped, // 👈 usar este no HTML
         ];
-
-
-       // dd($variants); // 🔥 Agora mostra IDs + nomes no dump
         return view('admin/catalog/products/edit', $data);
     }
-
-
-
-
-
     public function update()
     {
         $data = $this->request->getJSON(true);
