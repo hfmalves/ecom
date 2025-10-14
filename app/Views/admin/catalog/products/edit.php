@@ -645,7 +645,7 @@ Dashboard
 
                         <div class="tab-pane fade" id="tab-multimedia" role="tabpanel"
                              x-data="{
-                                images: form.images || [],
+                                 images: <?= $productImages ?>,
                                 productId: form.id,
                                 uploading: false,
                                 deleteId: null,

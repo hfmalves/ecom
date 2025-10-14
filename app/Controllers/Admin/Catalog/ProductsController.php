@@ -136,19 +136,36 @@ class ProductsController extends BaseController
             }
         }
         unset($variant);
+        $images = $this->productsImages
+            ->where('owner_type', 'product')
+            ->where('owner_id', $id)
+            ->orderBy('position', 'ASC')
+            ->findAll();
 
-        // Envia tudo para a view
+        $product['images'] = array_map(fn($img) => [
+            'id'       => (int) $img['id'],
+            'url'      => '/' . ltrim($img['path'], '/'),
+            'alt_text' => $img['alt_text'] ?? '',
+        ], $images);
+
+// 🔹 JSON limpo
+        $productImagesJson = json_encode($product['images'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+// 🔹 Escapar para HTML (essencial!)
+        $productImagesEscaped = htmlspecialchars($productImagesJson, ENT_QUOTES, 'UTF-8');
+
         $data = [
-            'productsImages'   => $this->productsImages->where('owner_id', $id)->findAll(),
-            'suppliers'   => $this->suppliers->findAll(),
-            'brands'      => $this->brands->findAll(),
-            'categories'  => $this->categories->findAll(),
-            'product'     => $product,
-            'product_tax'       => $this->TaxModel->findAll(),
-            'attributes'  => json_encode($attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'productsVariants' => json_encode($variants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-            'productsVariantsAttributes' => json_encode($variantAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'suppliers'                   => $this->suppliers->findAll(),
+            'brands'                      => $this->brands->findAll(),
+            'categories'                  => $this->categories->findAll(),
+            'product'                     => $product,
+            'product_tax'                 => $this->TaxModel->findAll(),
+            'attributes'                  => json_encode($attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'productsVariants'            => json_encode($variants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'productsVariantsAttributes'  => json_encode($variantAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            'productImages'               => $productImagesEscaped, // 👈 usar este no HTML
         ];
+
 
        // dd($variants); // 🔥 Agora mostra IDs + nomes no dump
         return view('admin/catalog/products/edit', $data);
