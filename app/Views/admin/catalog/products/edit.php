@@ -614,7 +614,6 @@ Dashboard
                                                                                     </div>
                                                                                 </div>
                                                                                 <!-- VALORES -->
-                                                                                <!-- VALORES -->
                                                                                 <div class="tab-pane fade show" id="prices" role="tabpanel"
                                                                                      x-init="
                                                                                         $nextTick(() => {
@@ -699,36 +698,56 @@ Dashboard
                                                                                                ">
                                                                                         </div>
                                                                                         <!-- IVA -->
-                                                                                        <div class="col-md-4">
-                                                                                            <label class="form-label" for="current_tax_class_id">Taxa (IVA)</label>
-                                                                                            <select class="form-select"
-                                                                                                    id="current_tax_class_id"
-                                                                                                    x-model="current.tax_class_id"
-                                                                                                    @change="
-                                                                                                        const selected = $event.target.options[$event.target.selectedIndex];
-                                                                                                        const tax = parseFloat(selected.dataset.rate) || 0;
-                                                                                                        current.tax_rate = tax;
-                                                                                                        const base = parseFloat(current.base_price) || 0;
-                                                                                                        current.base_price_tax = (base * (1 + tax / 100)).toFixed(2);
-                                                                                                        if (current.discount_type && current.discount_value) {
-                                                                                                            const val = parseFloat(current.discount_value) || 0;
-                                                                                                            if (current.discount_type === 'percent') {
-                                                                                                                current.special_price = (current.base_price_tax - (current.base_price_tax * val / 100)).toFixed(2);
-                                                                                                            } else if (current.discount_type === 'fixed') {
-                                                                                                                current.special_price = (current.base_price_tax - val).toFixed(2);
-                                                                                                            }
+                                                                                        <div class="col-md-4"
+                                                                                             x-data="{ field: 'tax_class_id' }"
+                                                                                             x-init="$nextTick(() => {
+                                                                                                const el = $refs.select;
+                                                                                                $(el).select2({
+                                                                                                    width: '100%',
+                                                                                                    placeholder: '-- Selecionar --',
+                                                                                                    minimumResultsForSearch: Infinity,
+                                                                                                    dropdownParent: $(el).closest('.modal-content')
+                                                                                                });
+                                                                                                $(el).val(current[field]).trigger('change.select2');
+                                                                                                $(el).on('change', function () {
+                                                                                                    const val = $(this).val();
+                                                                                                    current[field] = val;
+                                                                                                    const selected = $(this).find(':selected');
+                                                                                                    const tax = parseFloat(selected.data('rate')) || 0;
+                                                                                                    current.tax_rate = tax;
+                                                                                                    const base = parseFloat(current.base_price) || 0;
+                                                                                                    current.base_price_tax = (base * (1 + tax / 100)).toFixed(2);
+                                                                                                    if (current.discount_type && current.discount_value) {
+                                                                                                        const discVal = parseFloat(current.discount_value) || 0;
+                                                                                                        if (current.discount_type === 'percent') {
+                                                                                                            current.special_price = (current.base_price_tax - (current.base_price_tax * discVal / 100)).toFixed(2);
+                                                                                                        } else if (current.discount_type === 'fixed') {
+                                                                                                            current.special_price = (current.base_price_tax - discVal).toFixed(2);
                                                                                                         }
-                                                                                                    ">
+                                                                                                    }
+                                                                                                });
+                                                                                                $watch('current[field]', (val) => {
+                                                                                                    setTimeout(() => {
+                                                                                                        $(el).val(val).trigger('change.select2');
+                                                                                                    }, 10);
+                                                                                                });
+                                                                                             })">
+                                                                                            <label class="form-label" :for="field">Taxa (IVA)</label>
+                                                                                            <select class="form-select select2"
+                                                                                                    x-ref="select"
+                                                                                                    :id="field"
+                                                                                                    name="tax_class_id">
                                                                                                 <option value="">-- Selecionar --</option>
                                                                                                 <?php foreach ($product_tax ?? [] as $tax): ?>
                                                                                                     <option value="<?= $tax['id'] ?>"
                                                                                                             data-rate="<?= esc($tax['rate']) ?>"
-                                                                                                        <?= ($product['tax_class_id'] ?? '') == $tax['id'] ? 'selected' : '' ?>>
+                                                                                                            <?= ($product['tax_class_id'] ?? '') == $tax['id'] ? 'selected' : '' ?>>
                                                                                                         <?= esc($tax['name']) ?> — <?= esc($tax['rate']) ?>%
                                                                                                     </option>
                                                                                                 <?php endforeach; ?>
                                                                                             </select>
                                                                                         </div>
+
                                                                                     </div>
                                                                                     <!-- Preço + IVA -->
                                                                                     <div class="col-md-4">
@@ -763,10 +782,41 @@ Dashboard
                                                                                     </div>
                                                                                     <div class="row mt-3">
                                                                                         <!-- Tipo de Desconto -->
-                                                                                        <div class="col-md-4">
-                                                                                            <label class="form-label">Tipo de Desconto</label>
-                                                                                            <select class="form-select" x-ref="discountTypeSelect"
-                                                                                                    x-model="current.discount_type">
+                                                                                        <div class="col-md-4"
+                                                                                             x-data="{ field: 'discount_type' }"
+                                                                                             x-init="$nextTick(() => {
+                                                                                                const el = $refs.select;
+                                                                                                $(el).select2({
+                                                                                                    width: '100%',
+                                                                                                    placeholder: '-- Selecionar --',
+                                                                                                    minimumResultsForSearch: Infinity,
+                                                                                                    dropdownParent: $(el).closest('.modal-content')
+                                                                                                });
+                                                                                                $(el).val(current[field]).trigger('change.select2');
+                                                                                                $(el).on('change', function () {
+                                                                                                    const val = $(this).val();
+                                                                                                    current[field] = val;
+                                                                                                    const base = parseFloat(current.base_price_tax) || 0;
+                                                                                                    const discVal = parseFloat(current.discount_value) || 0;
+                                                                                                    if (val === 'percent') {
+                                                                                                        current.special_price = (base - (base * discVal / 100)).toFixed(2);
+                                                                                                    } else if (val === 'fixed') {
+                                                                                                        current.special_price = (base - discVal).toFixed(2);
+                                                                                                    } else {
+                                                                                                        current.special_price = base.toFixed(2);
+                                                                                                    }
+                                                                                                });
+                                                                                                $watch('current[field]', (val) => {
+                                                                                                    setTimeout(() => {
+                                                                                                        $(el).val(val).trigger('change.select2');
+                                                                                                    }, 10);
+                                                                                                });
+                                                                                             })">
+                                                                                            <label class="form-label" :for="field">Tipo de Desconto</label>
+                                                                                            <select class="form-select select2"
+                                                                                                    x-ref="select"
+                                                                                                    :id="field"
+                                                                                                    name="discount_type">
                                                                                                 <option value="">-- Selecionar --</option>
                                                                                                 <option value="percent">Percentagem (%)</option>
                                                                                                 <option value="fixed">Valor Fixo (€)</option>
@@ -820,14 +870,37 @@ Dashboard
 
                                                                         <div class="col-md-4">
                                                                             <div class="row">
-                                                                                <div class="col-md-12">
-                                                                                    <label class="form-label">Estado</label>
-                                                                                    <select class="form-select" x-model="current.status">
+                                                                                <div class="col-md-12"
+                                                                                     x-data="{ field: 'status' }"
+                                                                                     x-init="$nextTick(() => {
+                                                                                        const el = $refs.select;
+                                                                                        $(el).select2({
+                                                                                            width: '100%',
+                                                                                            placeholder: '-- Selecionar --',
+                                                                                            minimumResultsForSearch: Infinity,
+                                                                                            dropdownParent: $(el).closest('.modal-content')
+                                                                                        });
+                                                                                        $(el).val(current[field]).trigger('change.select2');
+                                                                                        $(el).on('change', function () {
+                                                                                            current[field] = $(this).val();
+                                                                                        });
+                                                                                        $watch('current[field]', (val) => {
+                                                                                            setTimeout(() => {
+                                                                                                $(el).val(val).trigger('change.select2');
+                                                                                            }, 10);
+                                                                                        });
+                                                                                     })">
+                                                                                    <label class="form-label" :for="field">Estado</label>
+                                                                                    <select class="form-select select2"
+                                                                                            x-ref="select"
+                                                                                            :id="field"
+                                                                                            name="status">
                                                                                         <option value="1">Ativo</option>
                                                                                         <option value="0">Inativo</option>
                                                                                     </select>
                                                                                 </div>
                                                                             </div>
+
                                                                             <div class="row mt-2 align-items-center">
                                                                                 <div class="col-md-6">
                                                                                     <label class="form-label d-block">Gerir Stock</label>
@@ -836,14 +909,14 @@ Dashboard
                                                                                                type="checkbox"
                                                                                                :checked="current.manage_stock == 1 || current.manage_stock === '1'"
                                                                                                @change="
-                       current.manage_stock = $event.target.checked ? 1 : 0;
+                                                                                                   current.manage_stock = $event.target.checked ? 1 : 0;
 
-                       // Atualiza também na linha da tabela
-                       let v = form.productsVariants.find(v => v.id == current.id);
-                       if (v) {
-                           v.manage_stock = current.manage_stock;
-                       }
-                   ">
+                                                                                                   // Atualiza também na linha da tabela
+                                                                                                   let v = form.productsVariants.find(v => v.id == current.id);
+                                                                                                   if (v) {
+                                                                                                       v.manage_stock = current.manage_stock;
+                                                                                                   }
+                                                                                               ">
                                                                                     </div>
                                                                                 </div>
 
@@ -854,10 +927,10 @@ Dashboard
                                                                                            x-model="current.stock_qty"
                                                                                            :disabled="Number(current.manage_stock) !== 1"
                                                                                            @input="
-                   // Atualiza o valor do stock em tempo real na tabela
-                   let v = form.productsVariants.find(v => v.id == current.id);
-                   if (v) v.stock_qty = current.stock_qty;
-               ">
+                                                                                           // Atualiza o valor do stock em tempo real na tabela
+                                                                                           let v = form.productsVariants.find(v => v.id == current.id);
+                                                                                           if (v) v.stock_qty = current.stock_qty;
+                                                                                       ">
                                                                                 </div>
                                                                             </div>
 
