@@ -487,38 +487,102 @@ Dashboard
                                             this.updateVariant(this.current);
                                             this.showEditVariant = false;
                                         },
-                                        updateVariant() {
+                                       updateVariant(variant) {
+    if (!variant?.id) {
+        console.warn('⚠️ Variante sem ID, não pode ser atualizada:', variant);
+        showToast('Erro: ID da variante em falta.', 'error', '⚠️ Erro');
+        return;
+    }
+
+    const csrfName = '<?= csrf_token() ?>';
+    const csrfValue = this[csrfName];
+    const payload = JSON.parse(JSON.stringify(variant));
+    payload[csrfName] = csrfValue;
+
+    fetch('<?= base_url('admin/catalog/products/variants/update') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfValue
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast(`Variante ${variant.sku} atualizada com sucesso`, 'success', 'Sucesso');
+        } else {
+            showToast(data.message || 'Erro ao atualizar variante.', 'error', '❌ Falha');
+        }
+    })
+    .catch(err => {
+        console.error('Erro de rede:', err);
+        showToast('Erro de rede ao atualizar variante.', 'error', '⚠️ Erro');
+    });
+},
+                                        showCreateVariant: false,
+                                        productAttributes: JSON.parse(`<?= htmlspecialchars($attributes, ENT_QUOTES, 'UTF-8') ?>`),
+                                        selectedAttributes: {},
+                                        newVariantSkuBase: '',
+                                        async createVariantFromAttributes() {
                                             const csrfName = '<?= csrf_token() ?>';
                                             const csrfValue = this[csrfName];
-                                            const payload = JSON.parse(JSON.stringify(this.current));
-                                            payload[csrfName] = csrfValue;
 
-                                            fetch('<?= base_url('admin/catalog/products/variants/update') ?>', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'X-Requested-With': 'XMLHttpRequest',
-                                                    'X-CSRF-TOKEN': csrfValue
-                                                },
-                                                body: JSON.stringify(payload)
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    showToast(`Variante ${payload.sku} atualizada com sucesso`, 'success', 'Sucesso');
-                                                } else {
-                                                    const msg = data.message || 'Erro ao atualizar variante.';
-                                                    showToast(msg, 'error', '❌ Falha');
-                                                    if (data.errors) console.warn('Detalhes do erro:', data.errors);
-                                                }
-                                                if (data.csrf) this[csrfName] = data.csrf; // atualiza CSRF
-                                            })
-                                            .catch(err => {
-                                                console.error('Erro de rede:', err);
-                                                showToast('Erro de rede ao atualizar variante.', 'error', '⚠️ Erro');
-                                            });
+                                            if (Object.keys(this.selectedAttributes).length === 0) {
+                                                showToast('Selecione pelo menos um atributo.', 'error', '❌ Falha');
+                                                return;
+                                            }
+                                        const selectedCombo = Object.values(this.selectedAttributes).sort().join('-');
+                                        const duplicate = form.productsVariants.some(v => {
+                                            if (!Array.isArray(v.attributes)) return false;
+                                            const combo = [...v.attributes].sort().join('-');
+                                            return combo === selectedCombo;
+                                        });
+
+                                        if (duplicate) {
+                                            showToast('Já existe uma variante com esta combinação de atributos.', 'warning', '⚠️ Duplicado');
+                                            return;
                                         }
+                                            const payload = {
+                                                [csrfName]: csrfValue,
+                                                product_id: form.id,
+                                                attributes: this.selectedAttributes,
+                                                sku_base: this.newVariantSkuBase
+                                            };
+                                            try {
+                                                const res = await fetch('<?= base_url('admin/catalog/products/variants/create') ?>', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-Requested-With': 'XMLHttpRequest',
+                                                        'X-CSRF-TOKEN': csrfValue
+                                                    },
+                                                    body: JSON.stringify(payload)
+                                                });
+                                                const data = await res.json();
+                                                if (data.success) {
+                                                    form.productsVariants.push(data.variant);
+                                                    showToast('Variante criada com sucesso!', 'success', '✅ Sucesso');
+                                                    this.showCreateVariant = false;
+                                                    this.selectedAttributes = {};
+                                                    this.openEditVariant(data.variant);
+                                                } else {
+                                                    showToast(data.message || 'Erro ao criar variante.', 'error', '❌ Falha');
+                                                }
+                                            } catch (err) {
+                                                console.error(err);
+                                                showToast('Erro de rede ao criar variante.', 'error', '⚠️ Erro');
+                                            }
+                                        }
+
                                     }">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="mb-0">Variantes</h5>
+                                        <button type="button" class="btn btn-success btn-sm" @click="showCreateVariant = true">
+                                            <i class="mdi mdi-plus"></i> Nova Variante
+                                        </button>
+                                    </div>
                                     <template x-if="form.productsVariants.length > 0">
                                         <table class="table table-bordered align-middle mt-0">
                                             <thead class="table-light">
@@ -534,13 +598,30 @@ Dashboard
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <template x-for="(variant, index) in form.productsVariants" :key="variant.id ?? index">
+                                            <<template x-for="(variant, index) in form.productsVariants" :key="variant.id ?? index">
                                                 <tr>
-                                                    <td><input type="text" class="form-control form-control-sm" x-model="variant.sku" @change="updateVariant(variant)"></td>
-                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" x-model="variant.cost_price" @change="updateVariant(variant)"></td>
-                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" x-model="variant.base_price" @change="updateVariant(variant)"></td>
-                                                    <td><input type="number" step="0.01" class="form-control form-control-sm" x-model="variant.base_price_tax" @change="updateVariant(variant)"></td>
-                                                    <td><input type="number" class="form-control form-control-sm" x-model="variant.stock_qty" :disabled="variant.manage_stock != 1" @change="updateVariant(variant)"></td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm"
+                                                               x-model="variant.sku" disabled>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm"
+                                                               x-model="variant.cost_price" disabled>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm"
+                                                               x-model="variant.base_price" disabled>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step="0.01" class="form-control form-control-sm"
+                                                               x-model="variant.base_price_tax" disabled>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                               x-model="variant.stock_qty"
+                                                               :disabled="variant.manage_stock != 1"
+                                                               @change="updateVariant(variant)">
+                                                    </td>
                                                     <td class="text-center">
                                                         <div class="form-check form-switch d-inline-block">
                                                             <input type="checkbox" class="form-check-input"
@@ -550,7 +631,8 @@ Dashboard
                                                         </div>
                                                     </td>
                                                     <td class="text-center">
-                                                        <input type="radio" name="default_variant" :id="'default_'+index" :value="variant.sku"
+                                                        <input type="radio" name="default_variant"
+                                                               :id="'default_'+index" :value="variant.sku"
                                                                :checked="variant.is_default == 1 || variant.is_default === '1'"
                                                                @change="form.defaultVariantSku = variant.sku; form.productsVariants.forEach(v => v.is_default = (v.sku === variant.sku ? 1 : 0)); updateVariant(variant)">
                                                     </td>
@@ -968,6 +1050,54 @@ Dashboard
                                             </div>
                                         </div>
                                     </template>
+                                    <!-- MODAL CRIAR VARIANTE -->
+                                    <template x-if="showCreateVariant">
+                                        <div class="modal fade show d-block bg-dark bg-opacity-50">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Nova Variante — Selecionar Atributos</h5>
+                                                        <button type="button" class="btn-close" @click="showCreateVariant = false"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="alert alert-info mb-3">
+                                                            Escolha os atributos que compõem esta variante.
+                                                        </div>
+                                                        <div class="row g-3">
+                                                            <template x-for="attr in productAttributes" :key="attr.id">
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label" x-text="attr.name"></label>
+                                                                    <select class="form-select form-select-sm"
+                                                                            x-model="selectedAttributes[attr.id]">
+                                                                        <option value="">-- Selecionar --</option>
+                                                                        <template x-for="val in attr.values" :key="val.id">
+                                                                            <option :value="val.id" x-text="val.value"></option>
+                                                                        </template>
+                                                                    </select>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+
+                                                        <div class="row mt-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label">SKU base</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                       placeholder="ex: P1-OA030"
+                                                                       x-model="newVariantSkuBase">
+                                                                <small class="text-muted">Será usado como prefixo do SKU final.</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" @click="showCreateVariant = false">Cancelar</button>
+                                                        <button type="button" class="btn btn-success" @click="createVariantFromAttributes()">Criar Variante</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
                                 </div>
                                 <!-- CAMPOS DE PRODUTO VIRTUAL -->
                                 <div x-show="form.type === 'virtual'" class="mt-4 border-top pt-3">
