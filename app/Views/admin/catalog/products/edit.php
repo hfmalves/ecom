@@ -401,6 +401,16 @@ Dashboard
                             </div>
 
 
+                            <div x-show="form.type === 'pack'"
+                                <span>Custo total dos itens: </span>
+                                <strong x-text="totalCost.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })"></strong>
+                                <span class="mx-2">|</span>
+                                <span>Valor de venda sugerido: </span>
+                                <strong x-text="totalPrice.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })"></strong>
+                            </div>
+
+
+
                         </div>
                         <div class="tab-pane fade" id="tab-composicao" role="tabpanel">
                             <!-- Campos de Identificação (só para produtos simples) -->
@@ -1235,62 +1245,152 @@ Dashboard
                                     </template>
                                 </div>
                                 <!-- CAMPOS DE PRODUTO VIRTUAL -->
-                                <div x-show="form.type === 'virtual'" class="mt-4 pt-3">
-                                    <div x-show="form.type === 'virtual'" class="mt-4  pt-3">
-                                        <h5 class="mb-3">Configurações do Produto Virtual</h5>
+                                <div x-show="form.type === 'virtual'">
+                                    <h5 class="mb-3">Configurações do Produto Virtual</h5>
 
-                                        <div class="row g-3">
-                                            <!-- Tipo de Entrega -->
-                                            <div class="col-md-4" x-data="{ field: 'virtual_type' }">
-                                                <label class="form-label" :for="field">Tipo de Conteúdo</label>
-                                                <select class="form-select" :id="field" x-model="form[field]">
-                                                    <option value="">-- Selecionar --</option>
-                                                    <option value="download">Download Digital</option>
-                                                    <option value="service">Serviço / Subscrição</option>
-                                                    <option value="license">Licença Digital</option>
-                                                </select>
-                                            </div>
+                                    <div class="row g-3">
+                                        <!-- Tipo de Entrega -->
+                                        <div class="col-md-4" x-data="{ field: 'virtual_type' }">
+                                            <label class="form-label" :for="field">Tipo de Conteúdo</label>
+                                            <select class="form-select" :id="field" x-model="form[field]">
+                                                <option value="">-- Selecionar --</option>
+                                                <option value="download">Download Digital</option>
+                                                <option value="service">Serviço / Subscrição</option>
+                                                <option value="license">Licença Digital</option>
+                                            </select>
+                                        </div>
 
-                                            <!-- Upload de Ficheiro (para download) -->
-                                            <div class="col-md-8" x-show="form.virtual_type === 'download'">
-                                                <label class="form-label">Ficheiro Digital</label>
-                                                <input type="file" class="form-control"
-                                                       @change="uploadVirtualFile($event)">
-                                                <small class="text-muted">Formatos permitidos: PDF, ZIP, MP3, JPG, etc.</small>
+                                        <!-- Upload de Ficheiro (para download) -->
+                                        <div class="col-md-8" x-show="form.virtual_type === 'download'">
+                                            <label class="form-label">Ficheiro Digital</label>
+                                            <input type="file" class="form-control"
+                                                   @change="uploadVirtualFile($event)">
+                                            <small class="text-muted">Formatos permitidos: PDF, ZIP, MP3, JPG, etc.</small>
 
-                                                <template x-if="form.virtual_file">
-                                                    <div class="mt-2">
-                                                        <a :href="form.virtual_file" target="_blank" class="text-success">
-                                                            <i class="mdi mdi-file"></i> Ver ficheiro atual
-                                                        </a>
-                                                    </div>
+                                            <template x-if="form.virtual_file">
+                                                <div class="mt-2">
+                                                    <a :href="form.virtual_file" target="_blank" class="text-success">
+                                                        <i class="mdi mdi-file"></i> Ver ficheiro atual
+                                                    </a>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- URL (para serviço / subscrição) -->
+                                        <div class="col-md-8" x-show="form.virtual_type === 'service' || form.virtual_type === 'license'">
+                                            <label class="form-label">Link de Acesso / Ativação</label>
+                                            <input type="url" class="form-control"
+                                                   placeholder="https://exemplo.com/servico"
+                                                   x-model="form.virtual_url">
+                                        </div>
+
+                                        <!-- Expiração / validade -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Validade (dias)</label>
+                                            <input type="number" min="0" step="1" class="form-control"
+                                                   placeholder="ex: 30"
+                                                   x-model="form.virtual_expiry_days">
+                                            <small class="text-muted">Deixa a 0 para ilimitado.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- CAMPOS DE PACK -->
+                                <div x-show="form.type === 'pack'"
+                                     class="mt-4 border-top pt-3"
+                                     x-data="{
+                                         products: <?= $availableProducts ?? '[]' ?>, // ← passa do PHP (produtos e variantes)
+                                         items: [],
+                                         newQty: 1,
+                                         totalCost: 0,
+                                         totalPrice: 0,
+
+                                         addItem() {
+                                             const id = this.$refs.selectProduct.value;
+                                             if (!id) return;
+                                             const product = this.products.find(p => p.id == id);
+                                             if (!product) return;
+                                             const existing = this.items.find(i => i.id == id);
+                                             if (existing) {
+                                                 existing.qty += this.newQty;
+                                             } else {
+                                                 this.items.push({ ...product, qty: this.newQty });
+                                             }
+                                             this.calcTotals();
+                                             this.$refs.selectProduct.value = '';
+                                             this.newQty = 1;
+                                             form.pack_items = this.items; // sincroniza com form global
+                                         },
+
+                                         removeItem(index) {
+                                             this.items.splice(index, 1);
+                                             this.calcTotals();
+                                             form.pack_items = this.items;
+                                         },
+
+                                         calcTotals() {
+                                             this.totalCost = this.items.reduce((sum, i) => sum + (parseFloat(i.cost) * i.qty), 0);
+                                             this.totalPrice = this.items.reduce((sum, i) => sum + (parseFloat(i.price) * i.qty), 0);
+                                         }
+                                     }">
+                                    <h5 class="mb-3">Gestão de Produtos do Pack</h5>
+
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Selecionar Produto / Variante</label>
+                                            <select class="form-select" x-ref="selectProduct">
+                                                <option value="">-- Selecionar --</option>
+                                                <template x-for="item in products" :key="item.id">
+                                                    <option :value="item.id" x-text="item.label"></option>
                                                 </template>
-                                            </div>
-
-                                            <!-- URL (para serviço / subscrição) -->
-                                            <div class="col-md-8" x-show="form.virtual_type === 'service' || form.virtual_type === 'license'">
-                                                <label class="form-label">Link de Acesso / Ativação</label>
-                                                <input type="url" class="form-control"
-                                                       placeholder="https://exemplo.com/servico"
-                                                       x-model="form.virtual_url">
-                                            </div>
-
-                                            <!-- Expiração / validade -->
-                                            <div class="col-md-4">
-                                                <label class="form-label">Validade (dias)</label>
-                                                <input type="number" min="0" step="1" class="form-control"
-                                                       placeholder="ex: 30"
-                                                       x-model="form.virtual_expiry_days">
-                                                <small class="text-muted">Deixa a 0 para ilimitado.</small>
-                                            </div>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Quantidade</label>
+                                            <input type="number" min="1" class="form-control" x-model.number="newQty" placeholder="1">
+                                        </div>
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary w-100" @click="addItem()">Adicionar</button>
                                         </div>
                                     </div>
 
+                                    <table class="table table-sm table-bordered align-middle">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Nome</th>
+                                            <th class="text-center" style="width:100px;">Qtd</th>
+                                            <th class="text-end" style="width:120px;">Custo (€)</th>
+                                            <th class="text-end" style="width:120px;">Venda (€)</th>
+                                            <th class="text-center" style="width:50px;">Ações</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <template x-for="(row, index) in items" :key="row.id">
+                                            <tr>
+                                                <td x-text="row.sku"></td>
+                                                <td x-text="row.name"></td>
+                                                <td class="text-center">
+                                                    <input type="number" min="1" class="form-control form-control-sm text-center"
+                                                           x-model.number="row.qty" @input="calcTotals()">
+                                                </td>
+                                                <td class="text-end" x-text="(row.cost * row.qty).toFixed(2)"></td>
+                                                <td class="text-end" x-text="(row.price * row.qty).toFixed(2)"></td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger" @click="removeItem(index)">×</button>
+                                                </td>
+                                            </tr>
+                                        </template>
+
+                                        <tr class="fw-bold table-secondary">
+                                            <td colspan="3" class="text-end">Totais:</td>
+                                            <td class="text-end" x-text="totalCost.toFixed(2)"></td>
+                                            <td class="text-end" x-text="totalPrice.toFixed(2)"></td>
+                                            <td></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <!-- CAMPOS DE PACK -->
-                                <div x-show="form.type === 'pack'" class="mt-4  pt-3">
-                                    <p class="text-muted">Gestão de produtos que compõem o pack...</p>
-                                </div>
+
                             </div>
                         </div>
                         <div class="tab-pane fade" id="tab-dimensoes" role="tabpanel">
