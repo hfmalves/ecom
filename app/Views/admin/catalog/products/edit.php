@@ -138,7 +138,6 @@ Dashboard
                                 <div class="col-md-12"
                                      x-data="{ field: 'description' }"
                                      x-init="
-                                        // Espera Alpine montar o campo e depois inicia o Summernote
                                         $nextTick(() => {
                                             $('#description').summernote({
                                                 height: 200,
@@ -158,11 +157,7 @@ Dashboard
                                                     }
                                                 }
                                             });
-
-                                            // 🔹 Garante que o valor inicial de Alpine entra no Summernote
                                             $('#description').summernote('code', form.description);
-
-                                            // 🔹 Atualiza o Summernote se o Alpine mudar (p.ex. via load AJAX)
                                             $watch('form.description', value => {
                                                 if ($('#description').summernote('code') !== value) {
                                                     $('#description').summernote('code', value);
@@ -181,26 +176,26 @@ Dashboard
                             </div>
                         </div>
                         <div class="tab-pane fade" id="tab-valores" role="tabpanel">
+                            <div x-show="form.type != 'configurable'">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="cost_price">Preço de Custo</label>
+                                        <input type="number" step="0.01" class="form-control"
+                                               id="cost_price" name="cost_price"
+                                               x-model="form.cost_price" placeholder="0.00"
+                                               :class="{ 'is-invalid': errors.cost_price }">
+                                        <template x-if="errors.cost_price">
+                                            <small class="text-danger" x-text="errors.cost_price"></small>
+                                        </template>
+                                    </div>
 
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label class="form-label" for="cost_price">Preço de Custo</label>
-                                    <input type="number" step="0.01" class="form-control"
-                                           id="cost_price" name="cost_price"
-                                           x-model="form.cost_price" placeholder="0.00"
-                                           :class="{ 'is-invalid': errors.cost_price }">
-                                    <template x-if="errors.cost_price">
-                                        <small class="text-danger" x-text="errors.cost_price"></small>
-                                    </template>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <label class="form-label" for="base_price">Preço Base</label>
-                                    <input type="number" step="0.01" class="form-control"
-                                           id="base_price" name="base_price"
-                                           x-model="form.base_price" placeholder="0.00"
-                                           :class="{ 'is-invalid': errors.base_price }"
-                                           @input="
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="base_price">Preço Base</label>
+                                        <input type="number" step="0.01" class="form-control"
+                                               id="base_price" name="base_price"
+                                               x-model="form.base_price" placeholder="0.00"
+                                               :class="{ 'is-invalid': errors.base_price }"
+                                               @input="
                                            const base = parseFloat(form.base_price) || 0;
                                            const tax = parseFloat(form.tax_rate) || 0;
                                            form.base_price_tax = (base * (1 + tax / 100)).toFixed(2);
@@ -213,37 +208,35 @@ Dashboard
                                                }
                                            }
                                        ">
-                                    <template x-if="errors.base_price">
-                                        <small class="text-danger" x-text="errors.base_price"></small>
-                                    </template>
-                                </div>
+                                        <template x-if="errors.base_price">
+                                            <small class="text-danger" x-text="errors.base_price"></small>
+                                        </template>
+                                    </div>
 
-                                <div class="col-md-3">
-                                    <label class="form-label" for="base_price_tax">Preço Base + Imposto</label>
-                                    <input type="number" step="0.01" class="form-control"
-                                           id="base_price_tax" name="base_price_tax"
-                                           x-model="form.base_price_tax" placeholder="0.00"
-                                           :class="{ 'is-invalid': errors.base_price_tax }"
-                                           disabled>
-                                    <template x-if="errors.base_price_tax">
-                                        <small class="text-danger" x-text="errors.base_price_tax"></small>
-                                    </template>
-                                </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="base_price_tax">Preço Base + Imposto</label>
+                                        <input type="number" step="0.01" class="form-control"
+                                               id="base_price_tax" name="base_price_tax"
+                                               x-model="form.base_price_tax" placeholder="0.00"
+                                               :class="{ 'is-invalid': errors.base_price_tax }"
+                                               disabled>
+                                        <template x-if="errors.base_price_tax">
+                                            <small class="text-danger" x-text="errors.base_price_tax"></small>
+                                        </template>
+                                    </div>
 
-                                <div class="col-md-3">
-                                    <label class="form-label" for="tax_class_id">Taxa (IVA)</label>
-                                    <select class="form-select"
-                                            id="tax_class_id"
-                                            name="tax_class_id"
-                                            x-model="form.tax_class_id"
-                                            @change="
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="tax_class_id">Taxa (IVA)</label>
+                                        <select class="form-select"
+                                                id="tax_class_id"
+                                                name="tax_class_id"
+                                                x-model="form.tax_class_id"
+                                                @change="
                                         const selected = $event.target.options[$event.target.selectedIndex];
                                             const tax = parseFloat(selected.dataset.rate) || 0;
                                             form.tax_rate = tax;
                                             const base = parseFloat(form.base_price) || 0;
                                             form.base_price_tax = (base * (1 + tax / 100)).toFixed(2);
-
-                                            // 🔹 Atualiza Preço Promocional se houver desconto
                                             if (form.discount_type && form.discount_value) {
                                                 const val = parseFloat(form.discount_value) || 0;
                                                 if (form.discount_type === 'percent') {
@@ -253,21 +246,21 @@ Dashboard
                                                 }
                                             }
                                         ">
-                                        <option value="">-- Selecionar --</option>
-                                        <?php foreach ($product_tax ?? [] as $tax): ?>
-                                            <option
-                                                    value="<?= $tax['id'] ?>"
-                                                    data-rate="<?= esc($tax['rate']) ?>"
-                                                <?= ($product['tax_class_id'] ?? '') == $tax['id'] ? 'selected' : '' ?>>
-                                                <?= esc($tax['name']) ?> — <?= esc($tax['rate']) ?>%
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                            <option value="">-- Selecionar --</option>
+                                            <?php foreach ($product_tax ?? [] as $tax): ?>
+                                                <option
+                                                        value="<?= $tax['id'] ?>"
+                                                        data-rate="<?= esc($tax['rate']) ?>"
+                                                    <?= ($product['tax_class_id'] ?? '') == $tax['id'] ? 'selected' : '' ?>>
+                                                    <?= esc($tax['name']) ?> — <?= esc($tax['rate']) ?>%
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="row mt-3"
-                                 x-init="
+                                <div class="row mt-3"
+                                     x-init="
                                     $nextTick(() => {
                                         const start = $refs.start;
                                         const end = $refs.end;
@@ -297,34 +290,34 @@ Dashboard
                                         });
                                     });
                                  ">
-                                <!-- Início Promoção -->
-                                <div class="col-md-3">
-                                    <label class="form-label">Início Promoção</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control"
-                                               placeholder="dd-mm-yyyy"
-                                               x-ref="start"
-                                               x-model="form.special_price_start">
-                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                    <!-- Início Promoção -->
+                                    <div class="col-md-3">
+                                        <label class="form-label">Início Promoção</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control"
+                                                   placeholder="dd-mm-yyyy"
+                                                   x-ref="start"
+                                                   x-model="form.special_price_start">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
+                                    </div>
+                                    <!-- Fim Promoção -->
+                                    <div class="col-md-3">
+                                        <label class="form-label">Fim Promoção</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control"
+                                                   placeholder="dd-mm-yyyy"
+                                                   x-ref="end"
+                                                   x-model="form.special_price_end">
+                                            <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
+                                        </div>
                                     </div>
                                 </div>
-                                <!-- Fim Promoção -->
-                                <div class="col-md-3">
-                                    <label class="form-label">Fim Promoção</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control"
-                                               placeholder="dd-mm-yyyy"
-                                               x-ref="end"
-                                               x-model="form.special_price_end">
-                                        <span class="input-group-text"><i class="mdi mdi-calendar"></i></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <!-- Tipo de Desconto -->
-                                <div class="col-md-3"
-                                     x-data="{ field: 'discount_type' }"
-                                     x-init="$nextTick(() => {
+                                <div class="row mt-3">
+                                    <!-- Tipo de Desconto -->
+                                    <div class="col-md-3"
+                                         x-data="{ field: 'discount_type' }"
+                                         x-init="$nextTick(() => {
                                         const el = $refs.select;
                                         $(el).select2({
                                             width: '100%',
@@ -347,27 +340,27 @@ Dashboard
                                             $(el).val(val).trigger('change.select2');
                                         });
                                      })">
-                                    <label class="form-label" :for="field">Tipo de Desconto</label>
-                                    <select class="form-select select2"
-                                            x-ref="select"
-                                            :id="field"
-                                            :name="field"
-                                            x-model="form[field]"
-                                            :class="{ 'is-invalid': errors[field] }">
-                                        <option value="">-- Selecionar --</option>
-                                        <option value="percent">Percentagem (%)</option>
-                                        <option value="fixed">Valor Fixo (€)</option>
-                                    </select>
-                                </div>
+                                        <label class="form-label" :for="field">Tipo de Desconto</label>
+                                        <select class="form-select select2"
+                                                x-ref="select"
+                                                :id="field"
+                                                :name="field"
+                                                x-model="form[field]"
+                                                :class="{ 'is-invalid': errors[field] }">
+                                            <option value="">-- Selecionar --</option>
+                                            <option value="percent">Percentagem (%)</option>
+                                            <option value="fixed">Valor Fixo (€)</option>
+                                        </select>
+                                    </div>
 
-                                <!-- Valor do Desconto -->
-                                <div class="col-md-3" x-data="{ field: 'discount_value' }">
-                                    <label class="form-label" :for="field">Valor do Desconto</label>
-                                    <input type="number" step="0.01" class="form-control"
-                                           :id="field" :name="field"
-                                           x-model="form[field]" placeholder="0.00"
-                                           :class="{ 'is-invalid': errors[field] }"
-                                           @input="
+                                    <!-- Valor do Desconto -->
+                                    <div class="col-md-3" x-data="{ field: 'discount_value' }">
+                                        <label class="form-label" :for="field">Valor do Desconto</label>
+                                        <input type="number" step="0.01" class="form-control"
+                                               :id="field" :name="field"
+                                               x-model="form[field]" placeholder="0.00"
+                                               :class="{ 'is-invalid': errors[field] }"
+                                               @input="
                                                 const base = parseFloat(form.base_price_tax) || 0;
                                                 const val  = parseFloat(form.discount_value) || 0;
 
@@ -379,76 +372,104 @@ Dashboard
                                                     form.special_price = base.toFixed(2);
                                                 }
                                            ">
-                                    <template x-if="errors[field]">
-                                        <small class="text-danger" x-text="errors[field]"></small>
-                                    </template>
-                                </div>
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
 
-                                <!-- Preço Promocional -->
-                                <div class="col-md-3" x-data="{ field: 'special_price' }">
-                                    <label class="form-label" :for="field">Preço Promocional</label>
-                                    <input type="number" step="0.01" class="form-control"
-                                           :id="field" :name="field"
-                                           x-model="form[field]"
-                                           placeholder="0.00"
-                                           :class="{ 'is-invalid': errors[field] }"
-                                           disabled>
-                                    <template x-if="errors[field]">
-                                        <small class="text-danger" x-text="errors[field]"></small>
-                                    </template>
+                                    <!-- Preço Promocional -->
+                                    <div class="col-md-3" x-data="{ field: 'special_price' }">
+                                        <label class="form-label" :for="field">Preço Promocional</label>
+                                        <input type="number" step="0.01" class="form-control"
+                                               :id="field" :name="field"
+                                               x-model="form[field]"
+                                               placeholder="0.00"
+                                               :class="{ 'is-invalid': errors[field] }"
+                                               disabled>
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Caso o produto seja CONFIGURÁVEL -->
+                            <div x-show="form.type === 'configurable'" class="alert alert-info text-center p-4 mt-3">
+                                <i class="mdi mdi-information-outline fs-4 d-block mb-2"></i>
+                                Este produto é <strong>configurável</strong>. <br>
+                                Os preços, promoções e impostos são definidos individualmente em cada <strong>variante</strong>.
+                            </div>
+
 
                         </div>
                         <div class="tab-pane fade" id="tab-composicao" role="tabpanel">
-                            <div class="row">
-                                <div class="col-md-4" x-data="{ field: 'sku' }">
-                                    <label class="form-label" :for="field">SKU</label>
-                                    <input type="text" class="form-control"
-                                           :id="field" :name="field"
-                                           placeholder="ex: PROD12345"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                                    <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+                            <!-- Campos de Identificação (só para produtos simples) -->
+                            <div x-show="form.type != 'configurable' ">
+                                <div class="row">
+                                    <div class="col-md-4" x-data="{ field: 'sku' }">
+                                        <label class="form-label" :for="field">SKU</label>
+                                        <input type="text" class="form-control"
+                                               :id="field" :name="field"
+                                               placeholder="ex: PROD12345"
+                                               x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
+
+                                    <div class="col-md-4" x-data="{ field: 'ean' }">
+                                        <label class="form-label" :for="field">EAN</label>
+                                        <input type="text" class="form-control"
+                                               :id="field" :name="field"
+                                               placeholder="EAN do produto"
+                                               x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
+
+                                    <div class="col-md-4" x-data="{ field: 'upc' }">
+                                        <label class="form-label" :for="field">UPC</label>
+                                        <input type="text" class="form-control"
+                                               :id="field" :name="field"
+                                               placeholder="UPC do produto"
+                                               x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
                                 </div>
-                                <div class="col-md-4" x-data="{ field: 'ean' }">
-                                    <label class="form-label" :for="field">EAN</label>
-                                    <input type="text" class="form-control"
-                                           :id="field" :name="field"
-                                           placeholder="EAN do produto"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                                    <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
-                                </div>
-                                <div class="col-md-4" x-data="{ field: 'upc' }">
-                                    <label class="form-label" :for="field">UPC</label>
-                                    <input type="text" class="form-control"
-                                           :id="field" :name="field"
-                                           placeholder="UPC do produto"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                                    <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
+
+                                <div class="row mt-2">
+                                    <div class="col-md-4" x-data="{ field: 'isbn' }">
+                                        <label class="form-label" :for="field">ISBN</label>
+                                        <input type="text" class="form-control"
+                                               :id="field" :name="field"
+                                               placeholder="ISBN"
+                                               x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
+
+                                    <div class="col-md-4" x-data="{ field: 'gtin' }">
+                                        <label class="form-label" :for="field">GTIN</label>
+                                        <input type="text" class="form-control"
+                                               :id="field" :name="field"
+                                               placeholder="GTIN do produto"
+                                               x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-4" x-data="{ field: 'isbn' }">
-                                    <label class="form-label" :for="field">ISBN</label>
-                                    <input type="text" class="form-control"
-                                           :id="field" :name="field"
-                                           placeholder="ISBN"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                                    <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
-                                </div>
-                                <div class="col-md-4" x-data="{ field: 'gtin' }">
-                                    <label class="form-label" :for="field">GTIN</label>
-                                    <input type="text" class="form-control"
-                                           :id="field" :name="field"
-                                           placeholder="GTIN do produto"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                                    <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
-                                </div>
+                            <!-- Mensagem caso seja configurável -->
+                            <div x-show="form.type === 'configurable'" class="alert alert-info text-center mt-3">
+                                <i class="mdi mdi-information-outline"></i>
+                                Os identificadores (SKU, EAN, UPC, ISBN, GTIN) são definidos individualmente em cada variante.
                             </div>
                             <div class="row mt-3">
-                                <div x-show="form.type === 'simple'" class="mt-4">
-                                    <p class="text-muted">Campos específicos para produto simples...</p>
-                                </div>
                                 <div x-show="form.type === 'configurable'" class="mt-0 pt-0"
                                      x-data="{
                                         showDeleteVariant: false,
@@ -488,39 +509,38 @@ Dashboard
                                             this.showEditVariant = false;
                                         },
                                        updateVariant(variant) {
-    if (!variant?.id) {
-        console.warn('⚠️ Variante sem ID, não pode ser atualizada:', variant);
-        showToast('Erro: ID da variante em falta.', 'error', '⚠️ Erro');
-        return;
-    }
+                                            if (!variant?.id) {
+                                                console.warn('⚠️ Variante sem ID, não pode ser atualizada:', variant);
+                                                showToast('Erro: ID da variante em falta.', 'error', '⚠️ Erro');
+                                                return;
+                                            }
+                                            const csrfName = '<?= csrf_token() ?>';
+                                            const csrfValue = this[csrfName];
+                                            const payload = JSON.parse(JSON.stringify(variant));
+                                            payload[csrfName] = csrfValue;
 
-    const csrfName = '<?= csrf_token() ?>';
-    const csrfValue = this[csrfName];
-    const payload = JSON.parse(JSON.stringify(variant));
-    payload[csrfName] = csrfValue;
-
-    fetch('<?= base_url('admin/catalog/products/variants/update') ?>', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRF-TOKEN': csrfValue
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showToast(`Variante ${variant.sku} atualizada com sucesso`, 'success', 'Sucesso');
-        } else {
-            showToast(data.message || 'Erro ao atualizar variante.', 'error', '❌ Falha');
-        }
-    })
-    .catch(err => {
-        console.error('Erro de rede:', err);
-        showToast('Erro de rede ao atualizar variante.', 'error', '⚠️ Erro');
-    });
-},
+                                            fetch('<?= base_url('admin/catalog/products/variants/update') ?>', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-Requested-With': 'XMLHttpRequest',
+                                                    'X-CSRF-TOKEN': csrfValue
+                                                },
+                                                body: JSON.stringify(payload)
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    showToast(`Variante ${variant.sku} atualizada com sucesso`, 'success', 'Sucesso');
+                                                } else {
+                                                    showToast(data.message || 'Erro ao atualizar variante.', 'error', '❌ Falha');
+                                                }
+                                            })
+                                            .catch(err => {
+                                                console.error('Erro de rede:', err);
+                                                showToast('Erro de rede ao atualizar variante.', 'error', '⚠️ Erro');
+                                            });
+                                        },
                                         showCreateVariant: false,
                                         productAttributes: JSON.parse(`<?= htmlspecialchars($attributes, ENT_QUOTES, 'UTF-8') ?>`),
                                         selectedAttributes: {},
@@ -576,17 +596,15 @@ Dashboard
                                             }
                                         },
                                         updateManageStock(event) {
-    this.current.manage_stock = event.target.checked ? 1 : 0;
-    const v = form.productsVariants.find(v => v.id == this.current.id);
-    if (v) v.manage_stock = this.current.manage_stock;
-},
+                                            this.current.manage_stock = event.target.checked ? 1 : 0;
+                                            const v = form.productsVariants.find(v => v.id == this.current.id);
+                                            if (v) v.manage_stock = this.current.manage_stock;
+                                        },
 
-updateStockQty() {
-    const v = form.productsVariants.find(v => v.id == this.current.id);
-    if (v) v.stock_qty = this.current.stock_qty;
-},
-
-
+                                        updateStockQty() {
+                                            const v = form.productsVariants.find(v => v.id == this.current.id);
+                                            if (v) v.stock_qty = this.current.stock_qty;
+                                        },
                                     }">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h5 class="mb-0">Variantes</h5>
@@ -1215,20 +1233,69 @@ updateStockQty() {
                                             </div>
                                         </div>
                                     </template>
-
                                 </div>
                                 <!-- CAMPOS DE PRODUTO VIRTUAL -->
-                                <div x-show="form.type === 'virtual'" class="mt-4 border-top pt-3">
-                                    <p class="text-muted">Configurações para produtos virtuais (downloads, links, etc.)</p>
+                                <div x-show="form.type === 'virtual'" class="mt-4 pt-3">
+                                    <div x-show="form.type === 'virtual'" class="mt-4  pt-3">
+                                        <h5 class="mb-3">Configurações do Produto Virtual</h5>
+
+                                        <div class="row g-3">
+                                            <!-- Tipo de Entrega -->
+                                            <div class="col-md-4" x-data="{ field: 'virtual_type' }">
+                                                <label class="form-label" :for="field">Tipo de Conteúdo</label>
+                                                <select class="form-select" :id="field" x-model="form[field]">
+                                                    <option value="">-- Selecionar --</option>
+                                                    <option value="download">Download Digital</option>
+                                                    <option value="service">Serviço / Subscrição</option>
+                                                    <option value="license">Licença Digital</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Upload de Ficheiro (para download) -->
+                                            <div class="col-md-8" x-show="form.virtual_type === 'download'">
+                                                <label class="form-label">Ficheiro Digital</label>
+                                                <input type="file" class="form-control"
+                                                       @change="uploadVirtualFile($event)">
+                                                <small class="text-muted">Formatos permitidos: PDF, ZIP, MP3, JPG, etc.</small>
+
+                                                <template x-if="form.virtual_file">
+                                                    <div class="mt-2">
+                                                        <a :href="form.virtual_file" target="_blank" class="text-success">
+                                                            <i class="mdi mdi-file"></i> Ver ficheiro atual
+                                                        </a>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <!-- URL (para serviço / subscrição) -->
+                                            <div class="col-md-8" x-show="form.virtual_type === 'service' || form.virtual_type === 'license'">
+                                                <label class="form-label">Link de Acesso / Ativação</label>
+                                                <input type="url" class="form-control"
+                                                       placeholder="https://exemplo.com/servico"
+                                                       x-model="form.virtual_url">
+                                            </div>
+
+                                            <!-- Expiração / validade -->
+                                            <div class="col-md-4">
+                                                <label class="form-label">Validade (dias)</label>
+                                                <input type="number" min="0" step="1" class="form-control"
+                                                       placeholder="ex: 30"
+                                                       x-model="form.virtual_expiry_days">
+                                                <small class="text-muted">Deixa a 0 para ilimitado.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                                 <!-- CAMPOS DE PACK -->
-                                <div x-show="form.type === 'pack'" class="mt-4 border-top pt-3">
+                                <div x-show="form.type === 'pack'" class="mt-4  pt-3">
                                     <p class="text-muted">Gestão de produtos que compõem o pack...</p>
                                 </div>
                             </div>
                         </div>
                         <div class="tab-pane fade" id="tab-dimensoes" role="tabpanel">
-                            <div class="row">
+                            <div x-show="form.type === 'simple' || form.type === 'pack' ">
+                                <div class="row">
                                 <div class="col-md-3" x-data="{ field: 'weight' }">
                                     <label class="form-label" :for="field">Peso (kg)</label>
                                     <input type="text" step="0.01" class="form-control"
@@ -1262,128 +1329,154 @@ updateStockQty() {
                                     <template x-if="errors[field]"><small class="text-danger" x-text="errors[field]"></small></template>
                                 </div>
                             </div>
-                        </div>
-                        <div class="tab-pane fade" id="tab-multimedia" role="tabpanel"
-                             x-data="{
-                                 images: <?= $productImages ?>,
-                                 productId: form.id,
-                                 uploading: false,
-                                 deleteId: null,
-                                 showDelete: false,
-                                 getCsrf() {
-                                     const match = document.cookie.match(/csrf_cookie_name=([^;]+)/);
-                                     return match ? decodeURIComponent(match[1]) : null;
-                                 },
-                                 async addFiles(event) {
-                                     const files = event.target.files;
-                                     if (!files.length) return;
-                                     const csrf = this.getCsrf();
-                                     for (const file of files) {
-                                         const formData = new FormData();
-                                         formData.append('file', file);
-                                         formData.append('owner_type', 'product');
-                                         formData.append('owner_id', this.productId);
-                                         this.uploading = true;
-                                         const res = await fetch('/admin/catalog/products/upload-image', {
-                                             method: 'POST',
-                                             headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
-                                             body: formData,
-                                             credentials: 'include'
-                                         });
-                                         const data = await res.json();
-                                         this.uploading = false;
-                                         if (data?.path) {
-                                             this.images.push({
-                                                 id: data.id,
-                                                 url: '/' + data.path,
-                                                 alt_text: data.alt_text
-                                             });
-                                         }
-                                     }
-                                     event.target.value = '';
-                                     form.images = this.images;
-                                 },
-                                 async confirmDelete(id) {
-                                     this.deleteId = id;
-                                     this.showDelete = true;
-                                 },
-                                 async deleteImage() {
-                                     if (!this.deleteId) return;
-                                     const csrf = this.getCsrf();
-                                     await fetch(`/admin/catalog/products/delete-image/${this.deleteId}`, {
-                                         method: 'DELETE',
-                                         headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
-                                         credentials: 'include'
-                                     });
-                                     this.images = this.images.filter(i => i.id !== this.deleteId);
-                                     form.images = this.images;
-                                     this.showDelete = false;
-                                     this.deleteId = null;
-                                 },
-                                 async reorderImages() {
-                                     const order = this.images.map(i => i.id);
-                                     const csrf = this.getCsrf();
-                                     await fetch('/admin/catalog/products/reorder-images', {
-                                         method: 'POST',
-                                         headers: {
-                                             'Content-Type': 'application/json',
-                                             ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
-                                         },
-                                         body: JSON.stringify(order),
-                                         credentials: 'include'
-                                     });
-                                 },
-                                 initSortable() {
-                                     const el = this.$refs.list;
-                                     Sortable.create(el, {
-                                         animation: 150,
-                                         handle: '.drag-handle',
-                                         onEnd: async evt => {
-                                             const moved = this.images.splice(evt.oldIndex, 1)[0];
-                                             this.images.splice(evt.newIndex, 0, moved);
-                                             form.images = this.images;
-                                             await this.reorderImages();
-                                         }
-                                     });
-                                 }
-                             }"
-                             x-init="initSortable()">
-                            <h4 class="card-title">Imagens</h4>
-                            <p class="card-title-desc">Carregar, ordenar e eliminar imagens.</p>
-                            <input type="file" multiple accept="image/*" class="form-control mb-3"
-                                   @change="addFiles($event)" :disabled="uploading">
-                            <div class="d-flex flex-wrap gap-3" x-ref="list">
-                                <template x-for="(img, index) in images" :key="img.id">
-                                    <div class="position-relative border rounded p-1 bg-light text-center"
-                                         style="width: 120px; height: 140px;">
-                                        <div class="drag-handle position-absolute top-0 start-0 text-muted ps-1" style="cursor: grab;">☰</div>
-                                        <img :src="img.url" class="img-fluid rounded mb-1" style="height: 100px; width: 100%; object-fit: cover;">
-                                        <input type="text" class="form-control form-control-sm" placeholder="Alt" x-model="img.alt_text">
-                                        <button type="button"
-                                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 px-2 py-0"
-                                                @click="confirmDelete(img.id)">×</button>
-                                    </div>
-                                </template>
                             </div>
-                            <template x-if="showDelete">
-                                <div class="modal fade show d-block bg-dark bg-opacity-50">
-                                    <div class="modal-dialog modal-sm modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Remover Imagem</h5>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>Tens a certeza que queres eliminar esta imagem?</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button class="btn btn-secondary btn-sm" @click="showDelete=false">Cancelar</button>
-                                                <button class="btn btn-danger btn-sm" @click="deleteImage()">Eliminar</button>
+                            <div x-show="form.type === 'configurable'" class="alert alert-info text-center p-4 mt-3">
+                                <i class="mdi mdi-ruler"></i>
+                                As dimensões são definidas individualmente em cada <strong>variante</strong>.
+                            </div>
+                            <div x-show="form.type === 'virtual'" class="alert alert-info text-center p-4 mt-3">
+                                <i class="mdi mdi-ruler"></i>
+                                As dimensões não são definidas no  <strong>produto virtual</strong>.
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="tab-multimedia" role="tabpanel">
+                            <!-- Só mostra upload se NÃO for configurável -->
+                            <div x-show="form.type !== 'configurable'"
+                                 x-data="{
+             images: <?= $productImages ?>,
+             productId: form.id,
+             uploading: false,
+             deleteId: null,
+             showDelete: false,
+             getCsrf() {
+                 const match = document.cookie.match(/csrf_cookie_name=([^;]+)/);
+                 return match ? decodeURIComponent(match[1]) : null;
+             },
+             async addFiles(event) {
+                 const files = event.target.files;
+                 if (!files.length) return;
+                 const csrf = this.getCsrf();
+                 for (const file of files) {
+                     const formData = new FormData();
+                     formData.append('file', file);
+                     formData.append('owner_type', 'product');
+                     formData.append('owner_id', this.productId);
+                     this.uploading = true;
+                     const res = await fetch('/admin/catalog/products/upload-image', {
+                         method: 'POST',
+                         headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
+                         body: formData,
+                         credentials: 'include'
+                     });
+                     const data = await res.json();
+                     this.uploading = false;
+                     if (data?.path) {
+                         this.images.push({
+                             id: data.id,
+                             url: '/' + data.path,
+                             alt_text: data.alt_text
+                         });
+                     }
+                 }
+                 event.target.value = '';
+                 form.images = this.images;
+             },
+             async confirmDelete(id) {
+                 this.deleteId = id;
+                 this.showDelete = true;
+             },
+             async deleteImage() {
+                 if (!this.deleteId) return;
+                 const csrf = this.getCsrf();
+                 await fetch(`/admin/catalog/products/delete-image/${this.deleteId}`, {
+                     method: 'DELETE',
+                     headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
+                     credentials: 'include'
+                 });
+                 this.images = this.images.filter(i => i.id !== this.deleteId);
+                 form.images = this.images;
+                 this.showDelete = false;
+                 this.deleteId = null;
+             },
+             async reorderImages() {
+                 const order = this.images.map(i => i.id);
+                 const csrf = this.getCsrf();
+                 await fetch('/admin/catalog/products/reorder-images', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+                     },
+                     body: JSON.stringify(order),
+                     credentials: 'include'
+                 });
+             },
+             initSortable() {
+                 const el = this.$refs.list;
+                 Sortable.create(el, {
+                     animation: 150,
+                     handle: '.drag-handle',
+                     onEnd: async evt => {
+                         const moved = this.images.splice(evt.oldIndex, 1)[0];
+                         this.images.splice(evt.newIndex, 0, moved);
+                         form.images = this.images;
+                         await this.reorderImages();
+                     }
+                 });
+             }
+         }"
+                                 x-init="initSortable()">
+
+                                <h4 class="card-title">Imagens</h4>
+                                <p class="card-title-desc">Carregar, ordenar e eliminar imagens.</p>
+
+                                <input type="file" multiple accept="image/*" class="form-control mb-3"
+                                       @change="addFiles($event)" :disabled="uploading">
+
+                                <div class="d-flex flex-wrap gap-3" x-ref="list">
+                                    <template x-for="(img, index) in images" :key="img.id">
+                                        <div class="position-relative border rounded p-1 bg-light text-center"
+                                             style="width: 120px; height: 140px;">
+                                            <div class="drag-handle position-absolute top-0 start-0 text-muted ps-1"
+                                                 style="cursor: grab;">☰</div>
+                                            <img :src="img.url" class="img-fluid rounded mb-1"
+                                                 style="height: 100px; width: 100%; object-fit: cover;">
+                                            <input type="text" class="form-control form-control-sm"
+                                                   placeholder="Alt" x-model="img.alt_text">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 px-2 py-0"
+                                                    @click="confirmDelete(img.id)">×</button>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <template x-if="showDelete">
+                                    <div class="modal fade show d-block bg-dark bg-opacity-50">
+                                        <div class="modal-dialog modal-sm modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Remover Imagem</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Tens a certeza que queres eliminar esta imagem?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-secondary btn-sm" @click="showDelete=false">Cancelar</button>
+                                                    <button class="btn btn-danger btn-sm" @click="deleteImage()">Eliminar</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
+
+                            <!-- Aviso para produtos configuráveis -->
+                            <div x-show="form.type === 'configurable'" class="alert alert-info text-center p-4 mt-3">
+                                <i class="mdi mdi-image-multiple-outline"></i>
+                                As imagens são geridas individualmente em cada <strong>variante</strong>.
+                            </div>
                         </div>
+
                         <div class="tab-pane fade" id="tab-meta" role="tabpanel"
                              x-data="{
                                     fieldTitle: 'meta_title',
