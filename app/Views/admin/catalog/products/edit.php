@@ -574,7 +574,18 @@ Dashboard
                                                 console.error(err);
                                                 showToast('Erro de rede ao criar variante.', 'error', '⚠️ Erro');
                                             }
-                                        }
+                                        },
+                                        updateManageStock(event) {
+    this.current.manage_stock = event.target.checked ? 1 : 0;
+    const v = form.productsVariants.find(v => v.id == this.current.id);
+    if (v) v.manage_stock = this.current.manage_stock;
+},
+
+updateStockQty() {
+    const v = form.productsVariants.find(v => v.id == this.current.id);
+    if (v) v.stock_qty = this.current.stock_qty;
+},
+
 
                                     }">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -990,15 +1001,7 @@ Dashboard
                                                                                         <input class="form-check-input"
                                                                                                type="checkbox"
                                                                                                :checked="current.manage_stock == 1 || current.manage_stock === '1'"
-                                                                                               @change="
-                                                                                                   current.manage_stock = $event.target.checked ? 1 : 0;
-
-                                                                                                   // Atualiza também na linha da tabela
-                                                                                                   let v = form.productsVariants.find(v => v.id == current.id);
-                                                                                                   if (v) {
-                                                                                                       v.manage_stock = current.manage_stock;
-                                                                                                   }
-                                                                                               ">
+                                                                                               @change="updateManageStock">
                                                                                     </div>
                                                                                 </div>
 
@@ -1008,13 +1011,10 @@ Dashboard
                                                                                            class="form-control"
                                                                                            x-model="current.stock_qty"
                                                                                            :disabled="Number(current.manage_stock) !== 1"
-                                                                                           @input="
-                                                                                           // Atualiza o valor do stock em tempo real na tabela
-                                                                                           let v = form.productsVariants.find(v => v.id == current.id);
-                                                                                           if (v) v.stock_qty = current.stock_qty;
-                                                                                       ">
+                                                                                           @input="updateStockQty">
                                                                                 </div>
                                                                             </div>
+
 
                                                                         </div>
                                                                     </div>
