@@ -949,15 +949,133 @@ updateStockQty() {
                                                                                         <div class="col-md-3"><label class="form-label">Comprimento (cm)</label><input type="number" step="0.01" class="form-control" x-model="current.length"></div>
                                                                                     </div>
                                                                                 </div>
-
                                                                                 <!-- MULTIMÉDIA -->
-                                                                                <div class="tab-pane" id="multimédia" role="tabpanel">
-                                                                                    <div class="row g-3">
-                                                                                        <div class="col-lg-4"><img src="assets/images/users/avatar-3.jpg" alt="" class="rounded avatar-sm"></div>
-                                                                                        <div class="col-lg-4"><img src="assets/images/users/avatar-4.jpg" alt="" class="rounded avatar-md"></div>
-                                                                                        <div class="col-lg-4"><img src="assets/images/users/avatar-5.jpg" alt="" class="rounded avatar-lg"></div>
+                                                                                <div class="tab-pane fade" id="multimédia" role="tabpanel"
+                                                                                     x-data="{
+                                                                                         images: current.images || [],
+                                                                                         variantId: current.id,
+                                                                                         uploading: false,
+                                                                                         deleteId: null,
+                                                                                         showDelete: false,
+                                                                                         getCsrf() {
+                                                                                             const match = document.cookie.match(/csrf_cookie_name=([^;]+)/);
+                                                                                             return match ? decodeURIComponent(match[1]) : null;
+                                                                                         },
+                                                                                         async addFiles(event) {
+                                                                                             const files = event.target.files;
+                                                                                             if (!files.length) return;
+                                                                                             const csrf = this.getCsrf();
+                                                                                             for (const file of files) {
+                                                                                                 const formData = new FormData();
+                                                                                                 formData.append('file', file);
+                                                                                                 formData.append('owner_type', 'variant');
+                                                                                                 formData.append('owner_id', this.variantId);
+                                                                                                 this.uploading = true;
+                                                                                                 const res = await fetch('/admin/catalog/products/upload-image', {
+                                                                                                     method: 'POST',
+                                                                                                     headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
+                                                                                                     body: formData,
+                                                                                                     credentials: 'include'
+                                                                                                 });
+                                                                                                 const data = await res.json();
+                                                                                                 this.uploading = false;
+                                                                                                 if (data?.path) {
+                                                                                                     this.images.push({
+                                                                                                         id: data.id,
+                                                                                                         url: '/' + data.path,
+                                                                                                         alt_text: data.alt_text
+                                                                                                     });
+                                                                                                 }
+                                                                                             }
+                                                                                             event.target.value = '';
+                                                                                         },
+                                                                                         async confirmDelete(id) {
+                                                                                             this.deleteId = id;
+                                                                                             this.showDelete = true;
+                                                                                         },
+                                                                                         async deleteImage() {
+                                                                                             if (!this.deleteId) return;
+                                                                                             const csrf = this.getCsrf();
+                                                                                             await fetch(`/admin/catalog/products/delete-image/${this.deleteId}`, {
+                                                                                                 method: 'DELETE',
+                                                                                                 headers: csrf ? { 'X-CSRF-TOKEN': csrf } : {},
+                                                                                                 credentials: 'include'
+                                                                                             });
+                                                                                             this.images = this.images.filter(i => i.id !== this.deleteId);
+                                                                                             this.showDelete = false;
+                                                                                             this.deleteId = null;
+                                                                                         },
+                                                                                         async reorderImages() {
+                                                                                             const order = this.images.map(i => i.id);
+                                                                                             const csrf = this.getCsrf();
+                                                                                             await fetch('/admin/catalog/products/reorder-images', {
+                                                                                                 method: 'POST',
+                                                                                                 headers: {
+                                                                                                     'Content-Type': 'application/json',
+                                                                                                     ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+                                                                                                 },
+                                                                                                 body: JSON.stringify(order),
+                                                                                                 credentials: 'include'
+                                                                                             });
+                                                                                         },
+                                                                                         initSortable() {
+                                                                                             const el = this.$refs.list;
+                                                                                             Sortable.create(el, {
+                                                                                                 animation: 150,
+                                                                                                 handle: '.drag-handle',
+                                                                                                 onEnd: async evt => {
+                                                                                                     const moved = this.images.splice(evt.oldIndex, 1)[0];
+                                                                                                     this.images.splice(evt.newIndex, 0, moved);
+                                                                                                     await this.reorderImages();
+                                                                                                 }
+                                                                                             });
+                                                                                         }
+                                                                                     }"
+                                                                                                                                                                     x-init="initSortable()">
+
+                                                                                    <h4 class="card-title">Imagens da Variante</h4>
+                                                                                    <p class="card-title-desc">Carregar, ordenar e eliminar imagens.</p>
+
+                                                                                    <input type="file" multiple accept="image/*" class="form-control mb-3"
+                                                                                           @change="addFiles($event)" :disabled="uploading">
+
+                                                                                    <div class="d-flex flex-wrap gap-3" x-ref="list">
+                                                                                        <template x-for="(img, index) in images" :key="img.id">
+                                                                                            <div class="position-relative border rounded p-1 bg-light text-center"
+                                                                                                 style="width: 120px; height: 140px;">
+                                                                                                <div class="drag-handle position-absolute top-0 start-0 text-muted ps-1"
+                                                                                                     style="cursor: grab;">☰</div>
+                                                                                                <img :src="img.url" class="img-fluid rounded mb-1"
+                                                                                                     style="height: 100px; width: 100%; object-fit: cover;">
+                                                                                                <input type="text" class="form-control form-control-sm"
+                                                                                                       placeholder="Alt" x-model="img.alt_text">
+                                                                                                <button type="button"
+                                                                                                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 px-2 py-0"
+                                                                                                        @click="confirmDelete(img.id)">×</button>
+                                                                                            </div>
+                                                                                        </template>
                                                                                     </div>
+
+                                                                                    <template x-if="showDelete">
+                                                                                        <div class="modal fade show d-block bg-dark bg-opacity-50">
+                                                                                            <div class="modal-dialog modal-sm modal-dialog-centered">
+                                                                                                <div class="modal-content">
+                                                                                                    <div class="modal-header">
+                                                                                                        <h5 class="modal-title">Remover Imagem</h5>
+                                                                                                    </div>
+                                                                                                    <div class="modal-body">
+                                                                                                        <p>Tens a certeza que queres eliminar esta imagem?</p>
+                                                                                                    </div>
+                                                                                                    <div class="modal-footer">
+                                                                                                        <button class="btn btn-secondary btn-sm" @click="showDelete=false">Cancelar</button>
+                                                                                                        <button class="btn btn-danger btn-sm" @click="deleteImage()">Eliminar</button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </template>
                                                                                 </div>
+
                                                                             </div>
                                                                         </div>
 
@@ -1660,10 +1778,8 @@ updateStockQty() {
                 const tax  = parseFloat(this.form.tax_rate) || 0;
                 const val  = parseFloat(this.form.discount_value) || 0;
                 const type = this.form.discount_type;
-                // Preço base + imposto
                 const priceWithTax = base * (1 + tax / 100);
                 this.form.base_price_tax = priceWithTax.toFixed(2);
-                // Cálculo do preço promocional
                 if (type === 'percent') {
                     this.form.special_price = (priceWithTax - (priceWithTax * val / 100)).toFixed(2);
                 } else if (type === 'fixed') {

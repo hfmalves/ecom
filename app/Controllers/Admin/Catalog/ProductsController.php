@@ -125,7 +125,19 @@ class ProductsController extends BaseController
                     $variant['attribute_names'][] = $mapValues[$valId] ?? '—';
                 }
             }
+            $variantImages = $this->productsImages
+                ->where('owner_type', 'variant')
+                ->where('owner_id', $variant['id'])
+                ->orderBy('position', 'ASC')
+                ->findAll();
+
+            $variant['images'] = array_map(fn($img) => [
+                'id'       => (int) $img['id'],
+                'url'      => '/' . ltrim($img['path'], '/'),
+                'alt_text' => $img['alt_text'] ?? '',
+            ], $variantImages);
         }
+
         unset($variant);
         $images = $this->productsImages
             ->where('owner_type', 'product')
