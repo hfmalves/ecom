@@ -1286,45 +1286,151 @@ Dashboard
                                 <div x-show="form.type === 'pack'"
                                      class="mt-4 border-top pt-3"
                                      x-data="{
-                                        products: <?= $availableProducts ?? '[]' ?>, // agora contém apenas SKU, name, cost, price, type, parent, label
+                                        products: <?= $availableProducts ?? '[]' ?>,
                                         items: [],
                                         newQty: 1,
                                         totalCost: 0,
                                         totalPrice: 0,
 
-                                        addItem() {
+                                        async init() {
+                                            if (form.id) {
+                                                await this.reloadItems();
+                                            }
+                                        },
+
+                                        async addItem() {
                                             const sku = this.$refs.selectProduct.value;
                                             if (!sku) return;
-
                                             const product = this.products.find(p => p.sku === sku);
                                             if (!product) return;
-
                                             const existing = this.items.find(i => i.sku === sku);
                                             if (existing) {
                                                 existing.qty += this.newQty;
-                                            } else {
-                                                this.items.push({ ...product, qty: this.newQty });
+                                                this.calcTotals();
+                                                this.$refs.selectProduct.value = '';
+                                                this.newQty = 1;
+                                                return;
                                             }
-
+                                            const newItem = {
+                                                sku: product.sku,
+                                                name: product.name,
+                                                type: product.type,
+                                                qty: this.newQty,
+                                                cost: product.cost,
+                                                price: product.price,
+                                            };
+                                            this.items.push(newItem);
                                             this.calcTotals();
+                                            if (form.id) {
+                                                try {
+                                                    const res = await fetch(`/admin/catalog/products/packs/items/save/${form.id}`, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-Requested-With': 'XMLHttpRequest'
+                                                        },
+                                                        body: JSON.stringify([newItem]) // envia só o item adicionado
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.success) {
+                                                        console.log('✅ Item adicionado com sucesso ao pack');
+                                                    } else {
+                                                        console.warn('❌ Falha ao adicionar item:', data.message);
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Erro de rede ao adicionar item:', err);
+                                                }
+                                            }
                                             this.$refs.selectProduct.value = '';
                                             this.newQty = 1;
-                                            form.pack_items = JSON.parse(JSON.stringify(this.items));
                                         },
-
-                                        removeItem(index) {
+                                        async updateQty(item) {
+                                            if (!item || !form.id) return;
+                                            this.calcTotals();
+                                            try {
+                                                const res = await fetch(`/admin/catalog/products/packs/items/update-qty/${item.id}`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                    },
+                                                    body: JSON.stringify({ qty: item.qty })
+                                                });
+                                                const data = await res.json();
+                                                if (data.success) {
+                                                    console.log(`✅ Quantidade atualizada para SKU ${item.sku}: ${item.qty}`);
+                                                } else {
+                                                    console.warn(`❌ Falha ao atualizar quantidade: ${data.message}`);
+                                                }
+                                            } catch (err) {
+                                                console.error('Erro de rede ao atualizar quantidade:', err);
+                                            }
+                                        },
+                                        async removeItem(index) {
+                                            const item = this.items[index];
+                                            if (!item) return;
                                             this.items.splice(index, 1);
                                             this.calcTotals();
-                                            form.pack_items = this.items;
+                                            if (item.id) {
+                                                try {
+                                                    const res = await fetch(`/admin/catalog/products/packs/items/delete/${item.id}`, {
+                                                        method: 'DELETE',
+                                                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.success) {
+                                                        console.log(`✅ Item ${item.sku} removido do pack`);
+                                                    } else {
+                                                        console.warn(`⚠️ Erro ao remover item: ${data.message}`);
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Erro de rede ao remover item', err);
+                                                }
+                                            }
+                                            form.pack_items = JSON.parse(JSON.stringify(this.items));
                                         },
-
+                                        async syncWithServer() {
+                                            const payload = this.items.map(i => ({
+                                                sku: i.sku,
+                                                type: i.type,
+                                                qty: i.qty,
+                                                cost: i.cost,
+                                                price: i.price
+                                            }));
+                                            await fetch(`/admin/catalog/products/packs/items/save/${form.id}`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                                body: JSON.stringify(payload)
+                                            });
+                                            await this.reloadItems();
+                                        },
+                                        async reloadItems() {
+                                            if (!form.id) return;
+                                            const res = await fetch(`/admin/catalog/products/packs/items/${form.id}`, {
+                                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                            });
+                                            const data = await res.json();
+                                            if (data.success && Array.isArray(data.items)) {
+                                                this.items = data.items.map(i => ({
+                                                    id: i.id,
+                                                    sku: i.product_sku,
+                                                    name: i.name || '', // opcional
+                                                    type: i.product_type,
+                                                    qty: Number(i.qty) || 0,
+                                                    cost: parseFloat(i.cost_price) || 0,
+                                                    price: parseFloat(i.base_price) || 0,
+                                                }));
+                                                this.calcTotals();
+                                            }
+                                        },
                                         calcTotals() {
-                                            this.totalCost = this.items.reduce((sum, i) => sum + (parseFloat(i.cost) * i.qty), 0);
-                                            this.totalPrice = this.items.reduce((sum, i) => sum + (parseFloat(i.price) * i.qty), 0);
+                                            this.totalCost = this.items.reduce((sum, i) => sum + ((parseFloat(i.cost) || 0) * (parseFloat(i.qty) || 0)), 0);
+                                            this.totalPrice = this.items.reduce((sum, i) => sum + ((parseFloat(i.price) || 0) * (parseFloat(i.qty) || 0)), 0);
                                         }
-                                    }"
+                                     }"
+                                     x-init="init()"
                                 >
-                                    <h5 class="mb-3">Gestão de Produtos do Pack</h5>
+                                <h5 class="mb-3">Gestão de Produtos do Pack</h5>
 
                                     <div class="row g-2 mb-3">
                                         <div class="col-md-6">
@@ -1347,7 +1453,6 @@ Dashboard
                                         </div>
                                     </div>
 
-
                                     <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light">
                                         <tr>
@@ -1360,13 +1465,15 @@ Dashboard
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        <template x-for="(row, index) in items" :key="row.id">
+                                        <template x-for="(row, index) in items" :key="row.id ?? row.sku">
                                             <tr>
                                                 <td x-text="row.sku"></td>
                                                 <td x-text="row.name"></td>
                                                 <td class="text-center">
-                                                    <input type="number" min="1" class="form-control form-control-sm text-center"
-                                                           x-model.number="row.qty" @input="calcTotals()">
+                                                    <input type="number" min="1"
+                                                           class="form-control form-control-sm text-center"
+                                                           x-model.number="row.qty"
+                                                           @input="updateQty(row)">
                                                 </td>
                                                 <td class="text-end" x-text="(row.cost * row.qty).toFixed(2)"></td>
                                                 <td class="text-end" x-text="(row.price * row.qty).toFixed(2)"></td>

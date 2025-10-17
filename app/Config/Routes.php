@@ -42,6 +42,12 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
                 $routes->post('update', 'ProductVariantsController::update');
                 $routes->delete('delete/(:num)', 'ProductVariantsController::delete/$1');
             });
+            $routes->group('packs', function ($routes) {
+                $routes->get('items/(:num)', 'ProductsPackItemController::getPackItems/$1', ['filter' => 'noauth']);
+                $routes->post('items/save/(:num)', 'ProductsPackItemController::savePackItems/$1', ['filter' => 'noauth']);
+                $routes->post('items/update-qty/(:num)', 'ProductsPackItemController::updateQty/$1', ['filter' => 'noauth']);
+                $routes->delete('items/delete/(:num)', 'ProductsPackItemController::deleteItem/$1', ['filter' => 'noauth']);
+            });
         });
         $routes->group('categories', function ($routes) {
             $routes->get('/', 'CategoriesController::index', ['filter' => 'noauth']);
