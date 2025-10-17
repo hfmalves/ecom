@@ -399,18 +399,6 @@ Dashboard
                                 Este produto é <strong>configurável</strong>. <br>
                                 Os preços, promoções e impostos são definidos individualmente em cada <strong>variante</strong>.
                             </div>
-
-
-                            <div x-show="form.type === 'pack'"
-                                <span>Custo total dos itens: </span>
-                                <strong x-text="totalCost.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })"></strong>
-                                <span class="mx-2">|</span>
-                                <span>Valor de venda sugerido: </span>
-                                <strong x-text="totalPrice.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })"></strong>
-                            </div>
-
-
-
                         </div>
                         <div class="tab-pane fade" id="tab-composicao" role="tabpanel">
                             <!-- Campos de Identificação (só para produtos simples) -->
@@ -626,7 +614,7 @@ Dashboard
                                         <table class="table table-bordered align-middle mt-0">
                                             <thead class="table-light">
                                             <tr>
-                                                <th width="15%">SKU</th>
+                                                <th width="15%">SKU222</th>
                                                 <th>Preço Custo</th>
                                                 <th>Preço Base</th>
                                                 <th>Preço + IVA</th>
@@ -637,7 +625,7 @@ Dashboard
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            <<template x-for="(variant, index) in form.productsVariants" :key="variant.id ?? index">
+                                            <template x-for="(variant, index) in form.productsVariants" :key="variant.id ?? index">
                                                 <tr>
                                                     <td>
                                                         <input type="text" class="form-control form-control-sm"
@@ -1298,60 +1286,67 @@ Dashboard
                                 <div x-show="form.type === 'pack'"
                                      class="mt-4 border-top pt-3"
                                      x-data="{
-                                         products: <?= $availableProducts ?? '[]' ?>, // ← passa do PHP (produtos e variantes)
-                                         items: [],
-                                         newQty: 1,
-                                         totalCost: 0,
-                                         totalPrice: 0,
+                                        products: <?= $availableProducts ?? '[]' ?>, // agora contém apenas SKU, name, cost, price, type, parent, label
+                                        items: [],
+                                        newQty: 1,
+                                        totalCost: 0,
+                                        totalPrice: 0,
 
-                                         addItem() {
-                                             const id = this.$refs.selectProduct.value;
-                                             if (!id) return;
-                                             const product = this.products.find(p => p.id == id);
-                                             if (!product) return;
-                                             const existing = this.items.find(i => i.id == id);
-                                             if (existing) {
-                                                 existing.qty += this.newQty;
-                                             } else {
-                                                 this.items.push({ ...product, qty: this.newQty });
-                                             }
-                                             this.calcTotals();
-                                             this.$refs.selectProduct.value = '';
-                                             this.newQty = 1;
-                                             form.pack_items = this.items; // sincroniza com form global
-                                         },
+                                        addItem() {
+                                            const sku = this.$refs.selectProduct.value;
+                                            if (!sku) return;
 
-                                         removeItem(index) {
-                                             this.items.splice(index, 1);
-                                             this.calcTotals();
-                                             form.pack_items = this.items;
-                                         },
+                                            const product = this.products.find(p => p.sku === sku);
+                                            if (!product) return;
 
-                                         calcTotals() {
-                                             this.totalCost = this.items.reduce((sum, i) => sum + (parseFloat(i.cost) * i.qty), 0);
-                                             this.totalPrice = this.items.reduce((sum, i) => sum + (parseFloat(i.price) * i.qty), 0);
-                                         }
-                                     }">
+                                            const existing = this.items.find(i => i.sku === sku);
+                                            if (existing) {
+                                                existing.qty += this.newQty;
+                                            } else {
+                                                this.items.push({ ...product, qty: this.newQty });
+                                            }
+
+                                            this.calcTotals();
+                                            this.$refs.selectProduct.value = '';
+                                            this.newQty = 1;
+                                            form.pack_items = JSON.parse(JSON.stringify(this.items));
+                                        },
+
+                                        removeItem(index) {
+                                            this.items.splice(index, 1);
+                                            this.calcTotals();
+                                            form.pack_items = this.items;
+                                        },
+
+                                        calcTotals() {
+                                            this.totalCost = this.items.reduce((sum, i) => sum + (parseFloat(i.cost) * i.qty), 0);
+                                            this.totalPrice = this.items.reduce((sum, i) => sum + (parseFloat(i.price) * i.qty), 0);
+                                        }
+                                    }"
+                                >
                                     <h5 class="mb-3">Gestão de Produtos do Pack</h5>
 
                                     <div class="row g-2 mb-3">
                                         <div class="col-md-6">
                                             <label class="form-label">Selecionar Produto / Variante</label>
-                                            <select class="form-select" x-ref="selectProduct">
+                                            <select x-ref="selectProduct" class="form-select">
                                                 <option value="">-- Selecionar --</option>
-                                                <template x-for="item in products" :key="item.id">
-                                                    <option :value="item.id" x-text="item.label"></option>
+                                                <template x-for="item in products" :key="item.sku">
+                                                    <option :value="item.sku" x-text="item.label"></option>
                                                 </template>
                                             </select>
                                         </div>
+
                                         <div class="col-md-3">
                                             <label class="form-label">Quantidade</label>
                                             <input type="number" min="1" class="form-control" x-model.number="newQty" placeholder="1">
                                         </div>
+
                                         <div class="col-md-3 d-flex align-items-end">
                                             <button type="button" class="btn btn-primary w-100" @click="addItem()">Adicionar</button>
                                         </div>
                                     </div>
+
 
                                     <table class="table table-sm table-bordered align-middle">
                                         <thead class="table-light">

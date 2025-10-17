@@ -152,6 +152,46 @@ class ProductsController extends BaseController
         ], $images);
         $productImagesJson = json_encode($product['images'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $productImagesEscaped = htmlspecialchars($productImagesJson, ENT_QUOTES, 'UTF-8');
+
+        $baseProductsForPack = $this->products
+            ->select('id, name, sku, type, cost_price, base_price')
+            ->whereNotIn('type', ['pack'])
+            ->findAll();
+        $variantListForPack = $this->productsVariants
+            ->select('id, product_id, sku, cost_price, base_price')
+            ->findAll();
+        $parentsMap = [];
+        foreach ($baseProductsForPack as $p) {
+            $parentsMap[$p['id']] = $p['name'];
+        }
+        $availableProducts = [];
+        foreach ($baseProductsForPack as $p) {
+            if ($p['type'] === 'simple') {
+                $availableProducts[] = [
+                    'sku'    => $p['sku'],
+                    'name'   => $p['name'],
+                    'price'  => (float) $p['base_price'],
+                    'cost'   => (float) $p['cost_price'],
+                    'type'   => 'simple',
+                    'parent' => null,
+                    'label'  => "{$p['name']} ({$p['sku']})",
+                ];
+            }
+        }
+        foreach ($variantListForPack as $v) {
+            $parentName = $parentsMap[$v['product_id']] ?? '—';
+            $availableProducts[] = [
+                'sku'    => $v['sku'],
+                'name'   => $v['sku'], // ou outro campo se existir
+                'price'  => (float) $v['base_price'],
+                'cost'   => (float) $v['cost_price'],
+                'type'   => 'variant',
+                'parent' => $parentName,
+                'label'  => "{$parentName} — {$v['sku']}",
+            ];
+        }
+        $availableProductsJson = json_encode($availableProducts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $availableProductsEscaped = htmlspecialchars($availableProductsJson, ENT_QUOTES, 'UTF-8');
         $data = [
             'suppliers'                   => $this->suppliers->findAll(),
             'brands'                      => $this->brands->findAll(),
@@ -162,6 +202,7 @@ class ProductsController extends BaseController
             'productsVariants'            => json_encode($variants, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'productsVariantsAttributes'  => json_encode($variantAttrs, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'productImages'               => $productImagesEscaped, // 👈 usar este no HTML
+            'availableProducts'           => $availableProductsEscaped, // 👈 igual às imagens
         ];
         return view('admin/catalog/products/edit', $data);
     }
