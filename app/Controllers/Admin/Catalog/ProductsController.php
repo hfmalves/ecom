@@ -12,6 +12,8 @@ use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsVariantsAttributes;
 use App\Models\Admin\Catalog\ProductsAttributesModel;
 use App\Models\Admin\Catalog\ProductsAttributesValuesModel;
+use App\Models\Admin\Catalog\ProductsVirtualModel;
+
 use App\Models\Admin\Configurations\Taxes\TaxModel;
 
 class ProductsController extends BaseController
@@ -25,6 +27,7 @@ class ProductsController extends BaseController
     protected $productsVariantsAttributes;
     protected $productsAttributesModel;
     protected $productsAttributesValues;
+    protected $productsVirtualModel;
 
     protected $TaxModel;
 
@@ -41,6 +44,7 @@ class ProductsController extends BaseController
         $this->productsVariantsAttributes = new ProductsVariantsAttributes();
         $this->productsAttributesModel = new ProductsAttributesModel();
         $this->productsAttributesValues = new ProductsAttributesValuesModel();
+        $this->productsVirtualModel = new ProductsVirtualModel();
         $this->TaxModel = new TaxModel();
     }
 
@@ -192,6 +196,18 @@ class ProductsController extends BaseController
         }
         $availableProductsJson = json_encode($availableProducts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $availableProductsEscaped = htmlspecialchars($availableProductsJson, ENT_QUOTES, 'UTF-8');
+
+        // Dados do produto virtual (se existir)
+        $virtual = $this->productsVirtualModel
+            ->where('product_id', $id)
+            ->first();
+
+        if ($virtual) {
+            $product['virtual_type'] = $virtual['virtual_type'];
+            $product['virtual_file'] = !empty($virtual['virtual_file']) ? '/' . ltrim($virtual['virtual_file'], '/') : null;
+            $product['virtual_url']  = $virtual['virtual_url'] ?? null;
+            $product['virtual_expiry_days'] = $virtual['virtual_expiry_days'] ?? 0;
+        }
         $data = [
             'suppliers'                   => $this->suppliers->findAll(),
             'brands'                      => $this->brands->findAll(),

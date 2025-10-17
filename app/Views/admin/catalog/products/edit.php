@@ -1233,14 +1233,98 @@ Dashboard
                                     </template>
                                 </div>
                                 <!-- CAMPOS DE PRODUTO VIRTUAL -->
-                                <div x-show="form.type === 'virtual'">
+                                <div
+                                        x-show="form.type === 'virtual'"
+                                        x-data="{
+        form: {
+            id: '<?= esc($product['id']) ?>',
+            type: '<?= esc($product['type']) ?>',
+            virtual_type: '<?= esc($product['virtual_type'] ?? '') ?>',
+            virtual_file: '<?= esc($product['virtual_file'] ?? '') ?>',
+            virtual_url: '<?= esc($product['virtual_url'] ?? '') ?>',
+            virtual_expiry_days: '<?= esc($product['virtual_expiry_days'] ?? 0) ?>'
+        },
+        uploading: false,
+
+        get productId() {
+            return this.form.id || null;
+        },
+
+        async uploadVirtualFile(event) {
+            const file = event.target.files[0];
+            if (!file || !this.productId) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            this.uploading = true;
+
+            try {
+                const res = await fetch(`/admin/catalog/products/virtuals/upload/${this.productId}`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const data = await res.json();
+                console.log('Resposta upload:', data);
+
+ if (data?.path) {
+    // Usa exatamente o URL devolvido pelo servidor, apenas limpa barras extra
+    this.form.virtual_file = data.path.replace(/^\/+/, '');
+    await this.saveVirtualConfig();
+} else {
+    console.warn('Upload falhou:', data);
+}
+
+
+            } catch (err) {
+                console.error('Erro ao enviar ficheiro virtual:', err);
+            } finally {
+                this.uploading = false;
+                event.target.value = '';
+            }
+        },
+
+        async saveVirtualConfig() {
+            if (!this.productId) return;
+
+            const payload = {
+                virtual_type: this.form.virtual_type,
+                virtual_url: this.form.virtual_url,
+                virtual_expiry_days: this.form.virtual_expiry_days,
+                virtual_file: this.form.virtual_file
+            };
+
+            try {
+                const res = await fetch(`/admin/catalog/products/virtuals/save/${this.productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    credentials: 'include'
+                });
+
+                const data = await res.json();
+                console.log('Resposta save:', data);
+
+                if (data?.success) {
+                    console.log('✅ Configurações virtuais guardadas com sucesso.');
+                } else {
+                    console.warn('⚠️ Falha ao guardar produto virtual.', data);
+                }
+            } catch (err) {
+                console.error('Erro no saveVirtualConfig:', err);
+            }
+        }
+    }"
+                                >
                                     <h5 class="mb-3">Configurações do Produto Virtual</h5>
 
                                     <div class="row g-3">
                                         <!-- Tipo de Entrega -->
                                         <div class="col-md-4" x-data="{ field: 'virtual_type' }">
                                             <label class="form-label" :for="field">Tipo de Conteúdo</label>
-                                            <select class="form-select" :id="field" x-model="form[field]">
+                                            <select class="form-select" :id="field" x-model="form[field]" @change="saveVirtualConfig()">
                                                 <option value="">-- Selecionar --</option>
                                                 <option value="download">Download Digital</option>
                                                 <option value="service">Serviço / Subscrição</option>
@@ -1248,11 +1332,10 @@ Dashboard
                                             </select>
                                         </div>
 
-                                        <!-- Upload de Ficheiro (para download) -->
+                                        <!-- Upload de Ficheiro -->
                                         <div class="col-md-8" x-show="form.virtual_type === 'download'">
                                             <label class="form-label">Ficheiro Digital</label>
-                                            <input type="file" class="form-control"
-                                                   @change="uploadVirtualFile($event)">
+                                            <input type="file" class="form-control" @change="uploadVirtualFile($event)">
                                             <small class="text-muted">Formatos permitidos: PDF, ZIP, MP3, JPG, etc.</small>
 
                                             <template x-if="form.virtual_file">
@@ -1262,26 +1345,36 @@ Dashboard
                                                     </a>
                                                 </div>
                                             </template>
+
+                                            <template x-if="uploading">
+                                                <div class="mt-2 text-info">
+                                                    <i class="mdi mdi-loading mdi-spin"></i> A enviar ficheiro...
+                                                </div>
+                                            </template>
                                         </div>
 
-                                        <!-- URL (para serviço / subscrição) -->
+                                        <!-- URL -->
                                         <div class="col-md-8" x-show="form.virtual_type === 'service' || form.virtual_type === 'license'">
                                             <label class="form-label">Link de Acesso / Ativação</label>
                                             <input type="url" class="form-control"
                                                    placeholder="https://exemplo.com/servico"
-                                                   x-model="form.virtual_url">
+                                                   x-model="form.virtual_url"
+                                                   @blur="saveVirtualConfig()">
                                         </div>
 
-                                        <!-- Expiração / validade -->
+                                        <!-- Expiração -->
                                         <div class="col-md-4">
                                             <label class="form-label">Validade (dias)</label>
                                             <input type="number" min="0" step="1" class="form-control"
                                                    placeholder="ex: 30"
-                                                   x-model="form.virtual_expiry_days">
+                                                   x-model="form.virtual_expiry_days"
+                                                   @blur="saveVirtualConfig()">
                                             <small class="text-muted">Deixa a 0 para ilimitado.</small>
                                         </div>
                                     </div>
                                 </div>
+
+
                                 <!-- CAMPOS DE PACK -->
                                 <div x-show="form.type === 'pack'"
                                      class="mt-4 border-top pt-3"

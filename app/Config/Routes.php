@@ -48,6 +48,12 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
                 $routes->post('items/update-qty/(:num)', 'ProductsPackItemController::updateQty/$1', ['filter' => 'noauth']);
                 $routes->delete('items/delete/(:num)', 'ProductsPackItemController::deleteItem/$1', ['filter' => 'noauth']);
             });
+            $routes->group('virtuals', function ($routes) {
+                $routes->get('(:num)', 'ProductsVirtualController::show/$1', ['filter' => 'noauth']);
+                $routes->post('save/(:num)', 'ProductsVirtualController::save/$1', ['filter' => 'noauth']);
+                $routes->delete('delete/(:num)', 'ProductsVirtualController::delete/$1', ['filter' => 'noauth']);
+                $routes->post('upload/(:num)', 'ProductsVirtualController::upload/$1', ['filter' => 'noauth']);
+            });
         });
         $routes->group('categories', function ($routes) {
             $routes->get('/', 'CategoriesController::index', ['filter' => 'noauth']);
