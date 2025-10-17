@@ -1233,91 +1233,89 @@ Dashboard
                                     </template>
                                 </div>
                                 <!-- CAMPOS DE PRODUTO VIRTUAL -->
-                                <div
-                                        x-show="form.type === 'virtual'"
-                                        x-data="{
-        form: {
-            id: '<?= esc($product['id']) ?>',
-            type: '<?= esc($product['type']) ?>',
-            virtual_type: '<?= esc($product['virtual_type'] ?? '') ?>',
-            virtual_file: '<?= esc($product['virtual_file'] ?? '') ?>',
-            virtual_url: '<?= esc($product['virtual_url'] ?? '') ?>',
-            virtual_expiry_days: '<?= esc($product['virtual_expiry_days'] ?? 0) ?>'
-        },
-        uploading: false,
+                                <div x-show="form.type === 'virtual'">
+                                    <div x-data="{
+            form: {
+                id: '<?= esc($product['id']) ?>',
+                type: '<?= esc($product['type']) ?>',
+                virtual_type: '<?= esc($product['virtual_type'] ?? '') ?>',
+                virtual_file: '<?= esc($product['virtual_file'] ?? '') ?>',
+                virtual_url: '<?= esc($product['virtual_url'] ?? '') ?>',
+                virtual_expiry_days: '<?= esc($product['virtual_expiry_days'] ?? 0) ?>'
+            },
+            uploading: false,
 
-        get productId() {
-            return this.form.id || null;
-        },
+            get productId() {
+                return this.form.id || null;
+            },
 
-        async uploadVirtualFile(event) {
-            const file = event.target.files[0];
-            if (!file || !this.productId) return;
+            async uploadVirtualFile(event) {
+                const file = event.target.files[0];
+                if (!file || !this.productId) return;
 
-            const formData = new FormData();
-            formData.append('file', file);
+                const formData = new FormData();
+                formData.append('file', file);
 
-            this.uploading = true;
+                this.uploading = true;
 
-            try {
-                const res = await fetch(`/admin/catalog/products/virtuals/upload/${this.productId}`, {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'include'
-                });
+                try {
+                    const res = await fetch(`/admin/catalog/products/virtuals/upload/${this.productId}`, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
 
-                const data = await res.json();
-                console.log('Resposta upload:', data);
+                    const data = await res.json();
+                    console.log('Resposta upload:', data);
 
- if (data?.path) {
-    // Usa exatamente o URL devolvido pelo servidor, apenas limpa barras extra
-    this.form.virtual_file = data.path.replace(/^\/+/, '');
-    await this.saveVirtualConfig();
-} else {
-    console.warn('Upload falhou:', data);
-}
+     if (data?.path) {
+        // Usa exatamente o URL devolvido pelo servidor, apenas limpa barras extra
+        this.form.virtual_file = data.path.replace(/^\/+/, '');
+        await this.saveVirtualConfig();
+    } else {
+        console.warn('Upload falhou:', data);
+    }
 
 
-            } catch (err) {
-                console.error('Erro ao enviar ficheiro virtual:', err);
-            } finally {
-                this.uploading = false;
-                event.target.value = '';
-            }
-        },
-
-        async saveVirtualConfig() {
-            if (!this.productId) return;
-
-            const payload = {
-                virtual_type: this.form.virtual_type,
-                virtual_url: this.form.virtual_url,
-                virtual_expiry_days: this.form.virtual_expiry_days,
-                virtual_file: this.form.virtual_file
-            };
-
-            try {
-                const res = await fetch(`/admin/catalog/products/virtuals/save/${this.productId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    credentials: 'include'
-                });
-
-                const data = await res.json();
-                console.log('Resposta save:', data);
-
-                if (data?.success) {
-                    console.log('✅ Configurações virtuais guardadas com sucesso.');
-                } else {
-                    console.warn('⚠️ Falha ao guardar produto virtual.', data);
+                } catch (err) {
+                    console.error('Erro ao enviar ficheiro virtual:', err);
+                } finally {
+                    this.uploading = false;
+                    event.target.value = '';
                 }
-            } catch (err) {
-                console.error('Erro no saveVirtualConfig:', err);
+            },
+
+            async saveVirtualConfig() {
+                if (!this.productId) return;
+
+                const payload = {
+                    virtual_type: this.form.virtual_type,
+                    virtual_url: this.form.virtual_url,
+                    virtual_expiry_days: this.form.virtual_expiry_days,
+                    virtual_file: this.form.virtual_file
+                };
+
+                try {
+                    const res = await fetch(`/admin/catalog/products/virtuals/save/${this.productId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        credentials: 'include'
+                    });
+
+                    const data = await res.json();
+                    console.log('Resposta save:', data);
+
+                    if (data?.success) {
+                        console.log('✅ Configurações virtuais guardadas com sucesso.');
+                    } else {
+                        console.warn('⚠️ Falha ao guardar produto virtual.', data);
+                    }
+                } catch (err) {
+                    console.error('Erro no saveVirtualConfig:', err);
+                }
             }
-        }
-    }"
-                                >
+        }">
                                     <h5 class="mb-3">Configurações do Produto Virtual</h5>
 
                                     <div class="row g-3">
@@ -1373,7 +1371,7 @@ Dashboard
                                         </div>
                                     </div>
                                 </div>
-
+                                </div>
 
                                 <!-- CAMPOS DE PACK -->
                                 <div x-show="form.type === 'pack'"
@@ -1585,7 +1583,6 @@ Dashboard
                                         </tbody>
                                     </table>
                                 </div>
-
                             </div>
                         </div>
                         <div class="tab-pane fade" id="tab-dimensoes" role="tabpanel">
@@ -1771,7 +1768,6 @@ Dashboard
                                 As imagens são geridas individualmente em cada <strong>variante</strong>.
                             </div>
                         </div>
-
                         <div class="tab-pane fade" id="tab-meta" role="tabpanel"
                              x-data="{
                                     fieldTitle: 'meta_title',
@@ -1898,7 +1894,7 @@ Dashboard
                                     :class="{ 'is-invalid': errors[field] }">
                                 <option value="">-- Selecionar --</option>
                                 <option value="simple">Simples</option>
-                                <option value="configurable">Configurable</option>
+                                <option value="configurable">Variações</option>
                                 <option value="virtual">Virtual</option>
                                 <option value="pack">Pack</option>
                             </select>
@@ -1982,6 +1978,39 @@ Dashboard
                     </div>
                 </div>
             </div>
+            <!-- Inventário -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Inventário e Quantidades</h4>
+                    <p class="card-title-desc">Gestão de stock</p>
+                    <div class="row">
+                        <div class="col-md-6" x-data="{ field: 'stock_qty' }">
+                            <label class="form-label" :for="field">Qtd. em Stock</label>
+                            <input type="number" class="form-control"
+                                   :id="field" :name="field" placeholder="0"
+                                   x-model="form[field]" :disabled="!form.manage_stock"
+                                   :class="{ 'is-invalid': errors[field] }">
+                            <template x-if="errors[field]">
+                                <small class="text-danger" x-text="errors[field]"></small>
+                            </template>
+                        </div>
+                        <div class="col-md-6" x-data="{ field: 'manage_stock' }">
+                            <div class="mb-2">
+                                <label class="form-label" :for="field">Gerir Stock</label>
+                                <div>
+                                    <input type="checkbox" :id="field" :name="field" value="1"
+                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }" switch="none" />
+                                    <label :for="field" data-on-label="Sim" data-off-label="Não"></label>
+                                </div>
+                                <template x-if="errors[field]">
+                                    <small class="text-danger" x-text="errors[field]"></small>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
             <!-- Categorias -->
             <div class="card">
                 <div class="card-body">
@@ -2026,38 +2055,7 @@ Dashboard
                     </div>
                 </div>
             </div>
-            <!-- Inventário -->
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Inventário e Quantidades</h4>
-                    <p class="card-title-desc">Gestão de stock</p>
-                    <div class="row">
-                        <div class="col-md-6" x-data="{ field: 'stock_qty' }">
-                            <label class="form-label" :for="field">Qtd. em Stock</label>
-                            <input type="number" class="form-control"
-                                   :id="field" :name="field" placeholder="0"
-                                   x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                            <template x-if="errors[field]">
-                                <small class="text-danger" x-text="errors[field]"></small>
-                            </template>
-                        </div>
-                        <div class="col-md-6" x-data="{ field: 'manage_stock' }">
-                            <div class="mb-2">
-                                <label class="form-label" :for="field">Gerir Stock</label>
-                                <div>
-                                    <input type="checkbox" :id="field" :name="field" value="1"
-                                           x-model="form[field]" :class="{ 'is-invalid': errors[field] }" switch="none" />
-                                    <label :for="field" data-on-label="Sim" data-off-label="Não"></label>
-                                </div>
-                                <template x-if="errors[field]">
-                                    <small class="text-danger" x-text="errors[field]"></small>
-                                </template>
-                            </div>
-                        </div>
 
-                    </div>
-                </div>
-            </div>
             <!-- Fornecedores -->
             <div class="card">
                 <div class="card-body">
