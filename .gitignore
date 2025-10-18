@@ -140,3 +140,4 @@ _modules/*
 # Evita ficheiros temporários criados por mutagen/orbstack
 .ddev/.mutagen/
 .ddev/traefik/
+/public/uploads/
