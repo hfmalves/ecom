@@ -51,39 +51,99 @@ class ProductsController extends BaseController
     public function index()
     {
         $rawProducts = $this->products->findAll();
+
         $products = array_map(function ($p) {
+
+            // Campos principais
+            $basePrice     = (float) $p['base_price'];
+            $discountType  = $p['discount_type'] ?? null;
+            $discountValue = (float) ($p['discount_value'] ?? 0);
+            $hasDiscount   = $discountValue > 0 && in_array($discountType, ['percent', 'fixed']);
+
+            // === Preço normal (sem desconto aplicado) ===
+            $priceDisplay = number_format($basePrice, 2, ',', '.') . ' €';
+
+            // === Promoção: apenas tipo + valor ===
+            if ($hasDiscount) {
+                $badgeClass = $discountType === 'percent' ? 'bg-primary' : 'bg-success';
+                $typeLabel  = $discountType === 'percent' ? 'Percentagem' : 'Fixo';
+                $symbol     = $discountType === 'percent' ? '%' : '€';
+                $promoDisplay = '
+                <div class="d-flex flex-column align-items-start">
+                    <span class="badge w-100 , '.$badgeClass.'">'.$typeLabel.'<br> '.$discountValue.$symbol.'</span> 
+                </div>';
+            } else {
+                $promoDisplay = '<span class="text-muted">—</span>';
+            }
+            $storeURL = rtrim(env('app.storeURL', 'https://ecom/'), '/');
+
+            // === Montagem final ===
             return [
                 'id'       => $p['id'],
+                'manage_stock' => $p['manage_stock']
+                    ? '<span class="badge bg-success w-100">Sim</span>'
+                    : '<span class="badge bg-secondary w-100">Não</span>',
                 'sku'      => $p['sku'],
                 'name'     => $p['name'],
-                'price'    => number_format($p['base_price'], 2, ',', '.') . ' €',
-                'promo'    => !empty($p['special_price'])
-                    ? '<span class="badge bg-success">'.number_format($p['special_price'], 2, ',', '.').' €</span>'
-                    : '<span class="text-muted">—</span>',
+                'price'    => $priceDisplay,
+                'promo'    => $promoDisplay,
                 'stock'    => $p['manage_stock']
                     ? $p['stock_qty']
-                    : '<span class="badge bg-info">Ilimitado</span>',
+                    : '<span class="badge w-100 bg-info">Ilimitado</span>',
                 'status'   => match($p['status']) {
-                    'active'   => '<span class="badge bg-success">Ativo</span>',
-                    'inactive' => '<span class="badge bg-secondary">Inativo</span>',
-                    'draft'    => '<span class="badge bg-warning text-dark">Rascunho</span>',
-                    default    => '<span class="badge bg-dark">Arquivado</span>',
+                    'active'   => '<span class="badge w-100 bg-success">Ativo</span>',
+                    'inactive' => '<span class="badge w-100 bg-secondary">Inativo</span>',
+                    'draft'    => '<span class="badge w-100 bg-warning text-dark">Rascunho</span>',
+                    default    => '<span class="badge w-100 bg-dark">Arquivado</span>',
                 },
-                'type'     => ucfirst($p['type']),
+                'type' => match($p['type']) {
+                    'simple'        => '<span class="badge w-100 bg-light text-dark">Simples</span>',
+                    'configurable'  => '<span class="badge w-100 bg-primary">Configurável</span>',
+                    'virtual'       => '<span class="badge w-100 bg-warning">Virtual</span>',
+                    'pack'          => '<span class="badge w-100 bg-info ">Pack</span>',
+                    default         => '<span class="badge w-100 bg-secondary">—</span>',
+                },
                 'updated'  => !empty($p['updated_at'])
                     ? date('d/m/Y H:i', strtotime($p['updated_at']))
                     : '—',
-                'actions'  => '
-                    <a href="'.base_url('admin/catalog/products/edit/'.$p['id']).'" class="btn btn-sm btn-primary w-100">
-                        <i class="mdi mdi-pencil"></i>
-                    </a>'
+                'actions' => '
+                        <div class="d-flex justify-content-center">
+                            <ul class="list-unstyled hstack gap-1 mb-0">
+                                <li data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Ver na Loja">
+                                    <a href="' . $storeURL . '/product/' . $p['sku'] . '"
+                                       target="_blank"
+                                       class="btn btn-sm btn-light text-primary border-primary-subtle shadow-none">
+                                        <i class="mdi mdi-eye-outline"></i>
+                                    </a>
+                                </li>
+                                <li data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Editar produto">
+                                    <a href="' . base_url('admin/catalog/products/edit/' . $p['id']) . '"
+                                       class="btn btn-sm btn-light text-info border-info-subtle shadow-none">
+                                        <i class="mdi mdi-pencil-outline"></i>
+                                    </a>
+                                </li>
+                                <li data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Desativar produto">
+                                    <button type="button"
+                                        @click=" 
+                                            window.dispatchEvent(new CustomEvent(\'fill-form\', {
+                                                detail: { id: ' . $p['id'] . ', sku: \'' . addslashes($p['sku']) . '\' }
+                                            }));
+                                            new bootstrap.Modal(document.getElementById(\'disableProduct\')).show();
+                                        "
+                                        class="btn btn-sm btn-light text-warning border-warning-subtle shadow-none">
+                                        <i class="mdi mdi-cancel"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>'
+
             ];
         }, $rawProducts);
-        $data = [
-            'products' => $products
-        ];
-        return view('admin/catalog/products/index', $data);
+
+        return view('admin/catalog/products/index', ['products' => $products]);
     }
+
+
     public function edit($id = null)
     {
         if ($id === null) {
@@ -321,6 +381,108 @@ class ProductsController extends BaseController
             ],
         ]);
     }
+    public function disable()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'ID do produto não fornecido.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $product = $this->products->find($data['id']);
+        if (! $product) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Produto não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $updateData = [
+            'status'      => 'inactive',
+        ];
+        if (! empty($data['reason'])) {
+            $updateData['disable_reason'] = $data['reason'];
+        }
+        $updated = $this->products->update($data['id'], $updateData);
+        if (! $updated) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao desativar produto.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Produto desativado com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+    public function enabled()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'ID do produto não fornecido.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $product = $this->products->find($data['id']);
+        if (! $product) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Produto não encontrado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $updateData = [
+            'status'      => 'active',
+        ];
+        if (! empty($data['reason'])) {
+            $updateData['disable_reason'] = $data['reason'];
+        }
+        $updated = $this->products->update($data['id'], $updateData);
+        if (! $updated) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao activar produto.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Produto ativado com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+
 
 
 }
