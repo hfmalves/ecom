@@ -3,6 +3,122 @@
     Dashboard
     <?= $this->endSection() ?>
     <?= $this->section('content') ?>
+    <div class="row g-3 mb-4">
+
+        <!-- Produtos Ativos -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Produtos Ativos</h6>
+                        <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['active_products'] ?></h3>
+                    <small class="text-muted">em catálogo</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produtos Inativos -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Produtos Inativos</h6>
+                        <i class="mdi mdi-minus-circle-outline text-secondary fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['inactive_products'] ?></h3>
+                    <small class="text-muted">em pausa / descontinuados</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sem Stock -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Sem Stock</h6>
+                        <i class="mdi mdi-alert-octagon text-danger fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['out_of_stock'] ?></h3>
+                    <small class="text-muted">produtos esgotados</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Valor Total de Stock -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Valor Total de Stock</h6>
+                        <i class="mdi mdi-warehouse text-info fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['stock_value'] ?> €</h3>
+                    <small class="text-muted">em armazém</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preço Médio -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Preço Médio</h6>
+                        <i class="mdi mdi-tag-outline text-primary fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['avg_price'] ?> €</h3>
+                    <small class="text-muted">por produto</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Produtos em Promoção -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Produtos em Promoção</h6>
+                        <i class="mdi mdi-sale text-warning fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['promo_percent'] ?>%</h3>
+                    <small class="text-muted">com desconto ativo</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Médio -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Ticket Médio</h6>
+                        <i class="mdi mdi-cart-outline text-success fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['ticket_medio'] ?> €</h3>
+                    <small class="text-muted">valor médio por encomenda</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rotação de Stock -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card border-0 shadow-sm hover-scale">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <h6 class="text-muted">Rotação de Stock</h6>
+                        <i class="mdi mdi-sync text-info fs-4"></i>
+                    </div>
+                    <h3 class="fw-semibold mb-0"><?= $kpi['rotacao_media'] ?>x</h3>
+                    <small class="text-muted">em média / mês</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="card">
