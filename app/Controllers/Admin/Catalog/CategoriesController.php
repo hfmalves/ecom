@@ -18,9 +18,26 @@ class CategoriesController extends BaseController
     }
     public function index()
     {
-        $categories = $this->categories
-            ->orderBy('position', 'ASC')
-            ->findAll();
+        // obtém o parent_id da query string, 0 por defeito
+        $parentId = $this->request->getGet('parent_id');
+
+        $parentId = $parentId !== null ? (int)$parentId : 0;
+
+        // prepara query base
+        $query = $this->categories->orderBy('position', 'ASC');
+
+        if ($parentId === 0) {
+            // mostra só categorias raiz (parent_id = 0 ou NULL)
+            $query->groupStart()
+                ->where('parent_id', 0)
+                ->orWhere('parent_id', null)
+                ->groupEnd();
+        } else {
+            // mostra apenas as subcategorias do pai indicado
+            $query->where('parent_id', $parentId);
+        }
+
+        $categories = $query->findAll();
 
         // conta produtos
         foreach ($categories as &$category) {
@@ -28,16 +45,15 @@ class CategoriesController extends BaseController
                 ->where('category_id', $category['id'])
                 ->countAllResults();
         }
-
-        // converte para árvore hierárquica
-        $tree = $this->buildTree($categories);
-
-        $data = [
-            'tree' => $tree,
-        ];
-        //dd($tree);
-        return view('admin/catalog/categories/index', $data);
+        //dd($parentId);
+        return view('admin/catalog/categories/index', [
+            'tree' => $categories,
+            'parentId' => $parentId
+        ]);
     }
+
+
+
     public function store()
     {
         $data = $this->request->getJSON(true);
