@@ -7,8 +7,8 @@ Dashboard
     <div class="col-lg-12">
         <div class="d-flex align-items-center">
             <div class="ms-3 flex-grow-1">
-                <h5 class="mb-2 card-title">Hello, Henry Franklin</h5>
-                <p class="text-muted mb-0">Ready to jump back in?</p>
+                <h4 class="fw-bold mb-0"><?= esc($category['name'] ?: 'Nova Categoria') ?></h4>
+                <small class="text-muted">Última atualização: <?= esc($category['updated_at'] ?? '-') ?></small>
             </div>
 
             <a href="javascript:void(0);"
@@ -114,23 +114,173 @@ Dashboard
                 <div class="card-body">
                     <h4 class="card-title">Visibilidade</h4>
                     <p class="card-title-desc">Informações de Visibilidade</p>
+
                     <div class="row">
-                        <div class="col-md-6" x-data="{ field: 'is_active' }">
+                        <div class="col-md-12"
+                             x-data="{ field: 'is_active' }"
+                             x-init="$nextTick(() => {
+                     const el = $refs.select;
+                     $(el).select2({
+                         width: '100%',
+                         placeholder: '-- Selecionar --',
+                         dropdownParent: $(el).closest('.card-body')
+                     });
+
+                     $(el).val(form[field]).trigger('change.select2');
+
+                     $(el).on('change', function () {
+                         form[field] = $(this).val();
+                     });
+
+                     $watch('form[field]', (val) => {
+                         setTimeout(() => $(el).val(val).trigger('change.select2'), 10);
+                     });
+                 })">
+
                             <label class="form-label" :for="field">Estado</label>
-                            <select class="form-select"  :name="field"
-                                    x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                                <option value="">-- Selecionar --</option>
+                            <select class="form-select select2"
+                                    x-ref="select"
+                                    :id="field"
+                                    name="is_active">
                                 <option value="1">Ativo</option>
                                 <option value="0">Inativo</option>
                             </select>
+
                             <template x-if="errors[field]">
                                 <small class="text-danger" x-text="errors[field]"></small>
                             </template>
                         </div>
                     </div>
-
                 </div>
             </div>
+
+            <!-- Imagem da Categoria -->
+            <div class="card mt-3"
+                 x-data="{
+                    imagePreview: '<?= $category['image'] ? base_url('uploads/categories/' . $category['image']) : '' ?>',
+                    uploading: false,
+                    async uploadImage(event) {
+                        const file = event.target.files[0];
+                        if (!file) return;
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('category_id', '<?= $category['id'] ?>');
+
+                        this.uploading = true;
+
+                        try {
+                            const res = await fetch('<?= base_url('admin/catalog/categories/upload-image') ?>', {
+                                method: 'POST',
+                                body: formData,
+                                credentials: 'include'
+                            });
+
+                            const data = await res.json();
+                            this.uploading = false;
+
+                            if (data?.path) {
+                                this.imagePreview = '/' + data.path;
+                                showToast('Imagem carregada com sucesso!', 'success');
+                            } else {
+                                showToast('Erro ao carregar imagem.', 'error');
+                            }
+
+                        } catch (err) {
+                            this.uploading = false;
+                            console.error(err);
+                            showToast('Erro de comunicação.', 'error');
+                        }
+                    }
+                 }"
+                >
+                <div class="card-body ">
+                    <h4 class="card-title">Imagem</h4>
+                    <p class="card-title-desc">Imagem de categoria</p>
+
+                    <!-- Preview -->
+                    <template x-if="imagePreview">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img :src="imagePreview" alt="Imagem da categoria"
+                                 class="rounded shadow-sm"
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        </div>
+                    </template>
+
+                    <!-- Placeholder -->
+                    <template x-if="!imagePreview">
+                        <div class="bg-light border rounded d-flex align-items-center justify-content-center mb-3"
+                             style="width: 150px; height: 150px;">
+                            <i class="mdi mdi-image-off fs-1 text-muted"></i>
+                        </div>
+                    </template>
+
+                    <!-- Upload -->
+                    <div class="d-grid gap-2">
+                        <label class="btn btn-outline-primary mb-0">
+                            <input type="file" accept="image/*" class="d-none" @change="uploadImage">
+                            <span x-show="!uploading"><i class="mdi mdi-upload"></i> Carregar Imagem</span>
+                            <span x-show="uploading"><i class="fa fa-spinner fa-spin"></i> A carregar...</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- CATEGORIA PAI -->
+            <!-- CATEGORIA PAI -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h4 class="card-title">Categoria Pai</h4>
+                    <p class="card-title-desc">Selecione a categoria principal (opcional)</p>
+
+                    <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
+
+                        <!-- Opção de topo -->
+                        <div class="form-check mb-1">
+                            <input class="form-check-input" type="radio" name="parent_id" value="0"
+                                   x-model="form.parent_id"
+                                    <?= empty($category['parent_id']) ? 'checked' : '' ?>>
+                            <label class="form-check-label text-muted">Sem categoria pai</label>
+                        </div>
+
+                        <?php foreach ($categoriesTree as $cat1): ?>
+                            <div class="form-check mb-1">
+                                <input class="form-check-input" type="radio" name="parent_id"
+                                       value="<?= $cat1['id'] ?>"
+                                       x-model="form.parent_id"
+                                        <?= $category['parent_id'] == $cat1['id'] ? 'checked' : '' ?>>
+                                <label class="form-check-label"><?= esc($cat1['name']) ?></label>
+                            </div>
+
+                            <?php if (!empty($cat1['children'])): ?>
+                                <?php foreach ($cat1['children'] as $cat2): ?>
+                                    <div class="form-check mb-1 ms-3">
+                                        <input class="form-check-input" type="radio" name="parent_id"
+                                               value="<?= $cat2['id'] ?>"
+                                               x-model="form.parent_id"
+                                                <?= $category['parent_id'] == $cat2['id'] ? 'checked' : '' ?>>
+                                        <label class="form-check-label"><?= esc($cat2['name']) ?></label>
+                                    </div>
+
+                                    <?php if (!empty($cat2['children'])): ?>
+                                        <?php foreach ($cat2['children'] as $cat3): ?>
+                                            <div class="form-check mb-1 ms-4">
+                                                <input class="form-check-input" type="radio" name="parent_id"
+                                                       value="<?= $cat3['id'] ?>"
+                                                       x-model="form.parent_id"
+                                                        <?= $category['parent_id'] == $cat3['id'] ? 'checked' : '' ?>>
+                                                <label class="form-check-label"><?= esc($cat3['name']) ?></label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+
+                    </div>
+                </div>
+            </div>
+
+
         </div>
     </div>
 </form>

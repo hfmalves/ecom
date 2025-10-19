@@ -33,12 +33,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('update', 'ProductsController::update');
             $routes->post('disable', 'ProductsController::disable');
             $routes->post('enabled', 'ProductsController::enabled');
-
-
             $routes->post('upload-image', 'ProductImagesController::upload');
             $routes->delete('delete-image/(:num)', 'ProductImagesController::delete/$1');
             $routes->post('reorder-images', 'ProductImagesController::reorder');
-
             $routes->group('variants', function ($routes) {
                 $routes->post('create', 'ProductVariantsController::create', ['filter' => 'noauth']);
                 $routes->get('edit/(:num)', 'ProductVariantsController::edit/$1', ['filter' => 'noauth']);
@@ -66,6 +63,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('reorder', 'CategoriesController::reorder');
             $routes->post('disable', 'CategoriesController::disable');
             $routes->post('enabled', 'CategoriesController::enabled');
+            $routes->post('upload-image', 'CategoriesController::uploadImage');
+
         });
         $routes->group('attributes', function ($routes) {
             $routes->get('/', 'AttributesController::index', ['filter' => 'noauth']);

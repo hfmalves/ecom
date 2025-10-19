@@ -51,8 +51,6 @@ class CategoriesController extends BaseController
             'parentParentId'=> $parentParentId, // 👈 usado para o botão voltar
         ]);
     }
-
-
     public function store()
     {
         $data = $this->request->getJSON(true);
@@ -93,22 +91,28 @@ class CategoriesController extends BaseController
     public function edit($id = null)
     {
         if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Categoria não encontrado');
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Categoria não encontrada');
         }
         $category = $this->categories->find($id);
         if (!$category) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Categoria com ID $id não encontrado");
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Categoria com ID $id não encontrada");
         }
-        $data = [
-            'category' => $category
-        ];
-        return view('admin/catalog/categories/edit', $data);
+        $allCategories = $this->categories
+            ->where('id !=', $id)
+            ->orderBy('position', 'ASC')
+            ->findAll();
+        $categoryTree = $this->buildTree($allCategories);
+        return view('admin/catalog/categories/edit', [
+            'category'       => $category,
+            'categoriesTree' => $categoryTree,
+        ]);
     }
+
     public function update()
     {
         $data = $this->request->getJSON(true);
-        $data['parent_id'] = null;
         $id   = $data['id'] ?? null;
+
         if (! $id || ! $this->categories->find($id)) {
             return $this->response->setJSON([
                 'status'  => 'error',
@@ -119,10 +123,10 @@ class CategoriesController extends BaseController
                 ],
             ]);
         }
-
-        // ajusta regra do slug para update
+        if (empty($data['parent_id']) || $data['parent_id'] == 0) {
+            $data['parent_id'] = null;
+        }
         $this->categories->setValidationRule('slug', "required|min_length[2]|max_length[150]|is_unique[categories.slug,id,{$id}]");
-
         if (! $this->categories->update($id, $data)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -133,7 +137,6 @@ class CategoriesController extends BaseController
                 ],
             ]);
         }
-
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Categoria atualizada com sucesso!',
@@ -143,6 +146,7 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
+
     public function reorder()
     {
         $data = $this->request->getJSON(true);
@@ -196,23 +200,30 @@ class CategoriesController extends BaseController
         ]);
     }
 
-    public function enabled()
+    public function uploadImage()
     {
-        if (!$this->request->isAJAX() && !$this->request->is('json')) {
-            return $this->response->setStatusCode(403);
+        $file = $this->request->getFile('file');
+        $categoryId = (int) $this->request->getPost('category_id');
+        if (!$file || !$file->isValid()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Ficheiro inválido ou não enviado.'
+            ]);
         }
-        $id = (int) $this->request->getPost('id') ?: (int) ($this->request->getJSON()?->id ?? 0);
-        $this->categories->update($id, ['is_active' => 1]);
+        $newName = $file->getRandomName();
+        $file->move(FCPATH . 'uploads/categories', $newName);
+        $path = 'uploads/categories/' . $newName;
+        $this->categories->update($categoryId, ['image' => $newName]);
         return $this->response->setJSON([
             'status'  => 'success',
-            'message' => 'Categoria ativada com sucesso.',
+            'message' => 'Imagem carregada e associada à categoria com sucesso.',
+            'path'    => $path,
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
             ],
         ]);
     }
-
     private function buildTree(array $elements, int $parentId = 0): array
     {
         $branch = [];
