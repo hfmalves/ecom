@@ -179,6 +179,40 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
+    public function disable()
+    {
+        if (!$this->request->isAJAX() && !$this->request->is('json')) {
+            return $this->response->setStatusCode(403);
+        }
+        $id = (int) $this->request->getPost('id') ?: (int) ($this->request->getJSON()?->id ?? 0);
+        $this->categories->update($id, ['is_active' => 0]);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Categoria desativada com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+    public function enabled()
+    {
+        if (!$this->request->isAJAX() && !$this->request->is('json')) {
+            return $this->response->setStatusCode(403);
+        }
+        $id = (int) $this->request->getPost('id') ?: (int) ($this->request->getJSON()?->id ?? 0);
+        $this->categories->update($id, ['is_active' => 1]);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Categoria ativada com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
     private function buildTree(array $elements, int $parentId = 0): array
     {
         $branch = [];

@@ -64,6 +64,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('edit/(:num)', 'CategoriesController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'CategoriesController::update');
             $routes->post('reorder', 'CategoriesController::reorder');
+            $routes->post('disable', 'CategoriesController::disable');
+            $routes->post('enabled', 'CategoriesController::enabled');
         });
         $routes->group('attributes', function ($routes) {
             $routes->get('/', 'AttributesController::index', ['filter' => 'noauth']);
