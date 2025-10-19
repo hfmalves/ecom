@@ -42,6 +42,7 @@ Dashboard
                         <table class="table table-striped table-bordered align-middle mb-0">
                             <thead class="table-light">
                             <tr>
+                                <th style="width: 0px;"></th>
                                 <th style="width: 60px;">Estado</th>
                                 <th>Nome</th>
                                 <th>Slug</th>
@@ -53,7 +54,11 @@ Dashboard
                                 <?php foreach ($tree as $category): ?>
                                     <?php if ((int)($category['parent_id'] ?? 0) !== (int)$parentId) continue; ?>
 
-                                    <tr>
+                                    <tr class="align-middle" data-id="<?= $category['id'] ?>">
+
+                                    <td>
+                                            <i class="bx bx-move-vertical"></i>
+                                        </td>
                                         <td>
                                             <?= $category['is_active']
                                                 ? '<span class="badge bg-success w-100">Ativo</span>'
@@ -99,7 +104,6 @@ Dashboard
             <h5 class="modal-title">Criar Categoria</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
         <div class="modal-body"
              x-data="{
             ...formHandler('/admin/catalog/categories/store',
@@ -143,4 +147,50 @@ Dashboard
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tbody = document.querySelector('table tbody');
+        if (!tbody) return;
+
+        new Sortable(tbody, {
+            animation: 150,
+            ghostClass: 'bg-light',
+            onEnd: async () => {
+                const ids = Array.from(tbody.querySelectorAll('tr[data-id]'))
+                    .map(tr => tr.dataset.id)
+                    .filter(Boolean);
+
+                if (!ids.length) return;
+
+                console.log('🔥 Nova ordem:', ids);
+
+                try {
+                    const response = await fetch('<?= base_url('admin/catalog/categories/reorder') ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            parent_id: <?= $parentId ?: 'null' ?>,
+                            ids: ids
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    // ✅ feedback imediato ao utilizador
+                    if (data.message) {
+                        const type = data.status === 'success' ? 'success' : 'error';
+                        showToast(data.message, type);
+                    }
+
+                } catch (err) {
+                    console.error('Erro ao reordenar categorias:', err);
+                    showToast('Erro ao guardar nova ordem.', 'error');
+                }
+            }
+        });
+    });
+</script>
+
+
 <?= $this->endSection() ?>

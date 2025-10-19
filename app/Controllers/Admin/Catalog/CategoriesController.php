@@ -51,9 +51,6 @@ class CategoriesController extends BaseController
             'parentId' => $parentId
         ]);
     }
-
-
-
     public function store()
     {
         $data = $this->request->getJSON(true);
@@ -139,23 +136,42 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
-    private function buildTree(array $elements, $parentId = null): array
+    public function reorder()
     {
-        $branch = [];
-
-        foreach ($elements as $element) {
-            // o parent_id pode vir null, string ou int
-            if ((string)$element['parent_id'] === (string)$parentId) {
-                // chamada recursiva
-                $children = $this->buildTree($elements, $element['id']);
-                if (!empty($children)) {
-                    $element['children'] = $children;
-                }
-                $branch[] = $element;
-            }
+        $data = $this->request->getJSON(true);
+        $ids        = $data['ids']        ?? [];
+        $parent_id  = $data['parent_id']  ?? null;
+        if ($parent_id == 0) $parent_id = null;
+        if (empty($ids) || !is_array($ids)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Nenhuma categoria recebida.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
         }
-
-        return $branch;
+        $position = 1;
+        foreach ($ids as $id) {
+            $this->categories
+                ->where('id', $id)
+                ->set([
+                    'position'   => $position++,
+                    'parent_id'  => $parent_id,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ])
+                ->update();
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Categorias reordenadas com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
     }
+
 
 }
