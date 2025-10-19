@@ -18,9 +18,13 @@ class CategoriesController extends BaseController
     public function index()
     {
         $parentId = (int) ($this->request->getGet('parent_id') ?? 0);
+        $parentCategory = $parentId > 0 ? $this->categories->find($parentId) : null;
+        $parentParentId = $parentCategory['parent_id'] ?? 0;
         $categories = $this->categories
-            ->where('parent_id', $parentId === 0 ? null : $parentId) // trata NULL e 0
-            ->orWhere('parent_id', $parentId) // cobre os dois casos
+            ->groupStart()
+            ->where('parent_id', $parentId === 0 ? null : $parentId)
+            ->orWhere('parent_id', $parentId)
+            ->groupEnd()
             ->orderBy('position', 'ASC')
             ->findAll();
         foreach ($categories as &$category) {
@@ -28,16 +32,27 @@ class CategoriesController extends BaseController
                 ->where('category_id', $category['id'])
                 ->countAllResults();
         }
-        $allCategories = $this->categories
-            ->orderBy('position', 'ASC')
-            ->findAll();
+        $allCategories = $this->categories->orderBy('position', 'ASC')->findAll();
         $categoryTree = $this->buildTree($allCategories);
+        $breadcrumb = [];
+        $currentId = $parentId;
+        while ($currentId > 0) {
+            $cat = $this->categories->find($currentId);
+            if (!$cat) break;
+            $breadcrumb[] = $cat;
+            $currentId = (int) ($cat['parent_id'] ?? 0);
+        }
+        $breadcrumb = array_reverse($breadcrumb);
         return view('admin/catalog/categories/index', [
-            'tree'      => $categories,     // só as do nível atual
-            'fullTree'  => $categoryTree,   // todas (para o modal)
-            'parentId'  => $parentId
+            'tree'          => $categories,
+            'fullTree'      => $categoryTree,
+            'parentId'      => $parentId,
+            'breadcrumb'    => $breadcrumb,
+            'parentParentId'=> $parentParentId, // 👈 usado para o botão voltar
         ]);
     }
+
+
     public function store()
     {
         $data = $this->request->getJSON(true);

@@ -22,6 +22,14 @@ Dashboard
                     </div>
                     <div class="col-sm-2 offset-sm-6">
                         <div class="text-sm-end">
+
+                            <?php if ($parentId > 0): ?>
+                                <a href="<?= base_url('admin/catalog/categories?parent_id=' . $parentParentId) ?>"
+                                   class="btn btn-light ">
+                                    <i class="mdi mdi-arrow-left"></i> Voltar
+                                </a>
+                            <?php endif; ?>
+
                             <button type="button" x-data="systemModal()"
                                     @click="open('#formCategory', 'md')"
                                     class="btn btn-primary">
@@ -39,9 +47,34 @@ Dashboard
                             }
                          }">
 
+<!--                        <div class="page-title-right">-->
+<!--                            --><?php //if (!empty($breadcrumb)): ?>
+<!--                                <nav aria-label="breadcrumb">-->
+<!--                                    <ol class="breadcrumb mb-3">-->
+<!--                                        <li class="breadcrumb-item">-->
+<!--                                            <a href="--><?php //= base_url('admin/catalog/categories') ?><!--">-->
+<!--                                                <i class="mdi mdi-folder-outline me-1"></i> Categorias-->
+<!--                                            </a>-->
+<!--                                        </li>-->
+<!--                                        --><?php //foreach ($breadcrumb as $b): ?>
+<!--                                            <li class="breadcrumb-item --><?php //= ($b['id'] == $parentId) ? 'active' : '' ?><!--">-->
+<!--                                                --><?php //if ($b['id'] == $parentId): ?>
+<!--                                                    --><?php //= esc($b['name']) ?>
+<!--                                                --><?php //else: ?>
+<!--                                                    <a href="--><?php //= base_url('admin/catalog/categories?parent_id=' . $b['id']) ?><!--">-->
+<!--                                                        --><?php //= esc($b['name']) ?>
+<!--                                                    </a>-->
+<!--                                                --><?php //endif; ?>
+<!--                                            </li>-->
+<!--                                        --><?php //endforeach; ?>
+<!--                                    </ol>-->
+<!--                                </nav>-->
+<!--                            --><?php //endif; ?>
+<!--                        </div>-->
                         <table class="table table-striped table-bordered align-middle mb-0">
                             <thead class="table-light">
                             <tr>
+                                <th style="width: 0px;"></th>
                                 <th style="width: 0px;"></th>
                                 <th style="width: 60px;">Estado</th>
                                 <th>Nome</th>
@@ -51,24 +84,42 @@ Dashboard
                             </tr>
                             </thead>
                             <tbody>
+                            <?php
+                            // Verifica se existem categorias neste nível
+                            $hasCategories = false;
+                            foreach ($tree as $category) {
+                                if ((int)($category['parent_id'] ?? 0) === (int)$parentId) {
+                                    $hasCategories = true;
+                                    break;
+                                }
+                            }
+                            ?>
+                            <?php if ($hasCategories): ?>
                                 <?php foreach ($tree as $category): ?>
                                     <?php if ((int)($category['parent_id'] ?? 0) !== (int)$parentId) continue; ?>
 
                                     <tr class="align-middle" data-id="<?= $category['id'] ?>">
-
-                                    <td>
-                                            <i class="bx bx-move-vertical"></i>
+                                        <td><i class="bx bx-move-vertical"></i></td>
+                                        <td>
+                                            <?php if (!empty($category['image'])): ?>
+                                                <img src="<?= base_url('uploads/categories/' . $category['image']) ?>"
+                                                     alt="<?= esc($category['name']) ?>"
+                                                     class="rounded" width="40" height="40">
+                                            <?php else: ?>
+                                                <div class="bg-light text-muted text-center rounded"
+                                                     style="width:40px;height:40px;line-height:40px;">
+                                                    <i class="mdi mdi-image-off"></i>
+                                                </div>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <?= $category['is_active']
                                                 ? '<span class="badge bg-success w-100">Ativo</span>'
                                                 : '<span class="badge bg-secondary w-100">Inativo</span>' ?>
                                         </td>
-
                                         <td><?= esc($category['name']) ?></td>
                                         <td><?= esc($category['slug']) ?></td>
                                         <td><span class="badge bg-dark"><?= esc($category['products_count'] ?? 0) ?></span></td>
-
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <ul class="list-unstyled hstack gap-1 mb-0">
@@ -89,7 +140,17 @@ Dashboard
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="mdi mdi-folder-outline fs-3 d-block mb-2"></i>
+                                        <strong>Sem categorias neste nível</strong><br>
+                                        <small>Use o botão <b>“Adicionar”</b> para criar uma nova categoria.</small>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
                             </tbody>
+
                         </table>
                     </div>
 
