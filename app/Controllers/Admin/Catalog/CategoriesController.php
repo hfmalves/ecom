@@ -18,50 +18,59 @@ class CategoriesController extends BaseController
     }
     public function index()
     {
-        // obtém o parent_id da query string, 0 por defeito
-        $parentId = $this->request->getGet('parent_id');
-
-        $parentId = $parentId !== null ? (int)$parentId : 0;
-
-        // prepara query base
-        $query = $this->categories->orderBy('position', 'ASC');
-
-        if ($parentId === 0) {
-            // mostra só categorias raiz (parent_id = 0 ou NULL)
-            $query->groupStart()
-                ->where('parent_id', 0)
-                ->orWhere('parent_id', null)
-                ->groupEnd();
-        } else {
-            // mostra apenas as subcategorias do pai indicado
-            $query->where('parent_id', $parentId);
-        }
-
-        $categories = $query->findAll();
-
-        // conta produtos
+        $parentId = (int) ($this->request->getGet('parent_id') ?? 0);
+        $categories = $this->categories
+            ->where('parent_id', $parentId === 0 ? null : $parentId) // trata NULL e 0
+            ->orWhere('parent_id', $parentId) // cobre os dois casos
+            ->orderBy('position', 'ASC')
+            ->findAll();
         foreach ($categories as &$category) {
             $category['products_count'] = $this->products
                 ->where('category_id', $category['id'])
                 ->countAllResults();
         }
-        //dd($parentId);
+        $allCategories = $this->categories
+            ->orderBy('position', 'ASC')
+            ->findAll();
+        $categoryTree = $this->buildTree($allCategories);
         return view('admin/catalog/categories/index', [
-            'tree' => $categories,
-            'parentId' => $parentId
+            'tree'      => $categories,     // só as do nível atual
+            'fullTree'  => $categoryTree,   // todas (para o modal)
+            'parentId'  => $parentId
         ]);
     }
+
+    private function buildTree(array $elements, int $parentId = 0): array
+    {
+        $branch = [];
+
+        foreach ($elements as $element) {
+            if ((int)$element['parent_id'] === $parentId) {
+                $children = $this->buildTree($elements, (int)$element['id']);
+                $element['children'] = $children ?: [];
+                $branch[] = $element;
+            }
+        }
+
+        return $branch;
+    }
+
     public function store()
     {
         $data = $this->request->getJSON(true);
-        if (empty($data['slug']) && ! empty($data['name'])) {
-            helper('text'); // garante que o helper está carregado
+        if (empty($data['parent_id']) || $data['parent_id'] == '0') {
+            $data['parent_id'] = null; // categoria principal
+        } else {
+            $data['parent_id'] = (int)$data['parent_id']; // subcategoria
+        }
+        if (empty($data['slug']) && !empty($data['name'])) {
+            helper('text');
             $data['slug'] = url_title(convert_accented_characters($data['name']), '-', true);
         }
-        if (! isset($data['is_active'])) {
+        if (!isset($data['is_active'])) {
             $data['is_active'] = 0;
         }
-        if (! $this->categories->insert($data)) {
+        if (!$this->categories->insert($data)) {
             return $this->response->setJSON([
                 'status' => 'error',
                 'errors' => $this->categories->errors(),
@@ -83,6 +92,7 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
+
     public function edit($id = null)
     {
         if ($id === null) {

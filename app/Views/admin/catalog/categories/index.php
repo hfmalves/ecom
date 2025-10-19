@@ -104,38 +104,89 @@ Dashboard
             <h5 class="modal-title">Criar Categoria</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body"
              x-data="{
-            ...formHandler('/admin/catalog/categories/store',
-              {
-                id: '',
-                name: '',
-                <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-              },
-              { resetOnSuccess: true })
-         }"
+                ...formHandler('/admin/catalog/categories/store', {
+                    id: '',
+                    name: '',
+                    parent_id: '',
+                    <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                }, { resetOnSuccess: true })
+             }"
              x-init="
-            $el.addEventListener('fill-form', e => {
-              Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
-            });
-            $el.addEventListener('reset-form', () => {
-              Object.keys(form).forEach(k => {
-                if (k !== '<?= csrf_token() ?>') {
-                  form[k] = ''
-                }
-              })
-            });
-            document.addEventListener('csrf-update', e => {
-              form[e.detail.token] = e.detail.hash
-            });
-         ">
+                $el.addEventListener('fill-form', e => {
+                    Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
+                });
+                $el.addEventListener('reset-form', () => {
+                    Object.keys(form).forEach(k => {
+                        if (k !== '<?= csrf_token() ?>') form[k] = ''
+                    })
+                });
+                document.addEventListener('csrf-update', e => {
+                    form[e.detail.token] = e.detail.hash
+                });
+             ">
 
             <form @submit.prevent="submit()">
+                <!-- Nome -->
                 <div class="mb-3">
                     <label class="form-label">Nome</label>
                     <input type="text" class="form-control" name="name" x-model="form.name">
                     <div class="text-danger small" x-text="errors.name"></div>
                 </div>
+
+                <!-- Categoria Pai -->
+                <div class="mb-3">
+                    <label class="form-label">Categoria Pai</label>
+                    <div class="border rounded p-2" style="max-height: 350px; overflow-y: auto;">
+
+                        <!-- Categoria principal -->
+                        <div class="mb-2">
+                            <label class="d-flex align-items-center gap-2">
+                                <input type="radio" name="parent_id" x-model="form.parent_id"
+                                       value="0" <?= $parentId === 0 ? 'checked' : '' ?>
+                                       class="form-check-input">
+                                <strong>Categoria Principal</strong>
+                            </label>
+                        </div>
+
+                        <!-- Lista achatada de todas as categorias -->
+                        <?php
+                        function flattenTree($categories, $level = 0, &$flat = [])
+                        {
+                            foreach ($categories as $c) {
+                                $flat[] = [
+                                    'id' => $c['id'],
+                                    'name' => str_repeat('— ', $level) . $c['name']
+                                ];
+                                if (!empty($c['children'])) {
+                                    flattenTree($c['children'], $level + 1, $flat);
+                                }
+                            }
+                            return $flat;
+                        }
+
+                        $flat = [];
+                        flattenTree($fullTree, 0, $flat);
+
+                        foreach ($flat as $cat): ?>
+                            <div class="mb-1">
+                                <label class="d-flex align-items-center gap-2">
+                                    <input type="radio" name="parent_id" x-model="form.parent_id"
+                                           value="<?= $cat['id'] ?>"
+                                           class="form-check-input"
+                                        <?= ($parentId == $cat['id']) ? 'checked' : '' ?>>
+                                    <span><?= esc($cat['name']) ?></span>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div class="text-danger small" x-text="errors.parent_id"></div>
+                </div>
+
+                <!-- Botões -->
                 <div class="modal-footer mt-3">
                     <button type="submit" class="btn btn-primary" :disabled="loading">
                         <span x-show="!loading">Guardar</span>
@@ -191,6 +242,4 @@ Dashboard
         });
     });
 </script>
-
-
 <?= $this->endSection() ?>
