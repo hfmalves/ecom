@@ -168,7 +168,7 @@ Dashboard
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="9" class="text-center text-muted py-4">
                                         <i class="mdi mdi-folder-outline fs-3 d-block mb-2"></i>
                                         <strong>Sem categorias neste nível</strong><br>
                                         <small>Use o botão <b>“Adicionar”</b> para criar uma nova categoria.</small>
