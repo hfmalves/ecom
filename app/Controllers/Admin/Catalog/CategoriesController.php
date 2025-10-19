@@ -10,7 +10,6 @@ class CategoriesController extends BaseController
 {
     protected $categories;
     protected $products;
-
     public function __construct()
     {
         $this->categories = new CategoriesModel();
@@ -39,22 +38,6 @@ class CategoriesController extends BaseController
             'parentId'  => $parentId
         ]);
     }
-
-    private function buildTree(array $elements, int $parentId = 0): array
-    {
-        $branch = [];
-
-        foreach ($elements as $element) {
-            if ((int)$element['parent_id'] === $parentId) {
-                $children = $this->buildTree($elements, (int)$element['id']);
-                $element['children'] = $children ?: [];
-                $branch[] = $element;
-            }
-        }
-
-        return $branch;
-    }
-
     public function store()
     {
         $data = $this->request->getJSON(true);
@@ -92,7 +75,6 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
-
     public function edit($id = null)
     {
         if ($id === null) {
@@ -182,6 +164,19 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
+    private function buildTree(array $elements, int $parentId = 0): array
+    {
+        $branch = [];
 
+        foreach ($elements as $element) {
+            if ((int)$element['parent_id'] === $parentId) {
+                $children = $this->buildTree($elements, (int)$element['id']);
+                $element['children'] = $children ?: [];
+                $branch[] = $element;
+            }
+        }
+
+        return $branch;
+    }
 
 }
