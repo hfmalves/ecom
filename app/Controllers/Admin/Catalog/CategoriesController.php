@@ -18,15 +18,24 @@ class CategoriesController extends BaseController
     }
     public function index()
     {
-        $categories = $this->categories->orderBy('position', 'ASC')->findAll();
+        $categories = $this->categories
+            ->orderBy('position', 'ASC')
+            ->findAll();
+
+        // conta produtos
         foreach ($categories as &$category) {
             $category['products_count'] = $this->products
                 ->where('category_id', $category['id'])
                 ->countAllResults();
         }
+
+        // converte para árvore hierárquica
+        $tree = $this->buildTree($categories);
+
         $data = [
-            'categories' => $categories,
+            'tree' => $tree,
         ];
+        //dd($tree);
         return view('admin/catalog/categories/index', $data);
     }
     public function store()
@@ -114,4 +123,23 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
+    private function buildTree(array $elements, $parentId = null): array
+    {
+        $branch = [];
+
+        foreach ($elements as $element) {
+            // o parent_id pode vir null, string ou int
+            if ((string)$element['parent_id'] === (string)$parentId) {
+                // chamada recursiva
+                $children = $this->buildTree($elements, $element['id']);
+                if (!empty($children)) {
+                    $element['children'] = $children;
+                }
+                $branch[] = $element;
+            }
+        }
+
+        return $branch;
+    }
+
 }

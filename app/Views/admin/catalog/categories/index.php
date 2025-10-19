@@ -3,6 +3,11 @@
 Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
+<style>
+    [x-cloak] {
+        display: none !important;
+    }
+</style>
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -11,59 +16,92 @@ Dashboard
                     <div class="col-sm-4">
                         <div class="search-box me-2 mb-2 d-inline-block">
                             <div class="position-relative">
-                                <h4 class="card-title">Default Datatable</h4>
+                                <h4 class="card-title">Lista de Categorias</h4>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-8">
+                    <div class="col-sm-2 offset-sm-6">
                         <div class="text-sm-end">
                             <button type="button" x-data="systemModal()"
                                     @click="open('#formCategory', 'md')"
                                     class="btn btn-primary">
-                                <i class="fa-solid fa-plus me-1"></i> Adicionar
+                                <i class="bx bx-plus-circle me-1"></i> Adicionar
                             </button>
                         </div>
                     </div><!-- end col-->
                 </div>
                 <div class="col-sm-12">
-                    <div class="table-responsive">
-                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
+                    <div class="table-responsive"
+                         x-data="{
+        open: {},
+        toggle(id) {
+            this.open[id] = !this.open[id];
+        }
+     }">
+
+                        <table class="table table-striped table-bordered align-middle mb-0">
                             <thead class="table-light">
                             <tr>
-                                <th>Estado</th>
+                                <th style="width: 60px;">Estado</th>
                                 <th>Nome</th>
                                 <th>Slug</th>
-                                <th>Produtos</th>
-                                <th>Ações</th>
+                                <th style="width: 100px;">Produtos</th>
+                                <th style="width: 120px;">Ações</th>
                             </tr>
                             </thead>
-                            <tbody>
-                            <?php foreach ($categories as $category): ?>
-                                <tr>
-                                    <td>
-                                        <?= $category['is_active']
-                                            ? '<span class="badge bg-success w-100">Ativo</span>'
-                                            : '<span class="badge bg-secondary w-100">Inativo</span>' ?>
-                                    </td>
-                                    <td>
-                                        <?= esc($category['name']) ?>
-                                    </td>
-                                    <td><?= esc($category['slug']) ?></td>
-                                    <td><span class="badge bg-dark"><?= esc($category['products_count'] ?? 0) ?></span></td>
-                                    <td>
-                                        <!-- Botão Editar -->
-                                        <a href="<?= base_url('admin/catalog/categories/edit/' . $category['id']) ?>"
-                                           class="btn btn-sm btn-primary w-100">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </a>
-                                    </td>
-                                </tr>
+                            <tbody x-data="{ open: {} }">
+                            <?php
+                            function renderCategoryRows($categories, $level = 0, $parentId = null)
+                            {
+                                foreach ($categories as $category): ?>
+                                    <tr
+                                            x-show="<?= $parentId ? "open[$parentId]" : 'true' ?>"
+                                            x-cloak>
+                                        <td>
+                                            <?= $category['is_active']
+                                                ? '<span class="badge bg-success w-100">Ativo</span>'
+                                                : '<span class="badge bg-secondary w-100">Inativo</span>' ?>
+                                        </td>
 
-                            <?php endforeach; ?>
+                                        <td>
+                                            <?php if (!empty($category['children'])): ?>
+                                                <button class="btn btn-sm btn-light me-1"
+                                                        @click="open[<?= $category['id'] ?>] = !open[<?= $category['id'] ?>]">
+                                                    <i :class="open[<?= $category['id'] ?>] ? 'mdi mdi-chevron-down' : 'mdi mdi-chevron-right'"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                <span class="ms-4"></span>
+                                            <?php endif; ?>
+
+                                            <span style="padding-left: <?= $level * 20 ?>px">
+                    <?= esc($category['name']) ?>
+                </span>
+                                        </td>
+
+                                        <td><?= esc($category['slug']) ?></td>
+                                        <td><span class="badge bg-dark"><?= esc($category['products_count'] ?? 0) ?></span></td>
+                                        <td>
+                                            <a href="<?= base_url('admin/catalog/categories/edit/' . $category['id']) ?>"
+                                               class="btn btn-sm btn-primary w-100">
+                                                <i class="mdi mdi-pencil"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <?php
+                                    if (!empty($category['children'])) {
+                                        renderCategoryRows($category['children'], $level + 1, $category['id']);
+                                    }
+                                endforeach;
+                            }
+                            renderCategoryRows($tree);
+                            ?>
                             </tbody>
+
 
                         </table>
                     </div>
+
                 </div>
             </div>
         </div>
