@@ -20,6 +20,8 @@ class CategoriesController extends BaseController
         $parentId = (int) ($this->request->getGet('parent_id') ?? 0);
         $parentCategory = $parentId > 0 ? $this->categories->find($parentId) : null;
         $parentParentId = $parentCategory['parent_id'] ?? 0;
+
+        // === Categorias ===
         $categories = $this->categories
             ->groupStart()
             ->where('parent_id', $parentId === 0 ? null : $parentId)
@@ -27,13 +29,30 @@ class CategoriesController extends BaseController
             ->groupEnd()
             ->orderBy('position', 'ASC')
             ->findAll();
+
         foreach ($categories as &$category) {
             $category['products_count'] = $this->products
                 ->where('category_id', $category['id'])
                 ->countAllResults();
         }
+
+        // === KPIs ===
+        $totalCategories   = $this->categories->countAllResults();
+        $activeCategories  = $this->categories->where('is_active', 1)->countAllResults();
+        $inactiveCategories= $this->categories->where('is_active', 0)->countAllResults();
+        $totalProducts     = $this->products->countAllResults();
+
+        $kpi = [
+            'total'     => $totalCategories,
+            'active'    => $activeCategories,
+            'inactive'  => $inactiveCategories,
+            'products'  => $totalProducts,
+        ];
+
+        // === Árvores e breadcrumbs ===
         $allCategories = $this->categories->orderBy('position', 'ASC')->findAll();
         $categoryTree = $this->buildTree($allCategories);
+
         $breadcrumb = [];
         $currentId = $parentId;
         while ($currentId > 0) {
@@ -43,14 +62,17 @@ class CategoriesController extends BaseController
             $currentId = (int) ($cat['parent_id'] ?? 0);
         }
         $breadcrumb = array_reverse($breadcrumb);
+
         return view('admin/catalog/categories/index', [
-            'tree'          => $categories,
-            'fullTree'      => $categoryTree,
-            'parentId'      => $parentId,
-            'breadcrumb'    => $breadcrumb,
-            'parentParentId'=> $parentParentId, // 👈 usado para o botão voltar
+            'tree'           => $categories,
+            'fullTree'       => $categoryTree,
+            'parentId'       => $parentId,
+            'breadcrumb'     => $breadcrumb,
+            'parentParentId' => $parentParentId,
+            'kpi'            => $kpi,
         ]);
     }
+
     public function store()
     {
         $data = $this->request->getJSON(true);

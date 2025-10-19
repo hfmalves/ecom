@@ -8,6 +8,66 @@ Dashboard
         display: none !important;
     }
 </style>
+<div class="row g-3 mb-4">
+
+    <!-- Total de Categorias -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Categorias</h6>
+                    <i class="mdi mdi-shape text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?></h3>
+                <small class="text-muted">no sistema</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorias Ativas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Categorias Ativas</h6>
+                    <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?></h3>
+                <small class="text-muted">visíveis no catálogo</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorias Inativas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Categorias Inativas</h6>
+                    <i class="mdi mdi-minus-circle-outline text-secondary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['inactive'] ?></h3>
+                <small class="text-muted">ocultas no catálogo</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produtos Associados -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Produtos Associados</h6>
+                    <i class="mdi mdi-package-variant text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['products'] ?></h3>
+                <small class="text-muted">distribuídos por categorias</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card">
