@@ -74,6 +74,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->group('value', function ($routes) {
                 $routes->post('store', 'AttributesController::storeValue');
                 $routes->post('update', 'AttributesController::updateValue');
+                $routes->post('delete', 'AttributesController::deleteValue');
                 $routes->post('update-order', 'AttributesController::updateValueOrder');
             });
         });

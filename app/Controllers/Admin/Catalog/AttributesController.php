@@ -32,8 +32,6 @@ class AttributesController extends BaseController
         ];
         return view('admin/catalog/attributes/index', $data);
     }
-
-
     public function store()
     {
         $data = $this->request->getJSON(true);
@@ -170,11 +168,11 @@ class AttributesController extends BaseController
             ],
         ]);
     }
-
     public function updateValue()
     {
         $data = $this->request->getJSON(true);
         $id   = $data['id'] ?? null;
+
         if (! $id || ! $this->attributesValues->find($id)) {
             return $this->response->setJSON([
                 'status'  => 'error',
@@ -184,6 +182,10 @@ class AttributesController extends BaseController
                     'hash'  => csrf_hash(),
                 ],
             ]);
+        }
+        if (isset($data['name'])) {
+            $data['value'] = $data['name'];
+            unset($data['name']);
         }
         if (! $this->attributesValues->update($id, $data)) {
             return $this->response->setJSON([
@@ -198,6 +200,8 @@ class AttributesController extends BaseController
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Elemento do atributo atualizado com sucesso!',
+            'id'      => $id,
+            'value'   => $data['value'], // devolve para o front
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),

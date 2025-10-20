@@ -21,6 +21,7 @@ class ProductsAttributesModel extends Model
         'sort_order',
         'default_value',
         'validation',
+        'is_active'
     ];
 
 
