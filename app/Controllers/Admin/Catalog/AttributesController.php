@@ -20,11 +20,20 @@ class AttributesController extends BaseController
     }
     public function index()
     {
+        $kpi = [
+            'total'      => $this->attributes->countAllResults(),
+            'active'     => $this->attributes->where('is_active', 1)->countAllResults(true),
+            'inactive'   => $this->attributes->where('is_active', 0)->countAllResults(true),
+            'filterable' => $this->attributes->where('is_filterable', 1)->countAllResults(true),
+        ];
         $data = [
-            'atributes' => $this->attributes->findAll(),
+            'atributes' => $this->attributes->orderBy('id', 'asc')->findAll(),
+            'kpi'       => $kpi,
         ];
         return view('admin/catalog/attributes/index', $data);
     }
+
+
     public function store()
     {
         $data = $this->request->getJSON(true);
