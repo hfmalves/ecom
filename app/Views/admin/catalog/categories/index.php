@@ -206,24 +206,24 @@ Dashboard
                                         <td class="text-center">
                                             <?= $category['updated_at'] ?>
                                         </td>
-                                        <td>
-                                            <div class="d-flex justify-content-center">
-                                                <ul class="list-unstyled hstack gap-1 mb-0">
-                                                    <li>
-                                                        <a href="<?= base_url('admin/catalog/categories?parent_id=' . $category['id']) ?>"
-                                                           class="btn btn-sm btn-light text-primary" title="Abrir subcategorias">
-                                                            <i class="mdi mdi-eye-outline"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="<?= base_url('admin/catalog/categories/edit/' . $category['id']) ?>"
-                                                           class="btn btn-sm btn-light text-info" title="Editar categoria">
-                                                            <i class="mdi mdi-pencil-outline"></i>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </td>
+                                            <td>
+                                                <div class="d-flex justify-content-center">
+                                                    <ul class="list-unstyled hstack gap-1 mb-0">
+                                                        <li>
+                                                            <a href="<?= base_url('admin/catalog/categories?parent_id=' . $category['id']) ?>"
+                                                               class="btn btn-sm btn-light text-primary" title="Abrir subcategorias">
+                                                                <i class="mdi mdi-eye-outline"></i>
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="<?= base_url('admin/catalog/categories/edit/' . $category['id']) ?>"
+                                                               class="btn btn-sm btn-light text-info" title="Editar categoria">
+                                                                <i class="mdi mdi-pencil-outline"></i>
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>

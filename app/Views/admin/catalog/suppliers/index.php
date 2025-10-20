@@ -3,6 +3,122 @@
 Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
+<div class="row g-3 mb-4">
+
+    <!-- Total de Fornecedores -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Fornecedores</h6>
+                    <i class="mdi mdi-factory text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?? 0 ?></h3>
+                <small class="text-muted">registados no sistema</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fornecedores Ativos -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Ativos</h6>
+                    <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?? 0 ?></h3>
+                <small class="text-muted">disponíveis para compras</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fornecedores Inativos -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Inativos</h6>
+                    <i class="mdi mdi-minus-circle-outline text-secondary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['inactive'] ?? 0 ?></h3>
+                <small class="text-muted">não operacionais</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Percentagem Ativos -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">% Ativos</h6>
+                    <i class="mdi mdi-chart-pie text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['activePct'] ?? 0 ?>%</h3>
+                <small class="text-muted">taxa de atividade</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Países -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Países</h6>
+                    <i class="mdi mdi-earth text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['countries'] ?? 0 ?></h3>
+                <small class="text-muted">origens distintas</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Moedas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Moedas</h6>
+                    <i class="mdi mdi-currency-eur text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['currencies'] ?? 0 ?></h3>
+                <small class="text-muted">moedas distintas</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Termos de Pagamento -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Termos de Pagamento</h6>
+                    <i class="mdi mdi-calendar-clock text-secondary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['terms'] ?? 0 ?></h3>
+                <small class="text-muted">condições disponíveis</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- IBAN válidos -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">IBAN Válidos</h6>
+                    <i class="mdi mdi-bank-outline text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['ibanPct'] ?? 0 ?>%</h3>
+                <small class="text-muted">com dados bancários completos</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -11,7 +127,7 @@ Dashboard
                     <div class="col-sm-4">
                         <div class="search-box me-2 mb-2 d-inline-block">
                             <div class="position-relative">
-                                <h4 class="card-title">Default Datatable</h4>
+                                <h4 class="card-title">Lista de Fornecedores</h4>
                             </div>
                         </div>
                     </div>
@@ -20,7 +136,7 @@ Dashboard
                             <button type="button" x-data="systemModal()"
                                     @click="open('#formSupplier', 'md')"
                                     class="btn btn-primary">
-                                <i class="fa-solid fa-plus me-1"></i> Adicionar
+                                <i class="bx bx-plus-circle me-1"></i> Adicionar
                             </button>
                         </div>
                     </div><!-- end col-->
@@ -36,29 +152,64 @@ Dashboard
                                 <th>Telefone</th>
                                 <th>Website</th>
                                 <th>Morada</th>
-                                <th>Ações</th>
+                                <th>Status</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($suppliers as $supplier): ?>
                                 <tr>
-                                    <td><?= esc($supplier['name']) ?></td>
-                                    <td><?= esc($supplier['contact_person']) ?></td>
+                                    <td><strong><?= esc($supplier['name']) ?></strong></td>
+                                    <td>
+                                        <?php
+                                        $parts = explode(' ', trim($supplier['contact_person']));
+                                        $shortName = $parts[0] ?? '';
+                                        if (count($parts) > 1) {
+                                            $shortName .= ' ' . end($parts);
+                                        }
+                                        ?>
+                                        <?= esc($shortName) ?>
+                                    </td>
                                     <td><?= esc($supplier['email']) ?></td>
                                     <td><?= esc($supplier['phone']) ?></td>
                                     <td>
-                                        <?php if (! empty($supplier['website'])): ?>
+                                        <?php if (!empty($supplier['website'])): ?>
                                             <a href="<?= esc($supplier['website']) ?>" target="_blank">
                                                 <?= esc($supplier['website']) ?>
                                             </a>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= esc($supplier['address']) ?><br><?= esc($supplier['country']) ?></td>
                                     <td>
-                                        <a href="<?= base_url('admin/catalog/suppliers/edit/' . $supplier['id']) ?>"
-                                           class="btn btn-sm btn-primary w-100">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </a>
+                                        <?= esc($supplier['address']) ?><br>
+                                        <small class="text-muted"><?= esc($supplier['country']) ?></small>
+                                    </td>
+                                    <td>
+                                        <?php if ($supplier['status'] === 'active'): ?>
+                                            <span class="badge bg-success w-100">Ativo</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary w-100">Inativo</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center">
+                                            <ul class="list-unstyled hstack gap-1 mb-0">
+                                                <li>
+                                                    <a href="<?= base_url('admin/catalog/suppliers/edit/' . $supplier['id']) ?>"
+                                                       class="btn btn-sm btn-light text-info"
+                                                       title="Editar fornecedor">
+                                                        <i class="mdi mdi-pencil-outline"></i>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-light text-danger"
+                                                            title="Eliminar fornecedor"
+                                                            onclick="confirmDelete(<?= $supplier['id'] ?>)">
+                                                        <i class="mdi mdi-trash-can-outline"></i>
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

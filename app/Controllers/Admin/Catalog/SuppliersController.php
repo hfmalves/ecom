@@ -18,12 +18,35 @@ class SuppliersController extends BaseController
     }
     public function index()
     {
-        $suppliers = $this->suppliers->findAll();
+        $suppliers = $this->suppliers;
+
+        $total        = $suppliers->countAllResults();
+        $ativos       = $suppliers->where('status', 'active')->countAllResults();
+        $inativos     = $suppliers->where('status', 'inactive')->countAllResults();
+        $ativosPct    = $total > 0 ? round(($ativos / $total) * 100, 1) : 0;
+        $paises       = $suppliers->select('country')->distinct()->countAllResults();
+        $moedas       = $suppliers->select('currency')->distinct()->countAllResults();
+        $pagamentos   = $suppliers->select('payment_terms')->distinct()->countAllResults();
+        $ibanValidos  = $suppliers->where('iban IS NOT NULL')->where('iban !=', '')->countAllResults();
+        $ibanPct      = $total > 0 ? round(($ibanValidos / $total) * 100, 1) : 0;
+
         $data = [
-            'suppliers' => $suppliers,
+            'suppliers' => $suppliers->findAll(),
+            'kpi' => [
+                'total'       => $total,
+                'active'      => $ativos,
+                'inactive'    => $inativos,
+                'activePct'   => $ativosPct,
+                'countries'   => $paises,
+                'currencies'  => $moedas,
+                'terms'       => $pagamentos,
+                'ibanPct'     => $ibanPct,
+            ],
         ];
+
         return view('admin/catalog/suppliers/index', $data);
     }
+
     public function store()
     {
         $data = $this->request->getJSON(true);
