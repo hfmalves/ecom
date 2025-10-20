@@ -46,8 +46,8 @@
                             <div class="d-flex flex-column h-100">
                                 <div class="mb-4 mb-md-5">
                                     <a href="index.html" class="d-block auth-logo">
-                                        <img src="<?= base_url('assets/images/logo-dark.png') ?>" alt="Logo Dark" height="18" class="auth-logo-dark">
-                                        <img src="<?= base_url('assets/images/logo-light.png') ?>" alt="Logo Light" height="18" class="auth-logo-light">
+                                        <img src="<?= base_url('assets/images/logo.svg') ?>" alt="Logo Dark" height="160" class="auth-logo-dark">
+                                        <img src="<?= base_url('assets/images/logo.svg') ?>" alt="Logo Light" height="160" class="auth-logo-light">
 
                                     </a>
                                 </div>
