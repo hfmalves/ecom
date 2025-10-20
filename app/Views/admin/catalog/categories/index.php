@@ -8,6 +8,66 @@ Dashboard
         display: none !important;
     }
 </style>
+<div class="row g-3 mb-4">
+
+    <!-- Total de Categorias -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Categorias</h6>
+                    <i class="mdi mdi-shape text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?></h3>
+                <small class="text-muted">no sistema</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorias Ativas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Categorias Ativas</h6>
+                    <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?></h3>
+                <small class="text-muted">visíveis no catálogo</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorias Inativas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Categorias Inativas</h6>
+                    <i class="mdi mdi-minus-circle-outline text-secondary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['inactive'] ?></h3>
+                <small class="text-muted">ocultas no catálogo</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produtos Associados -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Produtos Associados</h6>
+                    <i class="mdi mdi-package-variant text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['products'] ?></h3>
+                <small class="text-muted">distribuídos por categorias</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -46,41 +106,18 @@ Dashboard
                                 this.open[id] = !this.open[id];
                             }
                          }">
-
-<!--                        <div class="page-title-right">-->
-<!--                            --><?php //if (!empty($breadcrumb)): ?>
-<!--                                <nav aria-label="breadcrumb">-->
-<!--                                    <ol class="breadcrumb mb-3">-->
-<!--                                        <li class="breadcrumb-item">-->
-<!--                                            <a href="--><?php //= base_url('admin/catalog/categories') ?><!--">-->
-<!--                                                <i class="mdi mdi-folder-outline me-1"></i> Categorias-->
-<!--                                            </a>-->
-<!--                                        </li>-->
-<!--                                        --><?php //foreach ($breadcrumb as $b): ?>
-<!--                                            <li class="breadcrumb-item --><?php //= ($b['id'] == $parentId) ? 'active' : '' ?><!--">-->
-<!--                                                --><?php //if ($b['id'] == $parentId): ?>
-<!--                                                    --><?php //= esc($b['name']) ?>
-<!--                                                --><?php //else: ?>
-<!--                                                    <a href="--><?php //= base_url('admin/catalog/categories?parent_id=' . $b['id']) ?><!--">-->
-<!--                                                        --><?php //= esc($b['name']) ?>
-<!--                                                    </a>-->
-<!--                                                --><?php //endif; ?>
-<!--                                            </li>-->
-<!--                                        --><?php //endforeach; ?>
-<!--                                    </ol>-->
-<!--                                </nav>-->
-<!--                            --><?php //endif; ?>
-<!--                        </div>-->
                         <table class="table table-striped table-bordered align-middle mb-0">
                             <thead class="table-light">
                             <tr>
-                                <th style="width: 0px;"></th>
-                                <th style="width: 0px;"></th>
-                                <th style="width: 60px;">Estado</th>
+                                <th></th>
+                                <th>Estado</th>
+                                <th>Imagem</th>
                                 <th>Nome</th>
                                 <th>Slug</th>
-                                <th style="width: 100px;">Produtos</th>
-                                <th style="width: 120px;">Ações</th>
+                                <th>Qtd Artigos</th>
+                                <th>Ativar</th>
+                                <th>Actualizado em</th>
+                                <th>Ações</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -101,6 +138,11 @@ Dashboard
                                     <tr class="align-middle" data-id="<?= $category['id'] ?>">
                                         <td><i class="bx bx-move-vertical"></i></td>
                                         <td>
+                                            <?= $category['is_active']
+                                                ? '<span class="badge bg-success w-100">Ativo</span>'
+                                                : '<span class="badge bg-secondary w-100">Inativo</span>' ?>
+                                        </td>
+                                        <td>
                                             <?php if (!empty($category['image'])): ?>
                                                 <img src="<?= base_url('uploads/categories/' . $category['image']) ?>"
                                                      alt="<?= esc($category['name']) ?>"
@@ -112,14 +154,58 @@ Dashboard
                                                 </div>
                                             <?php endif; ?>
                                         </td>
-                                        <td>
-                                            <?= $category['is_active']
-                                                ? '<span class="badge bg-success w-100">Ativo</span>'
-                                                : '<span class="badge bg-secondary w-100">Inativo</span>' ?>
-                                        </td>
                                         <td><?= esc($category['name']) ?></td>
                                         <td><?= esc($category['slug']) ?></td>
                                         <td><span class="badge bg-dark"><?= esc($category['products_count'] ?? 0) ?></span></td>
+                                        <td class="text-center"
+                                            x-data="{
+                                            form: { id: '<?= $category['id'] ?>', <?= csrf_token() ?>: '<?= csrf_hash() ?>' },
+                                            loading: false,
+                                            async submit(event) {
+                                                this.loading = true;
+
+                                                // vê se o checkbox está marcado
+                                                const checked = event.target.checked;
+
+                                                const url = checked
+                                                    ? '/admin/catalog/categories/enabled'
+                                                    : '/admin/catalog/categories/disable';
+
+                                                try {
+                                                    const response = await fetch(url, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify(this.form)
+                                                    });
+
+                                                    const data = await response.json();
+                                                    this.loading = false;
+
+                                                    const type = data.status === 'success' ? 'success' : 'error';
+                                                    showToast(data.message, type);
+                                                } catch (err) {
+                                                    this.loading = false;
+                                                    console.error(err);
+                                                }
+                                            }
+                                        }"
+                                        >
+                                            <input
+                                                    type="checkbox"
+                                                    id="toggle_<?= $category['id'] ?>"
+                                                    <?= $category['is_active'] ? 'checked' : '' ?>
+                                                    @change="form.id = '<?= $category['id'] ?>'; submit($event)"
+                                                    switch="none"
+                                            >
+                                            <label
+                                                    for="toggle_<?= $category['id'] ?>"
+                                                    data-on-label="Ativo"
+                                                    data-off-label="Inativo">
+                                            </label>
+                                        </td>
+                                        <td class="text-center">
+                                            <?= $category['updated_at'] ?>
+                                        </td>
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <ul class="list-unstyled hstack gap-1 mb-0">
@@ -142,7 +228,7 @@ Dashboard
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
+                                    <td colspan="9" class="text-center text-muted py-4">
                                         <i class="mdi mdi-folder-outline fs-3 d-block mb-2"></i>
                                         <strong>Sem categorias neste nível</strong><br>
                                         <small>Use o botão <b>“Adicionar”</b> para criar uma nova categoria.</small>

@@ -20,6 +20,8 @@ class CategoriesController extends BaseController
         $parentId = (int) ($this->request->getGet('parent_id') ?? 0);
         $parentCategory = $parentId > 0 ? $this->categories->find($parentId) : null;
         $parentParentId = $parentCategory['parent_id'] ?? 0;
+
+        // === Categorias ===
         $categories = $this->categories
             ->groupStart()
             ->where('parent_id', $parentId === 0 ? null : $parentId)
@@ -27,13 +29,30 @@ class CategoriesController extends BaseController
             ->groupEnd()
             ->orderBy('position', 'ASC')
             ->findAll();
+
         foreach ($categories as &$category) {
             $category['products_count'] = $this->products
                 ->where('category_id', $category['id'])
                 ->countAllResults();
         }
+
+        // === KPIs ===
+        $totalCategories   = $this->categories->countAllResults();
+        $activeCategories  = $this->categories->where('is_active', 1)->countAllResults();
+        $inactiveCategories= $this->categories->where('is_active', 0)->countAllResults();
+        $totalProducts     = $this->products->countAllResults();
+
+        $kpi = [
+            'total'     => $totalCategories,
+            'active'    => $activeCategories,
+            'inactive'  => $inactiveCategories,
+            'products'  => $totalProducts,
+        ];
+
+        // === Árvores e breadcrumbs ===
         $allCategories = $this->categories->orderBy('position', 'ASC')->findAll();
         $categoryTree = $this->buildTree($allCategories);
+
         $breadcrumb = [];
         $currentId = $parentId;
         while ($currentId > 0) {
@@ -43,15 +62,16 @@ class CategoriesController extends BaseController
             $currentId = (int) ($cat['parent_id'] ?? 0);
         }
         $breadcrumb = array_reverse($breadcrumb);
+
         return view('admin/catalog/categories/index', [
-            'tree'          => $categories,
-            'fullTree'      => $categoryTree,
-            'parentId'      => $parentId,
-            'breadcrumb'    => $breadcrumb,
-            'parentParentId'=> $parentParentId, // 👈 usado para o botão voltar
+            'tree'           => $categories,
+            'fullTree'       => $categoryTree,
+            'parentId'       => $parentId,
+            'breadcrumb'     => $breadcrumb,
+            'parentParentId' => $parentParentId,
+            'kpi'            => $kpi,
         ]);
     }
-
 
     public function store()
     {
@@ -93,22 +113,28 @@ class CategoriesController extends BaseController
     public function edit($id = null)
     {
         if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Categoria não encontrado');
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Categoria não encontrada');
         }
         $category = $this->categories->find($id);
         if (!$category) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Categoria com ID $id não encontrado");
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Categoria com ID $id não encontrada");
         }
-        $data = [
-            'category' => $category
-        ];
-        return view('admin/catalog/categories/edit', $data);
+        $allCategories = $this->categories
+            ->where('id !=', $id)
+            ->orderBy('position', 'ASC')
+            ->findAll();
+        $categoryTree = $this->buildTree($allCategories);
+        return view('admin/catalog/categories/edit', [
+            'category'       => $category,
+            'categoriesTree' => $categoryTree,
+        ]);
     }
+
     public function update()
     {
         $data = $this->request->getJSON(true);
-        $data['parent_id'] = null;
         $id   = $data['id'] ?? null;
+
         if (! $id || ! $this->categories->find($id)) {
             return $this->response->setJSON([
                 'status'  => 'error',
@@ -119,10 +145,10 @@ class CategoriesController extends BaseController
                 ],
             ]);
         }
-
-        // ajusta regra do slug para update
+        if (empty($data['parent_id']) || $data['parent_id'] == 0) {
+            $data['parent_id'] = null;
+        }
         $this->categories->setValidationRule('slug', "required|min_length[2]|max_length[150]|is_unique[categories.slug,id,{$id}]");
-
         if (! $this->categories->update($id, $data)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -133,7 +159,6 @@ class CategoriesController extends BaseController
                 ],
             ]);
         }
-
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Categoria atualizada com sucesso!',
@@ -143,6 +168,7 @@ class CategoriesController extends BaseController
             ],
         ]);
     }
+
     public function reorder()
     {
         $data = $this->request->getJSON(true);
@@ -173,6 +199,64 @@ class CategoriesController extends BaseController
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Categorias reordenadas com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+    public function disable()
+    {
+        if (!$this->request->isAJAX() && !$this->request->is('json')) {
+            return $this->response->setStatusCode(403);
+        }
+        $id = (int) $this->request->getPost('id') ?: (int) ($this->request->getJSON()?->id ?? 0);
+        $this->categories->update($id, ['is_active' => 0]);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Categoria desativada com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+    public function enabled()
+    {
+        if (!$this->request->isAJAX() && !$this->request->is('json')) {
+            return $this->response->setStatusCode(403);
+        }
+        $id = (int) $this->request->getPost('id') ?: (int) ($this->request->getJSON()?->id ?? 0);
+        $this->categories->update($id, ['is_active' => 1]);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Categoria ativada com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+    public function uploadImage()
+    {
+        $file = $this->request->getFile('file');
+        $categoryId = (int) $this->request->getPost('category_id');
+        if (!$file || !$file->isValid()) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Ficheiro inválido ou não enviado.'
+            ]);
+        }
+        $newName = $file->getRandomName();
+        $file->move(FCPATH . 'uploads/categories', $newName);
+        $path = 'uploads/categories/' . $newName;
+        $this->categories->update($categoryId, ['image' => $newName]);
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Imagem carregada e associada à categoria com sucesso.',
+            'path'    => $path,
             'csrf'    => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
