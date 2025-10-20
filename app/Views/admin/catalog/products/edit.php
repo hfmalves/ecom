@@ -14,7 +14,7 @@ Dashboard
             <a href="javascript:void(0);"
                class="btn btn-primary"
                onclick="console.log('cliquei no botão'); document.getElementById('productForm').dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }))">
-                Guardar
+                <i class="far fa-save me-1"></i> Guardar
             </a>
 
         </div>
