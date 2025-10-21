@@ -16,13 +16,29 @@ class CustomerModel extends Model
         'group_id',
         'name',
         'email',
+        'username',
         'password',
         'phone',
+        'date_of_birth',
+        'gender',
         'is_active',
         'is_verified',
+        'newsletter_optin',
         'login_2step',
+        'last_login_at',
+        'last_ip',
+        'referral_code',
+        'loyalty_points',
+        'preferred_language',
+        'preferred_currency',
+        'password_reset_token',
+        'password_reset_expires',
+        'login_attempts',
+        'last_failed_login',
+        'created_by',
+        'notes',
+        'source',
     ];
-
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
 

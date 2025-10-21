@@ -28,18 +28,30 @@ class CustumersController extends BaseController
     }
     public function index()
     {
-        $customers = $this->customerModel->findAll();
-        $groups = $this->customerGroupModel->findAll();
+        $kpi = [
+            'total'        => $this->customerModel->countAllResults(),
+            'active'       => $this->customerModel->where('is_active', 1)->countAllResults(true),
+            'verified'     => $this->customerModel->where('is_verified', 1)->countAllResults(true),
+            'two_factor'   => $this->customerModel->where('login_2step', 1)->countAllResults(true),
+            'newsletter'   => $this->customerModel->where('newsletter_optin', 1)->countAllResults(true),
+            'loyalty'      => $this->customerModel->where('loyalty_points >', 0)->countAllResults(true),
+            'new_30_days'  => $this->customerModel->where('created_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))->countAllResults(true),
+            'active_30_days' => $this->customerModel->where('last_login_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))->countAllResults(true),
+        ];
+        $customers = $this->customerModel->orderBy('created_at', 'DESC')->findAll();
+        $groups    = $this->customerGroupModel->findAll();
         $groupsMap = array_column($groups, 'name', 'id');
         foreach ($customers as &$c) {
             $c['group_name'] = $groupsMap[$c['group_id']] ?? 'Sem grupo';
         }
         $data = [
-            'costumers' => $customers,
-            'costumers_group' => $groups
+            'costumers'       => $customers,
+            'costumers_group' => $groups,
+            'kpi'             => $kpi,
         ];
         return view('admin/customers/index', $data);
     }
+
     public function edit($id = null)
     {
         if ($id === null) {

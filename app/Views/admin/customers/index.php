@@ -3,6 +3,105 @@
 Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
+<div class="row mb-1">
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Clientes</h6>
+                    <i class="mdi mdi-account-multiple text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?? 0 ?></h3>
+                <small class="text-muted">registados no sistema</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Ativos</h6>
+                    <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?? 0 ?></h3>
+                <small class="text-muted">contas em atividade</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Verificados</h6>
+                    <i class="mdi mdi-email-check-outline text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['verified'] ?? 0 ?></h3>
+                <small class="text-muted">emails confirmados</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Autenticação 2FA</h6>
+                    <i class="mdi mdi-shield-lock text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['two_factor'] ?? 0 ?></h3>
+                <small class="text-muted">utilizadores com 2FA ativo</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Newsletter</h6>
+                    <i class="mdi mdi-email-newsletter text-secondary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['newsletter'] ?? 0 ?></h3>
+                <small class="text-muted">subscritores ativos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Fidelizados</h6>
+                    <i class="mdi mdi-star-outline text-purple fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['loyalty'] ?? 0 ?></h3>
+                <small class="text-muted">clientes com pontos ativos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Novos (30 dias)</h6>
+                    <i class="mdi mdi-calendar-plus text-dark fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['new_30_days'] ?? 0 ?></h3>
+                <small class="text-muted">novos registos recentes</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Login Recente</h6>
+                    <i class="mdi mdi-clock-outline text-teal fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active_30_days'] ?? 0 ?></h3>
+                <small class="text-muted">clientes ativos no último mês</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -11,7 +110,7 @@ Dashboard
                     <div class="col-sm-4">
                         <div class="search-box me-2 mb-2 d-inline-block">
                             <div class="position-relative">
-                                <h4 class="card-title">Default Datatable</h4>
+                                <h4 class="card-title">Lista de Clientes</h4>
                             </div>
                         </div>
                     </div>
@@ -20,49 +119,112 @@ Dashboard
                             <button type="button" x-data="systemModal()"
                                     @click="open('#formCustomer', 'md')"
                                     class="btn btn-primary">
-                                <i class="fa-solid fa-plus me-1"></i> Adicionar
+                                <i class="bx bx-plus-circle me-1"></i> Adicionar
                             </button>
                         </div>
                     </div><!-- end col-->
                 </div>
                 <div class="col-sm-12">
                     <div class="table-responsive">
-                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
+                        <table id="datatable" class="table table-striped table-hover align-middle dt-responsive nowrap w-100">
                             <thead class="table-light">
                             <tr>
                                 <th>Grupo</th>
                                 <th>Nome</th>
                                 <th>Email</th>
                                 <th>Telefone</th>
-                                <th>Ativo</th>
-                                <th>Verificado</th>
-                                <th>Ações</th>
+                                <th class="text-center">Ativo</th>
+                                <th class="text-center">Verificado</th>
+                                <th class="text-center">Newsletter</th>
+                                <th class="text-center">Fidelização</th>
+                                <th class="text-center">Último Login</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($costumers as $c): ?>
                                 <tr>
-                                    <td><?= esc($c['group_name']) ?></td>
+                                    <td class="fw-semibold text-muted">
+                                        <?= esc($c['group_name']) ?>
+                                    </td>
                                     <td><?= esc($c['name']) ?></td>
                                     <td><?= esc($c['email']) ?></td>
-                                    <td><?= esc($c['phone']) ?></td>
-                                    <td>
-                                        <?= $c['is_active'] ? '<span class="badge bg-success w-100">Sim</span>' : '<span class="badge bg-danger w-100">Não</span>' ?>
-                                    </td>
-                                    <td>
-                                        <?= $c['is_verified'] ? '<span class="badge bg-success w-100">Sim</span>' : '<span class="badge bg-warning w-100">Não</span>' ?>
+                                    <td><?= esc($c['phone'] ?? '-') ?></td>
+                                    <td class="text-center">
+                                        <?= $c['is_active']
+                                                ? '<span class="badge bg-success w-100">Sim</span>'
+                                                : '<span class="badge bg-danger w-100">Não</span>' ?>
                                     </td>
                                     <td class="text-center">
-                                        <a href="<?= base_url('admin/customers/edit/' . $c['id']) ?>"
-                                           class="btn btn-sm btn-primary w-100">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </a>
+                                        <?= $c['is_verified']
+                                                ? '<span class="badge bg-success w-100">Sim</span>'
+                                                : '<span class="badge bg-warning text-dark w-100">Não</span>' ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if (!empty($c['newsletter_optin']) && $c['newsletter_optin'] == 1): ?>
+                                            <i class="mdi mdi-email-check text-success fs-5" title="Subscrito"></i>
+                                        <?php else: ?>
+                                            <i class="mdi mdi-email-off-outline text-muted fs-5" title="Não subscrito"></i>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if (!empty($c['loyalty_points']) && $c['loyalty_points'] > 0): ?>
+                                            <span class="badge bg-info"><?= esc($c['loyalty_points']) ?> pts</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-muted">0</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if (!empty($c['last_login_at'])): ?>
+                                            <span class="text-muted small"><?= date('d/m/Y H:i', strtotime($c['last_login_at'])) ?></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <ul class="list-unstyled hstack gap-1 mb-0 justify-content-center">
+                                            <li>
+                                                <a href="<?= base_url('admin/customers/view/' . $c['id']) ?>"
+                                                   class="btn btn-sm btn-light text-primary" title="Ver Detalhes">
+                                                    <i class="mdi mdi-eye-outline"></i>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="<?= base_url('admin/customers/edit/' . $c['id']) ?>"
+                                                   class="btn btn-sm btn-light text-info" title="Editar Cliente">
+                                                    <i class="mdi mdi-pencil-outline"></i>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <button type="button" class="btn btn-sm btn-light text-warning"
+                                                        @click="
+                                                            window.dispatchEvent(new CustomEvent('customer-deactivate', {
+                                                                detail: { id: <?= $c['id'] ?>, name: '<?= addslashes($c['name']) ?>' }
+                                                            }));
+                                                            new bootstrap.Modal(document.getElementById('modalDeactivateCustomer')).show();
+                                                        "
+                                                        title="Desativar Cliente">
+                                                    <i class="mdi mdi-cancel"></i>
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button type="button" class="btn btn-sm btn-light text-danger"
+                                                        @click="
+                                                            window.dispatchEvent(new CustomEvent('customer-delete', {
+                                                                detail: { id: <?= $c['id'] ?>, name: '<?= addslashes($c['name']) ?>' }
+                                                            }));
+                                                            new bootstrap.Modal(document.getElementById('modalDeleteCustomer')).show();
+                                                        "
+                                                        title="Eliminar Cliente">
+                                                    <i class="mdi mdi-trash-can-outline"></i>
+                                                </button>
+                                            </li>
+                                        </ul>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>
