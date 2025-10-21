@@ -47,36 +47,282 @@ Gestão de Cliente
     <div class="row">
         <!-- Coluna Principal -->
         <div class="col-8">
-
-            <?php foreach (['Compras', 'Pagamentos', 'Faturas', 'Devoluções', 'Análises'] as $titulo): ?>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h4 class="card-title"><?= esc($titulo) ?></h4>
-                        <p class="card-title-desc">Últimos registos de <?= strtolower($titulo) ?></p>
-
-                        <div class="table-responsive">
-                            <table class="table table-sm table-striped align-middle mb-0">
-                                <thead>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h4 class="card-title">Compras</h4>
+                    <p class="card-title-desc">Últimos registos de compras do cliente</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Status</th>
+                                <th class="text-center">Itens</th>
+                                <th class="text-end">Impostos</th>
+                                <th class="text-end">Desconto</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Data</th>
+                                <th class="text-end" style="width: 90px;">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (!empty($orders)): ?>
+                                <?php foreach ($orders as $order): ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?= esc($order['id']) ?></td>
+                                        <td class="text-center">
+                                            <?php
+                                            $statusClass = match ($order['status']) {
+                                                'pending'    => 'bg-warning text-dark',
+                                                'processing' => 'bg-info text-dark',
+                                                'completed'  => 'bg-success',
+                                                'canceled'   => 'bg-secondary',
+                                                'refunded'   => 'bg-primary',
+                                                'failed'     => 'bg-danger',
+                                                default      => 'bg-light text-dark',
+                                            };
+                                            ?>
+                                            <span class="badge <?= $statusClass ?> w-100">
+                                                <?= ucfirst($order['status']) ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-center"><?= number_format($order['total_items'], 0, ',', '.') ?></td>
+                                        <td class="text-end"><?= number_format($order['total_tax'], 2, ',', '.') ?> €</td>
+                                        <td class="text-end">-<?= number_format($order['total_discount'], 2, ',', '.') ?> €</td>
+                                        <td class="text-end fw-semibold "><?= number_format($order['grand_total'], 2, ',', '.') ?> €</td>
+                                        <td class="text-center"><?= date('d/m/Y', strtotime($order['created_at'])) ?></td>
+                                        <td class="text-end">
+                                            <ul class="list-unstyled hstack gap-1 mb-0 justify-content-end">
+                                                <li>
+                                                    <a href="<?= base_url('admin/orders/view/' . $order['id']) ?>"
+                                                       class="btn btn-sm btn-light text-info"
+                                                       title="Ver detalhes da encomenda">
+                                                        <i class="mdi mdi-eye-outline"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Descrição</th>
-                                    <th>Data</th>
-                                    <th class="text-end">Valor</th>
+                                    <td colspan="8" class="text-center text-muted">Sem registos</td>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">Sem registos</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            <?php endforeach; ?>
+            </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h4 class="card-title">Pagamentos</h4>
+                    <p class="card-title-desc">Últimos registos de pagamentos do cliente</p>
 
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th class="text-center">Estado</th>
+                                <th>Método</th>
+                                <th>Referência</th>
+                                <th>Transação</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Moeda</th>
+                                <th class="text-center">Data</th>
+                                <th class="text-end" style="width: 90px;">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (!empty($payments)): ?>
+                                <?php foreach ($payments as $payment): ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?= esc($payment['id']) ?></td>
+                                        <td class="text-center">
+                                            <?php
+                                            $statusClass = match ($payment['status']) {
+                                                'pending'  => 'bg-warning text-dark',
+                                                'paid'     => 'bg-success',
+                                                'failed'   => 'bg-danger',
+                                                'refunded' => 'bg-primary',
+                                                'partial'  => 'bg-info text-dark',
+                                                default    => 'bg-light text-dark',
+                                            };
+                                            ?>
+                                            <span class="badge <?= $statusClass ?> w-100">
+                                                <?= ucfirst($payment['status']) ?>
+                                            </span>
+                                        </td>
+                                        <td><?= esc($payment['method']) ?: '<span class="text-muted">—</span>' ?></td>
+                                        <td><?= esc($payment['reference']) ?: '<span class="text-muted">—</span>' ?></td>
+                                        <td><?= esc($payment['transaction_id']) ?: '<span class="text-muted">—</span>' ?></td>
+
+                                        <td class="text-end fw-semibold">
+                                            <?= number_format($payment['amount'], 2, ',', '.') ?> €
+                                        </td>
+                                        <td class="text-center"><?= esc($payment['currency'] ?? 'EUR') ?></td>
+                                        <td class="text-center">
+                                            <?= !empty($payment['paid_at'])
+                                                ? date('d/m/Y', strtotime($payment['paid_at']))
+                                                : '<span class="text-muted">—</span>' ?>
+                                        </td>
+                                        <td class="text-end">
+                                            <ul class="list-unstyled hstack gap-1 mb-0 justify-content-end">
+                                                <li>
+                                                    <a href="<?= base_url('admin/payments/view/' . $payment['id']) ?>"
+                                                       class="btn btn-sm btn-light text-info"
+                                                       title="Ver detalhes do pagamento">
+                                                        <i class="mdi mdi-eye-outline"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted">Sem registos</td>
+                                </tr>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h4 class="card-title">Envios</h4>
+                    <p class="card-title-desc">Últimos registos de envios do cliente</p>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th>Transportadora</th>
+                                <th>Nº de Rastreamento</th>
+                                <th class="text-center">Enviada em</th>
+                                <th class="text-center">Criada em</th>
+                                <th class="text-end" style="width: 90px;">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (!empty($shipments)): ?>
+                                <?php foreach ($shipments as $shipment): ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?= esc($shipment['id']) ?></td>
+                                        <td><?= esc($shipment['carrier']) ?: '<span class="text-muted">—</span>' ?></td>
+                                        <td><?= esc($shipment['tracking_number']) ?: '<span class="text-muted">—</span>' ?></td>
+                                        <td class="text-center">
+                                            <?= !empty($shipment['shipped_at'])
+                                                ? date('d/m/Y', strtotime($shipment['shipped_at']))
+                                                : '<span class="text-muted">—</span>' ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?= !empty($shipment['created_at'])
+                                                ? date('d/m/Y', strtotime($shipment['created_at']))
+                                                : '<span class="text-muted">—</span>' ?>
+                                        </td>
+                                        <td class="text-end">
+                                            <ul class="list-unstyled hstack gap-1 mb-0 justify-content-end">
+                                                <li>
+                                                    <a href="<?= base_url('admin/shipments/view/' . $shipment['id']) ?>"
+                                                       class="btn btn-sm btn-light text-info"
+                                                       title="Ver detalhes do envio">
+                                                        <i class="mdi mdi-eye-outline"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Sem registos</td>
+                                </tr>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h4 class="card-title">Devoluções</h4>
+                    <p class="card-title-desc">Últimos registos de devoluções do cliente</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th class="text-center">Estado</th>
+                                <th>Motivo</th>
+                                <th>Resolução</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Criado em</th>
+                                <th class="text-end" style="width: 90px;">Ações</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (!empty($returns)): ?>
+                                <?php foreach ($returns as $return): ?>
+                                    <tr>
+                                        <td class="fw-semibold"><?= esc($return['id']) ?></td>
+
+                                        <td class="text-center">
+                                            <?php
+                                            $statusClass = match ($return['status']) {
+                                                'pending'   => 'bg-warning text-dark',
+                                                'approved'  => 'bg-success',
+                                                'rejected'  => 'bg-danger',
+                                                'received'  => 'bg-info text-dark',
+                                                'refunded'  => 'bg-primary',
+                                                default     => 'bg-light text-dark',
+                                            };
+                                            ?>
+                                            <span class="badge <?= $statusClass ?> w-100">
+                                    <?= ucfirst($return['status']) ?>
+                                </span>
+                                        </td>
+
+                                        <td><?= esc($return['reason']) ?: '<span class="text-muted">—</span>' ?></td>
+                                        <td><?= esc($return['resolution']) ?: '<span class="text-muted">—</span>' ?></td>
+
+                                        <td class="text-end fw-semibold">
+                                            <?= number_format($return['refund_amount'], 2, ',', '.') ?> €
+                                        </td>
+
+                                        <td class="text-center">
+                                            <?= !empty($return['created_at'])
+                                                ? date('d/m/Y', strtotime($return['created_at']))
+                                                : '<span class="text-muted">—</span>' ?>
+                                        </td>
+
+                                        <td class="text-end">
+                                            <ul class="list-unstyled hstack gap-1 mb-0 justify-content-end">
+                                                <li>
+                                                    <a href="<?= base_url('admin/returns/view/' . $return['id']) ?>"
+                                                       class="btn btn-sm btn-light text-info"
+                                                       title="Ver detalhes da devolução">
+                                                        <i class="mdi mdi-eye-outline"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Sem registos</td>
+                                </tr>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-
         <!-- Coluna Lateral -->
         <div class="col-4">
             <div class="card">

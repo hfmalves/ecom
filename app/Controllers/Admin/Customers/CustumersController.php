@@ -10,6 +10,13 @@ use App\Models\Admin\Customers\CustomerReviewModel;
 use App\Models\Admin\Customers\CustomerWishlistModel;
 use App\Models\Admin\Customers\CustomerGroupModel;
 
+use App\Models\Admin\Sales\OrdersModel;
+use App\Models\Admin\Sales\OrdersItemsModel;
+
+use App\Models\Admin\Sales\PaymentsModel;
+use App\Models\Admin\Sales\OrdersShipmentsModel;
+use App\Models\Admin\Sales\OrdersReturnsModel;
+
 class CustumersController extends BaseController
 {
     protected $customerModel;
@@ -17,6 +24,12 @@ class CustumersController extends BaseController
     protected $customerReviewModel;
     protected $customerWishlistModel;
     protected $customerGroupModel;
+
+    protected $OrdersModel;
+    protected $OrdersItemsModel;
+    protected $PaymentsModel;
+    protected $OrdersShipmentsModel;
+    protected $OrdersReturnsModel;
     public function __construct()
     {
         $this->customerModel = new CustomerModel();
@@ -24,6 +37,11 @@ class CustumersController extends BaseController
         $this->customerReviewModel = new CustomerReviewModel();
         $this->customerWishlistModel = new CustomerWishlistModel();
         $this->customerGroupModel = new CustomerGroupModel();
+        $this->OrdersModel = new OrdersModel();
+        $this->OrdersItemsModel = new OrdersItemsModel();
+        $this->PaymentsModel = new PaymentsModel();
+        $this->OrdersShipmentsModel = new OrdersShipmentsModel();
+        $this->OrdersReturnsModel = new OrdersReturnsModel();
     }
     public function index()
     {
@@ -57,12 +75,43 @@ class CustumersController extends BaseController
         }
         $customer = $this->customerModel->find($id);
         $groups = $this->customerGroupModel->findAll();
-        if (!$customer) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Client com ID $id não encontrado");
+        if (! $customer) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Cliente com ID $id não encontrado");
         }
+        $orders = $this->OrdersModel ->where('customer_id', $id)->orderBy('created_at', 'DESC')->limit(10)->findAll();
+        $orderIds = array_column($orders, 'id');
+        $payments = [];
+        if (!empty($orderIds)) {
+            $payments = $this->PaymentsModel
+                ->whereIn('order_id', $orderIds)
+                ->orderBy('created_at', 'DESC')
+                ->limit(10)
+                ->findAll();
+        }
+        $shipments = [];
+        if (!empty($orderIds)) {
+            $shipments = $this->OrdersShipmentsModel
+                ->whereIn('order_id', $orderIds)
+                ->orderBy('created_at', 'DESC')
+                ->limit(10)
+                ->findAll();
+        }
+        $returns = [];
+        if (!empty($orderIds)) {
+            $returns = $this->OrdersReturnsModel
+                ->whereIn('order_id', $orderIds)
+                ->orderBy('created_at', 'DESC')
+                ->limit(10)
+                ->findAll();
+        }
+
         $data = [
-            'customer' => $customer,
-            'costumers_group' => $groups
+            'customer'        => $customer,
+            'costumers_group' => $groups,
+            'orders'          => $orders,
+            'payments'        => $payments,
+            'shipments'       => $shipments,
+            'returns'         => $returns,
         ];
         return view('admin/customers/edit', $data);
     }
