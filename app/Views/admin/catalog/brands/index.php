@@ -3,6 +3,64 @@
 Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
+<div class="row mb-1">
+    <!-- Total de Marcas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Marcas</h6>
+                    <i class="mdi mdi-tag-multiple text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?? 0 ?></h3>
+                <small class="text-muted">registadas no sistema</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marcas Ativas -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Ativas</h6>
+                    <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?? 0 ?></h3>
+                <small class="text-muted">marcas visíveis no catálogo</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Em Destaque -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Em Destaque</h6>
+                    <i class="mdi mdi-star text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['featured'] ?? 0 ?></h3>
+                <small class="text-muted">marcas promovidas</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total de Produtos -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Produtos</h6>
+                    <i class="mdi mdi-package-variant-closed text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['products'] ?? 0 ?></h3>
+                <small class="text-muted">total de artigos registados</small>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -11,7 +69,7 @@ Dashboard
                     <div class="col-sm-4">
                         <div class="search-box me-2 mb-2 d-inline-block">
                             <div class="position-relative">
-                                <h4 class="card-title">Default Datatable</h4>
+                                <h4 class="card-title">Lista de Marcas</h4>
                             </div>
                         </div>
                     </div>
@@ -20,41 +78,84 @@ Dashboard
                             <button type="button" x-data="systemModal()"
                                     @click="open('#formBrand', 'md')"
                                     class="btn btn-primary">
-                                <i class="fa-solid fa-plus me-1"></i> Adicionar
+                                <i class="bx bx-plus-circle me-1"></i> Adicionar
                             </button>
                         </div>
                     </div><!-- end col-->
                 </div>
                 <div class="col-sm-12">
                     <div class="table-responsive">
-                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
+                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100 align-middle">
                             <thead class="table-light">
                             <tr>
+                                <th>Logo</th>
                                 <th>Nome</th>
-                                <th>Slug</th>
-                                <th>Descrição</th>
-                                <th>Imagem</th>
-                                <th>Ações</th>
+                                <th>Fornecedor</th>
+                                <th>País</th>
+                                <th>Website</th>
+                                <th>Artigos</th>
+                                <th>Status</th>
+                                <th>Destaque</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($brands as $brand): ?>
                                 <tr>
-                                    <td><?= esc($brand['name']) ?></td>
-                                    <td><?= esc($brand['slug']) ?></td>
-                                    <td><?= esc($brand['description']) ?></td>
-                                    <td><?= esc($brand['logo']) ?></td>
                                     <td>
-                                        <a href="<?= base_url('admin/catalog/brands/edit/' . $brand['id']) ?>"
-                                           class="btn btn-sm btn-primary w-100">
-                                            <i class="mdi mdi-pencil"></i>
-                                        </a>
+                                        <?php if (!empty($brand['logo']) && file_exists(FCPATH . 'uploads/brands/' . $brand['logo'])): ?>
+                                            <img src="<?= base_url('uploads/brands/' . $brand['logo']) ?>"
+                                                 alt="<?= esc($brand['name']) ?>"
+                                                 class="rounded border bg-light"
+                                                 width="40" height="40">
+                                        <?php else: ?>
+                                            <div class="bg-light text-muted text-center rounded"
+                                                 style="width:40px;height:40px;line-height:40px;">
+                                                <i class="mdi mdi-image-off"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><strong><?= esc($brand['name']) ?></strong></td>
+                                    <td><?= esc($brand['supplier_name'] ?? '—') ?></td>
+                                    <td><?= esc($brand['country'] ?? '—') ?></td>
+                                    <td>
+                                        <?php if (!empty($brand['website'])): ?>
+                                            <a href="<?= esc($brand['website']) ?>" target="_blank">
+                                                <?= parse_url($brand['website'], PHP_URL_HOST) ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark"><?= $brand['product_count'] ?></span>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if ($brand['is_active']): ?>
+                                            <span class="badge bg-success">Ativa</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary">Inativa</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if ($brand['featured']): ?>
+                                            <i class="mdi mdi-star text-warning fs-5" title="Marca em destaque"></i>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <a href="<?= base_url('admin/catalog/brands/edit/' . $brand['id']) ?>"
+                                               class="btn btn-sm btn-light text-info" title="Editar marca">
+                                                <i class="mdi mdi-pencil-outline"></i>
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>

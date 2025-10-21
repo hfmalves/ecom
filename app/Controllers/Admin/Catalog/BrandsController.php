@@ -5,23 +5,56 @@ namespace App\Controllers\Admin\Catalog;
 use App\Controllers\BaseController;
 use App\Models\Admin\Catalog\BrandsModel;
 use App\Models\Admin\Catalog\ProductsModel;
-
+use App\Models\Admin\Catalog\SuppliersModel;
 class BrandsController extends BaseController
 {
     protected $brands;
     protected $products;
+    protected $suppliers;
 
     public function __construct()
     {
         $this->brands = new BrandsModel();
         $this->products = new ProductsModel();
+        $this->suppliers = new SuppliersModel();
     }
     public function index()
     {
+        // === Buscar todas as marcas ===
         $brands = $this->brands->findAll();
+
+        // === Agregar dados adicionais ===
+        foreach ($brands as &$brand) {
+            // total de produtos associados
+            $brand['product_count'] = $this->products
+                ->where('brand_id', $brand['id'])
+                ->countAllResults();
+
+            // fornecedor
+            $supplier = $this->suppliers
+                ->select('name')
+                ->where('id', $brand['supplier_id'])
+                ->get()
+                ->getRowArray();
+            $brand['supplier_name'] = $supplier['name'] ?? '—';
+        }
+
+        // === KPIs ===
+        $totalBrands     = count($brands);
+        $activeBrands    = array_sum(array_column($brands, 'is_active'));
+        $featuredBrands  = array_sum(array_column($brands, 'featured'));
+        $totalProducts   = $this->products->countAllResults();
+
         $data = [
             'brands' => $brands,
+            'kpi' => [
+                'total'     => $totalBrands,
+                'active'    => $activeBrands,
+                'featured'  => $featuredBrands,
+                'products'  => $totalProducts,
+            ],
         ];
+
         return view('admin/catalog/brands/index', $data);
     }
     public function store()
@@ -59,17 +92,23 @@ class BrandsController extends BaseController
     public function edit($id = null)
     {
         if ($id === null) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Marca não encontrado');
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Marca não encontrada');
         }
-        $brands = $this->brands->find($id);
-        if (!$brands) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException("Marca com ID $id não encontrado");
+        $brand = $this->brands->find($id);
+        if (!$brand) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException("Marca com ID {$id} não encontrada");
         }
+        $suppliers = $this->suppliers
+            ->select('id, name')
+            ->orderBy('name', 'ASC')
+            ->findAll();
         $data = [
-            'brands' => $brands
+            'brands'    => $brand,
+            'suppliers' => $suppliers,
         ];
         return view('admin/catalog/brands/edit', $data);
     }
+
     public function update()
     {
         $data = $this->request->getJSON(true);

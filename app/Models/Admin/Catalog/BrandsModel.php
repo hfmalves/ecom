@@ -10,15 +10,29 @@ class BrandsModel  extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields = [
+        'supplier_id',
         'name',
         'slug',
         'description',
         'logo',
+        'website',
+        'country',
+        'meta_title',
+        'meta_description',
+        'banner',
+        'sort_order',
+        'featured',
         'is_active',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -27,7 +41,7 @@ class BrandsModel  extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -35,11 +49,21 @@ class BrandsModel  extends Model
 
     // Validation
     protected $validationRules = [
-        'name'        => 'required|min_length[2]|max_length[150]|is_unique[brands.name]',
-        'slug'        => 'required|min_length[2]|max_length[150]|is_unique[brands.slug]',
-        'description' => 'permit_empty|string',
-        'logo'        => 'permit_empty|max_length[255]',
-        'is_active'   => 'required|in_list[0,1]',
+        'supplier_id'      => 'permit_empty|is_natural_no_zero|exists[suppliers.id]',
+        'name'             => 'required|min_length[2]|max_length[150]|is_unique[brands.name]',
+        'slug'             => 'required|min_length[2]|max_length[150]|is_unique[brands.slug]',
+        'description'      => 'permit_empty|string',
+        'logo'             => 'permit_empty|max_length[255]',
+        'website'          => 'permit_empty|valid_url|max_length[255]',
+        'country'          => 'permit_empty|max_length[100]',
+        'meta_title'       => 'permit_empty|max_length[255]',
+        'meta_description' => 'permit_empty|max_length[255]',
+        'banner'           => 'permit_empty|max_length[255]',
+        'sort_order'       => 'permit_empty|integer',
+        'featured'         => 'permit_empty|in_list[0,1]',
+        'is_active'        => 'required|in_list[0,1]',
+        'created_by'       => 'permit_empty|integer',
+        'updated_by'       => 'permit_empty|integer',
     ];
     protected $validationMessages = [
         'name' => [
@@ -54,15 +78,19 @@ class BrandsModel  extends Model
             'max_length' => 'O slug não pode ter mais de 150 caracteres.',
             'is_unique'  => 'Já existe uma marca com este slug.',
         ],
-        'description' => [
-            'string' => 'A descrição deve ser um texto válido.',
+        'website' => [
+            'valid_url'  => 'O campo Website deve conter um URL válido.',
+            'max_length' => 'O Website não pode ter mais de 255 caracteres.',
         ],
-        'logo' => [
-            'max_length' => 'O caminho do logo não pode ter mais de 255 caracteres.',
+        'country' => [
+            'max_length' => 'O nome do país não pode ter mais de 100 caracteres.',
         ],
         'is_active' => [
             'required' => 'O campo "Ativo" é obrigatório.',
-            'in_list'  => 'O campo "Ativo" deve ser 0 (não) ou 1 (sim).',
+            'in_list'  => 'O campo "Ativo" deve ser 0 (Inativo) ou 1 (Ativo).',
+        ],
+        'featured' => [
+            'in_list'  => 'O campo "Destaque" deve ser 0 (Não) ou 1 (Sim).',
         ],
     ];
 
