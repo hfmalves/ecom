@@ -29,12 +29,20 @@ class CustumersGroupsController extends BaseController
     }
     public function index()
     {
-        $customers_groups = $this->customerGroupModel->findAll();
+        $kpi = [
+            'total'        => $this->customerGroupModel->countAllResults(),
+            'active'       => $this->customerGroupModel->where('status', 'active')->countAllResults(true),
+            'inactive'     => $this->customerGroupModel->where('status', 'inactive')->countAllResults(true),
+            'defaultGroup' => $this->customerGroupModel->where('is_default', 1)->countAllResults(true),
+        ];
+        $customers_groups = $this->customerGroupModel->orderBy('name', 'ASC')->findAll();
         $data = [
-            'costumers_groups' => $customers_groups
+            'costumers_groups' => $customers_groups,
+            'kpi'              => $kpi,
         ];
         return view('admin/customers/groups/index', $data);
     }
+
     public function store()
     {
         $data = $this->request->getJSON(true);

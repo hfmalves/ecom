@@ -3,6 +3,56 @@
 Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
+<div class="row mb-1">
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Grupos</h6>
+                    <i class="mdi mdi-account-group-outline text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?? 0 ?></h3>
+                <small class="text-muted">registados no sistema</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Ativos</h6>
+                    <i class="mdi mdi-check-decagram text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?? 0 ?></h3>
+                <small class="text-muted">grupos disponíveis</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Inativos</h6>
+                    <i class="mdi mdi-close-octagon-outline text-danger fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['inactive'] ?? 0 ?></h3>
+                <small class="text-muted">grupos desativados</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Grupo Padrão</h6>
+                    <i class="mdi mdi-star-outline text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['defaultGroup'] ?? 0 ?></h3>
+                <small class="text-muted">grupo predefinido ativo</small>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -10,8 +60,9 @@ Dashboard
                 <div class="row mb-2">
                     <div class="col-sm-4">
                         <div class="search-box me-2 mb-2 d-inline-block">
-                            <div class="position-relative">
-                                <h4 class="card-title">Default Datatable</h4>
+                            <div>
+                                <h4 class="card-title mb-1">Grupos de Clientes</h4>
+                                <p class="text-muted mb-0">Gerir regras e descontos por grupo</p>
                             </div>
                         </div>
                     </div>
@@ -20,15 +71,14 @@ Dashboard
                             <button type="button" x-data="systemModal()"
                                     @click="open('#createCustomerGroup', 'md')"
                                     class="btn btn-primary">
-                                <i class="mdi mdi-plus me-1"></i> Adicionar Grupo
+                                <i class="mdi mdi-plus label-icon"></i>Adicionar
                             </button>
                         </div>
                     </div><!-- end col-->
                 </div>
                 <div class="col-sm-12">
                     <div class="table-responsive">
-                        <h1>Grupos de Clientes</h1>
-                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
+                        <table id="datatable" class="table table-hover table-striped align-middle mb-0 w-100">
                             <thead class="table-light">
                             <tr>
                                 <th>Nome</th>
@@ -36,64 +86,87 @@ Dashboard
                                 <th>Desconto (%)</th>
                                 <th>Min. Encomenda</th>
                                 <th>Max. Encomenda</th>
-                                <th>Padrão</th>
-                                <th>Status</th>
-                                <th>Ações</th>
+                                <th class="text-center">Padrão</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Ações</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($costumers_groups as $g): ?>
                                 <tr>
-                                    <td><?= esc($g['name']) ?></td>
-                                    <td><?= esc($g['description']) ?></td>
-                                    <td><?= esc($g['discount_percent']) ?>%</td>
+                                    <td class="fw-semibold text-dark"><?= esc($g['name']) ?></td>
+                                    <td class="text-muted"><?= esc($g['description']) ?></td>
+                                    <td><?= number_format($g['discount_percent'], 2, ',', '.') ?>%</td>
                                     <td><?= $g['min_order_value'] ? number_format($g['min_order_value'], 2, ',', '.') : '-' ?></td>
                                     <td><?= $g['max_order_value'] ? number_format($g['max_order_value'], 2, ',', '.') : '-' ?></td>
-                                    <td>
-                                        <?= $g['is_default'] ? '<span class="badge bg-primary w-100">Sim</span>' : '<span class="badge bg-secondary w-100">Não</span>' ?>
+
+                                    <!-- Padrão -->
+                                    <td class="text-center">
+                                        <?= $g['is_default']
+                                                ? '<span class="badge bg-primary">Sim</span>'
+                                                : '<span class="badge bg-secondary">Não</span>' ?>
                                     </td>
-                                    <td>
+
+                                    <!-- Status -->
+                                    <td class="text-center">
                                         <?= $g['status'] === 'active'
-                                                ? '<span class="badge bg-success w-100">Ativo</span>'
-                                                : '<span class="badge bg-danger w-100">Inativo</span>' ?>
+                                                ? '<span class="badge bg-success">Ativo</span>'
+                                                : '<span class="badge bg-danger">Inativo</span>' ?>
                                     </td>
                                     <td class="text-center">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="mdi mdi-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li>
-                                                    <button type="button" x-data="systemModal()"
-                                                            @click="open('#editCustomerGroup', 'md', {
-                                                                id: '<?= $g['id'] ?>',
-                                                                name: '<?= esc($g['name']) ?>',
-                                                                description: '<?= esc($g['description']) ?>',
-                                                                discount_percent: '<?= $g['discount_percent'] ?>',
-                                                                min_order_value: '<?= $g['min_order_value'] ?>',
-                                                                max_order_value: '<?= $g['max_order_value'] ?>',
-                                                                is_default: '<?= $g['is_default'] ?>',
-                                                                status: '<?= $g['status'] ?>'
-                                                            })"
-                                                            class="dropdown-item">
-                                                        <i class="mdi mdi-pencil font-size-16 text-success me-1"></i> Editar
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <button type="button" x-data="systemModal()"
-                                                            @click="open('#deleteCustomerGroup', 'md', {
-                                                                id: '<?= $g['id'] ?>',
-                                                                name: '<?= esc($g['name']) ?>'
-                                                            })"
-                                                            class="dropdown-item">
-                                                        <i class="mdi mdi-trash-can font-size-16 text-danger me-1"></i> Eliminar
-                                                    </button>
-                                                </li>
-
-                                            </ul>
-                                        </div>
+                                        <ul class="list-unstyled hstack gap-1 mb-0 justify-content-center">
+                                            <li>
+                                                <a href="javascript:void(0);"
+                                                   class="btn btn-sm btn-light text-primary"
+                                                   title="Ver Grupo">
+                                                    <i class="mdi mdi-eye-outline"></i>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-light text-info"
+                                                        title="Editar Grupo"
+                                                        x-data="systemModal()"
+                                                        @click="open('#editCustomerGroup', 'md', {
+                                                            id: '<?= $g['id'] ?>',
+                                                            name: '<?= esc($g['name']) ?>',
+                                                            description: '<?= esc($g['description']) ?>',
+                                                            discount_percent: '<?= $g['discount_percent'] ?>',
+                                                            min_order_value: '<?= $g['min_order_value'] ?>',
+                                                            max_order_value: '<?= $g['max_order_value'] ?>',
+                                                            is_default: '<?= $g['is_default'] ?>',
+                                                            status: '<?= $g['status'] ?>'
+                                                        })">
+                                                    <i class="mdi mdi-pencil-outline"></i>
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-light text-warning"
+                                                        title="Alterar Estado"
+                                                        @click="
+                                                        window.dispatchEvent(new CustomEvent('group-toggle', {
+                                                            detail: { id: <?= $g['id'] ?>, name: '<?= addslashes($g['name']) ?>' }
+                                                        }));
+                                                        new bootstrap.Modal(document.getElementById('toggleGroupStatus')).show();
+                                                    ">
+                                                    <i class="mdi mdi-cancel"></i>
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-light text-danger"
+                                                        title="Eliminar Grupo"
+                                                        x-data="systemModal()"
+                                                        @click="open('#deleteCustomerGroup', 'md', {
+                                                        id: '<?= $g['id'] ?>',
+                                                        name: '<?= esc($g['name']) ?>'
+                                                    })">
+                                                    <i class="mdi mdi-trash-can-outline"></i>
+                                                </button>
+                                            </li>
+                                        </ul>
                                     </td>
-
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
