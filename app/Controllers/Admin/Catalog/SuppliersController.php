@@ -20,7 +20,6 @@ class SuppliersController extends BaseController
     {
         $suppliers = $this->suppliers;
         $rawSuppliers = $suppliers->findAll();
-
         // === KPIs ===
         $totalSuppliers    = count($rawSuppliers);
         $ativosCount       = 0;
@@ -71,15 +70,19 @@ class SuppliersController extends BaseController
         ];
         return view('admin/catalog/suppliers/index', $data);
     }
-
-
-
     public function store()
     {
         $data = $this->request->getJSON(true);
-        if (empty($data['status'])) {
-            $data['status'] = 'active';
-        }
+        $data = array_map('trim', $data ?? []);
+        $data['code']        = $data['code'] ?? strtoupper(bin2hex(random_bytes(3))); // Código interno ex: 4F2A9B
+        $data['currency']    = $data['currency'] ?? 'EUR';
+        $data['status']      = $data['status'] ?? 'active';
+        $data['risk_level']  = $data['risk_level'] ?? 'low';
+        $data['type']        = $data['type'] ?? 'manufacturer';
+        $data['created_at']  = date('Y-m-d H:i:s');
+        $data['updated_at']  = date('Y-m-d H:i:s');
+        $allowed = $this->suppliers->allowedFields;
+        $data = array_intersect_key($data, array_flip($allowed));
         if (! $this->suppliers->insert($data)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -95,7 +98,7 @@ class SuppliersController extends BaseController
             'status'   => 'success',
             'message'  => 'Fornecedor criado com sucesso!',
             'id'       => $id,
-            'redirect' => base_url('admin/catalog/suppliers/edit/'.$id),
+            'redirect' => base_url('admin/catalog/suppliers/edit/' . $id),
             'csrf'     => [
                 'token' => csrf_token(),
                 'hash'  => csrf_hash(),
@@ -159,4 +162,49 @@ class SuppliersController extends BaseController
             ],
         ]);
     }
+    public function delete()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'ID do fornecedor não enviado.',
+                'csrf' => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $supplier = $this->suppliers->find($data['id']);
+        if (! $supplier) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Fornecedor não encontrado.',
+                'csrf' => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        if (! $this->suppliers->delete($data['id'])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Erro ao eliminar o fornecedor.',
+                'csrf' => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Fornecedor eliminado com sucesso!',
+            'csrf' => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
+
 }

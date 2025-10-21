@@ -83,6 +83,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('store', 'SuppliersController::store');
             $routes->get('edit/(:num)', 'SuppliersController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'SuppliersController::update');
+            $routes->post('delete', 'SuppliersController::delete');
         });
         $routes->group('brands', function ($routes) {
             $routes->get('/', 'BrandsController::index', ['filter' => 'noauth']);

@@ -4,8 +4,6 @@ Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
 <div class="row g-3">
-
-    <!-- Total de Fornecedores -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -18,8 +16,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Fornecedores Ativos -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -32,8 +28,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Fornecedores Inativos -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -46,8 +40,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Percentagem de Ativos -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -60,8 +52,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Fornecedores com API Ligada -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -74,8 +64,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Fornecedores de Alto Risco -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -88,8 +76,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Países distintos -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -102,8 +88,6 @@ Dashboard
             </div>
         </div>
     </div>
-
-    <!-- Moedas distintas -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -116,9 +100,7 @@ Dashboard
             </div>
         </div>
     </div>
-
 </div>
-
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -216,7 +198,12 @@ Dashboard
                                                 <li>
                                                     <button type="button" class="btn btn-sm btn-light text-danger"
                                                             title="Eliminar fornecedor"
-                                                            onclick="confirmDelete(<?= $supplier['id'] ?>)">
+                                                            @click="
+                                                                window.dispatchEvent(new CustomEvent('supplier-delete', {
+                                                                    detail: { id: <?= $supplier['id'] ?>, name: '<?= addslashes($supplier['name']) ?>' }
+                                                                }));
+                                                                new bootstrap.Modal(document.getElementById('modalDeleteSupplier')).show();
+                                                            ">
                                                         <i class="mdi mdi-trash-can-outline"></i>
                                                     </button>
                                                 </li>
@@ -237,59 +224,114 @@ Dashboard
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">Criar Fornecedor</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
-
         <div class="modal-body"
              x-data="{
-                ...formHandler('/admin/catalog/suppliers/store',
-                  {
+                ...formHandler('/admin/catalog/suppliers/store', {
                     id: '',
                     name: '',
                     legal_number: '',
+                    vat: '',
                     email: '',
+                    phone: '',
+                    contact_person: '',
                     status: 'active',
+                    type: 'manufacturer',
                     <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-                  },
-                  { resetOnSuccess: true })
+                }, { resetOnSuccess: true })
              }"
-             x-init="
-                $el.addEventListener('fill-form', e => {
-                  Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
-                });
-                $el.addEventListener('reset-form', () => {
-                  Object.keys(form).forEach(k => {
-                    if (k !== '<?= csrf_token() ?>') form[k] = ''
-                  })
-                });
-                document.addEventListener('csrf-update', e => {
-                  form[e.detail.token] = e.detail.hash
-                });
-             ">
-
+             x-init="csrfHandler(form)">
             <form @submit.prevent="submit()">
-                <!-- Nome -->
-                <div class="mb-3">
-                    <label class="form-label">Nome *</label>
-                    <input type="text" class="form-control" name="name" x-model="form.name">
-                    <div class="text-danger small" x-text="errors.name"></div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nome *</label>
+                        <input type="text" class="form-control" x-model="form.name">
+                        <div class="text-danger small" x-text="errors.name"></div>
+                    </div>
                 </div>
-
-                <!-- Número Legal -->
-                <div class="mb-3">
-                    <label class="form-label">Número Legal *</label>
-                    <input type="text" class="form-control" name="legal_number" x-model="form.legal_number">
-                    <div class="text-danger small" x-text="errors.legal_number"></div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">NIF / Número Legal *</label>
+                        <input type="text" class="form-control" x-model="form.legal_number">
+                        <div class="text-danger small" x-text="errors.legal_number"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">VAT / Internacional</label>
+                        <input type="text" class="form-control" x-model="form.vat">
+                        <div class="text-danger small" x-text="errors.vat"></div>
+                    </div>
                 </div>
-
-                <!-- Email -->
-                <div class="mb-3">
-                    <label class="form-label">Email *</label>
-                    <input type="email" class="form-control" name="email" x-model="form.email">
-                    <div class="text-danger small" x-text="errors.email"></div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Email *</label>
+                        <input type="email" class="form-control" x-model="form.email">
+                        <div class="text-danger small" x-text="errors.email"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Telefone *</label>
+                        <input type="text" class="form-control" x-model="form.phone">
+                        <div class="text-danger small" x-text="errors.phone"></div>
+                    </div>
                 </div>
-
-                <div class="modal-footer mt-3">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Pessoa de Contacto</label>
+                        <input type="text" class="form-control" x-model="form.contact_person">
+                        <div class="text-danger small" x-text="errors.contact_person"></div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6"
+                         x-data="{ field: 'type' }"
+                         x-init="$nextTick(() => {
+                             const el = $refs.select;
+                             $(el).select2({
+                                 width: '100%',
+                                 placeholder: '-- Selecionar --',
+                                 dropdownParent: $(el).closest('.modal-content'),
+                                 language: 'pt'
+                             });
+                             $(el).val(form[field]).trigger('change.select2');
+                             $(el).on('change', () => form[field] = $(el).val());
+                             $watch('form[field]', val => setTimeout(() => $(el).val(val).trigger('change.select2'), 10));
+                         })">
+                        <label class="form-label" :for="field">Tipo</label>
+                        <select class="form-select select2" x-ref="select" :id="field" :name="field">
+                            <option value="manufacturer">Fabricante</option>
+                            <option value="distributor">Distribuidor</option>
+                            <option value="service">Serviço</option>
+                            <option value="other">Outro</option>
+                        </select>
+                        <template x-if="errors[field]">
+                            <small class="text-danger" x-text="errors[field]"></small>
+                        </template>
+                    </div>
+                    <div class="col-md-6"
+                         x-data="{ field: 'status' }"
+                         x-init="$nextTick(() => {
+                             const el = $refs.select;
+                             $(el).select2({
+                                 width: '100%',
+                                 placeholder: '-- Selecionar --',
+                                 dropdownParent: $(el).closest('.modal-content'),
+                                 language: 'pt'
+                             });
+                             $(el).val(form[field]).trigger('change.select2');
+                             $(el).on('change', () => form[field] = $(el).val());
+                             $watch('form[field]', val => setTimeout(() => $(el).val(val).trigger('change.select2'), 10));
+                         })">
+                        <label class="form-label" :for="field">Estado</label>
+                        <select class="form-select select2" x-ref="select" :id="field" :name="field">
+                            <option value="active">Ativo</option>
+                            <option value="inactive">Inativo</option>
+                        </select>
+                        <template x-if="errors[field]">
+                            <small class="text-danger" x-text="errors[field]"></small>
+                        </template>
+                    </div>
+                </div>
+                <div class="modal-footer mt-4">
                     <button type="submit" class="btn btn-primary" :disabled="loading">
                         <span x-show="!loading">Guardar</span>
                         <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A guardar...</span>
@@ -300,6 +342,60 @@ Dashboard
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalDeleteSupplier" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content"
+             x-data="{
+                form: { id: '', name: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' },
+                loading: false,
+                submit() {
+                    this.loading = true;
+                    fetch('/admin/catalog/suppliers/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.form)
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        this.loading = false;
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalDeleteSupplier'));
+                        if (modal) modal.hide();
 
+                        if (data.message) {
+                            const type = data.status === 'success' ? 'success' : 'error';
+                            showToast(data.message, type);
+                        }
 
+                        if (data.status === 'success') {
+                            setTimeout(() => location.reload(), 800);
+                        }
+                    })
+                    .catch(() => this.loading = false);
+                }
+             }"
+             x-init="
+                window.addEventListener('supplier-delete', e => {
+                    form.id = e.detail.id;
+                    form.name = e.detail.name;
+                });
+             ">
+            <div class="modal-header bg-danger-subtle">
+                <h5 class="modal-title text-danger">Eliminar Fornecedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="mdi mdi-alert-outline text-danger" style="font-size: 48px;"></i>
+                <p class="mt-2">Tem a certeza que quer eliminar este fornecedor?</p>
+                <p><strong>Nome:</strong> <span x-text="form.name"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button @click="submit" type="button" class="btn btn-danger" :disabled="loading">
+                    <span x-show="!loading">Confirmar</span>
+                    <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A eliminar...</span>
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
 <?= $this->endSection() ?>

@@ -45,14 +45,13 @@ class SuppliersModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $deletedField  = 'deleted_at';
-
-    // Validation
     protected $validationRules = [
+        'id'             => 'permit_empty|is_natural_no_zero|is_not_unique[suppliers.id]',
         'name'           => 'required|min_length[3]|max_length[255]',
         'contact_person' => 'permit_empty|max_length[150]',
-        'legal_number'   => 'required|max_length[20]',
-        'vat'            => 'permit_empty|max_length[50]',
-        'email' => 'required|valid_email|max_length[255]|is_unique[suppliers.email]',
+        'legal_number'   => 'required|max_length[20]|is_unique[suppliers.legal_number,id,{id}]',
+        'vat'            => 'permit_empty|max_length[50]|is_unique[suppliers.vat,id,{id}]',
+        'email'          => 'required|valid_email|max_length[255]|is_unique[suppliers.email,id,{id}]',
         'phone'          => 'permit_empty|max_length[50]',
         'website'        => 'permit_empty|max_length[255]',
         'address'        => 'permit_empty|string',
@@ -66,7 +65,6 @@ class SuppliersModel extends Model
         'api_url'        => 'permit_empty|valid_url_strict|max_length[255]',
         'status'         => 'required|in_list[active,inactive]',
     ];
-
     protected $validationMessages = [
         'name' => [
             'required'   => 'O nome do fornecedor é obrigatório.',
@@ -74,13 +72,18 @@ class SuppliersModel extends Model
             'max_length' => 'O nome não pode ter mais de 255 caracteres.',
         ],
         'legal_number' => [
-            'required'   => 'O nif do fornecedor é obrigatório.',
-            'max_length' => 'O nif não pode ter mais de 20 caracteres.',
+            'required'   => 'O NIF do fornecedor é obrigatório.',
+            'max_length' => 'O NIF não pode ter mais de 20 caracteres.',
+            'is_unique'  => 'Já existe um fornecedor com este NIF.',
+        ],
+        'vat' => [
+            'max_length' => 'O VAT não pode ter mais de 50 caracteres.',
+            'is_unique'  => 'Já existe um fornecedor com este número de VAT.',
         ],
         'email' => [
-            'required'   => 'O email é obrigatório.',
-            'valid_email'=> 'O email fornecido não é válido.',
-            'is_unique'  => 'Já existe um fornecedor com este email.',
+            'required'    => 'O email é obrigatório.',
+            'valid_email' => 'O email fornecido não é válido.',
+            'is_unique'   => 'Já existe um fornecedor com este email.',
         ],
         'website' => [
             'valid_url_strict' => 'O website deve ser um URL válido.',
@@ -93,7 +96,6 @@ class SuppliersModel extends Model
             'in_list'  => 'O estado deve ser "active" ou "inactive".',
         ],
     ];
-
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
