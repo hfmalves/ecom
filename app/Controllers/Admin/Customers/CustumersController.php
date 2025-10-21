@@ -17,7 +17,6 @@ class CustumersController extends BaseController
     protected $customerReviewModel;
     protected $customerWishlistModel;
     protected $customerGroupModel;
-
     public function __construct()
     {
         $this->customerModel = new CustomerModel();
@@ -51,7 +50,6 @@ class CustumersController extends BaseController
         ];
         return view('admin/customers/index', $data);
     }
-
     public function edit($id = null)
     {
         if ($id === null) {
