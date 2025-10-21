@@ -19,33 +19,60 @@ class SuppliersController extends BaseController
     public function index()
     {
         $suppliers = $this->suppliers;
+        $rawSuppliers = $suppliers->findAll();
 
-        $total        = $suppliers->countAllResults();
-        $ativos       = $suppliers->where('status', 'active')->countAllResults();
-        $inativos     = $suppliers->where('status', 'inactive')->countAllResults();
-        $ativosPct    = $total > 0 ? round(($ativos / $total) * 100, 1) : 0;
-        $paises       = $suppliers->select('country')->distinct()->countAllResults();
-        $moedas       = $suppliers->select('currency')->distinct()->countAllResults();
-        $pagamentos   = $suppliers->select('payment_terms')->distinct()->countAllResults();
-        $ibanValidos  = $suppliers->where('iban IS NOT NULL')->where('iban !=', '')->countAllResults();
-        $ibanPct      = $total > 0 ? round(($ibanValidos / $total) * 100, 1) : 0;
+        // === KPIs ===
+        $totalSuppliers    = count($rawSuppliers);
+        $ativosCount       = 0;
+        $inativosCount     = 0;
+        $altoRiscoCount    = 0;
+        $comApiCount       = 0;
+        $distinctCountries = [];
+        $distinctCurrencies = [];
+        $ibanValidCount    = 0;
 
+        foreach ($rawSuppliers as $s) {
+            if ($s['status'] === 'active') {
+                $ativosCount++;
+            } else {
+                $inativosCount++;
+            }
+            if (!empty($s['api_url']) || !empty($s['api_key'])) {
+                $comApiCount++;
+            }
+            if (!empty($s['risk_level']) && $s['risk_level'] === 'high') {
+                $altoRiscoCount++;
+            }
+            if (!empty($s['iban'])) {
+                $ibanValidCount++;
+            }
+            if (!empty($s['country'])) {
+                $distinctCountries[$s['country']] = true;
+            }
+            if (!empty($s['currency'])) {
+                $distinctCurrencies[$s['currency']] = true;
+            }
+        }
+        $ativosPct = $totalSuppliers > 0 ? round(($ativosCount / $totalSuppliers) * 100, 1) : 0;
+        $ibanPct   = $totalSuppliers > 0 ? round(($ibanValidCount / $totalSuppliers) * 100, 1) : 0;
         $data = [
-            'suppliers' => $suppliers->findAll(),
+            'suppliers' => $rawSuppliers,
             'kpi' => [
-                'total'       => $total,
-                'active'      => $ativos,
-                'inactive'    => $inativos,
-                'activePct'   => $ativosPct,
-                'countries'   => $paises,
-                'currencies'  => $moedas,
-                'terms'       => $pagamentos,
-                'ibanPct'     => $ibanPct,
+                'total'         => $totalSuppliers,
+                'ativos'        => $ativosCount,
+                'inativos'      => $inativosCount,
+                'ativosPct'     => $ativosPct,
+                'altoRisco'     => $altoRiscoCount,
+                'apiLigados'    => $comApiCount,
+                'paises'        => count($distinctCountries),
+                'moedas'        => count($distinctCurrencies),
+                'ibanPct'       => $ibanPct,
             ],
         ];
-
         return view('admin/catalog/suppliers/index', $data);
     }
+
+
 
     public function store()
     {

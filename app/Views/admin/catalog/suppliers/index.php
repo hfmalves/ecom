@@ -3,7 +3,7 @@
 Dashboard
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
-<div class="row g-3 mb-4">
+<div class="row g-3">
 
     <!-- Total de Fornecedores -->
     <div class="col-xl-3 col-sm-6">
@@ -27,7 +27,7 @@ Dashboard
                     <h6 class="text-muted">Ativos</h6>
                     <i class="mdi mdi-check-decagram text-success fs-4"></i>
                 </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['active'] ?? 0 ?></h3>
+                <h3 class="fw-semibold mb-0"><?= $kpi['ativos'] ?? 0 ?></h3>
                 <small class="text-muted">disponíveis para compras</small>
             </div>
         </div>
@@ -39,15 +39,15 @@ Dashboard
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <h6 class="text-muted">Inativos</h6>
-                    <i class="mdi mdi-minus-circle-outline text-secondary fs-4"></i>
+                    <i class="mdi mdi-close-octagon text-secondary fs-4"></i>
                 </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['inactive'] ?? 0 ?></h3>
+                <h3 class="fw-semibold mb-0"><?= $kpi['inativos'] ?? 0 ?></h3>
                 <small class="text-muted">não operacionais</small>
             </div>
         </div>
     </div>
 
-    <!-- Percentagem Ativos -->
+    <!-- Percentagem de Ativos -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -55,13 +55,41 @@ Dashboard
                     <h6 class="text-muted">% Ativos</h6>
                     <i class="mdi mdi-chart-pie text-info fs-4"></i>
                 </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['activePct'] ?? 0 ?>%</h3>
+                <h3 class="fw-semibold mb-0"><?= $kpi['ativosPct'] ?? 0 ?>%</h3>
                 <small class="text-muted">taxa de atividade</small>
             </div>
         </div>
     </div>
 
-    <!-- Países -->
+    <!-- Fornecedores com API Ligada -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Integrações API</h6>
+                    <i class="mdi mdi-cloud-sync text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['apiLigados'] ?? 0 ?></h3>
+                <small class="text-muted">fornecedores com ligação ativa</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fornecedores de Alto Risco -->
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Alto Risco</h6>
+                    <i class="mdi mdi-alert-octagram text-danger fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['altoRisco'] ?? 0 ?></h3>
+                <small class="text-muted">fornecedores com risco elevado</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Países distintos -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -69,13 +97,13 @@ Dashboard
                     <h6 class="text-muted">Países</h6>
                     <i class="mdi mdi-earth text-warning fs-4"></i>
                 </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['countries'] ?? 0 ?></h3>
+                <h3 class="fw-semibold mb-0"><?= $kpi['paises'] ?? 0 ?></h3>
                 <small class="text-muted">origens distintas</small>
             </div>
         </div>
     </div>
 
-    <!-- Moedas -->
+    <!-- Moedas distintas -->
     <div class="col-xl-3 col-sm-6">
         <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
@@ -83,36 +111,8 @@ Dashboard
                     <h6 class="text-muted">Moedas</h6>
                     <i class="mdi mdi-currency-eur text-primary fs-4"></i>
                 </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['currencies'] ?? 0 ?></h3>
+                <h3 class="fw-semibold mb-0"><?= $kpi['moedas'] ?? 0 ?></h3>
                 <small class="text-muted">moedas distintas</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- Termos de Pagamento -->
-    <div class="col-xl-3 col-sm-6">
-        <div class="card border-0 shadow-sm hover-scale">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <h6 class="text-muted">Termos de Pagamento</h6>
-                    <i class="mdi mdi-calendar-clock text-secondary fs-4"></i>
-                </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['terms'] ?? 0 ?></h3>
-                <small class="text-muted">condições disponíveis</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- IBAN válidos -->
-    <div class="col-xl-3 col-sm-6">
-        <div class="card border-0 shadow-sm hover-scale">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <h6 class="text-muted">IBAN Válidos</h6>
-                    <i class="mdi mdi-bank-outline text-success fs-4"></i>
-                </div>
-                <h3 class="fw-semibold mb-0"><?= $kpi['ibanPct'] ?? 0 ?>%</h3>
-                <small class="text-muted">com dados bancários completos</small>
             </div>
         </div>
     </div>
@@ -146,63 +146,75 @@ Dashboard
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
                             <thead class="table-light">
                             <tr>
+                                <th>Código</th>
                                 <th>Nome</th>
                                 <th>Pessoa de Contacto</th>
                                 <th>Email</th>
                                 <th>Telefone</th>
-                                <th>Website</th>
-                                <th>Morada</th>
+                                <th>País</th>
+                                <th>Tipo</th>
+                                <th>Risco</th>
                                 <th>Status</th>
                                 <th class="text-center">Ações</th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php foreach ($suppliers as $supplier): ?>
+                                <?php
+                                // Traduções e estilos coerentes
+                                $tipo = match (strtolower($supplier['type'])) {
+                                    'manufacturer' => 'Fabricante',
+                                    'distributor'  => 'Distribuidor',
+                                    'service'      => 'Serviço',
+                                    'other'        => 'Outro',
+                                    default        => 'Desconhecido',
+                                };
+
+                                $riscoLabel = match (strtolower($supplier['risk_level'])) {
+                                    'high'   => 'Alto',
+                                    'medium' => 'Médio',
+                                    'low'    => 'Baixo',
+                                    default  => '—',
+                                };
+
+                                $riskColor = match (strtolower($supplier['risk_level'])) {
+                                    'high'   => 'danger',
+                                    'medium' => 'warning',
+                                    'low'    => 'success',
+                                    default  => 'secondary',
+                                };
+
+                                $statusLabel = $supplier['status'] === 'active' ? 'Ativo' : 'Inativo';
+                                $statusColor = $supplier['status'] === 'active' ? 'success' : 'secondary';
+                                ?>
                                 <tr>
-                                    <td><strong><?= esc($supplier['name']) ?></strong></td>
+                                    <td><strong><?= esc($supplier['code']) ?></strong></td>
+                                    <td><?= esc($supplier['name']) ?></td>
                                     <td>
                                         <?php
                                         $parts = explode(' ', trim($supplier['contact_person']));
                                         $shortName = $parts[0] ?? '';
-                                        if (count($parts) > 1) {
-                                            $shortName .= ' ' . end($parts);
-                                        }
+                                        if (count($parts) > 1) $shortName .= ' ' . end($parts);
                                         ?>
                                         <?= esc($shortName) ?>
                                     </td>
                                     <td><?= esc($supplier['email']) ?></td>
                                     <td><?= esc($supplier['phone']) ?></td>
-                                    <td>
-                                        <?php if (!empty($supplier['website'])): ?>
-                                            <a href="<?= esc($supplier['website']) ?>" target="_blank">
-                                                <?= esc($supplier['website']) ?>
-                                            </a>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?= esc($supplier['address']) ?><br>
-                                        <small class="text-muted"><?= esc($supplier['country']) ?></small>
-                                    </td>
-                                    <td>
-                                        <?php if ($supplier['status'] === 'active'): ?>
-                                            <span class="badge bg-success w-100">Ativo</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary w-100">Inativo</span>
-                                        <?php endif; ?>
-                                    </td>
+                                    <td><?= esc($supplier['country']) ?></td>
+                                    <td><span class="badge bg-info text-white w-100"><?= esc($tipo) ?></span></td>
+                                    <td><span class="badge bg-<?= $riskColor ?> text-white w-100"><?= esc(strtoupper($riscoLabel)) ?></span></td>
+                                    <td><span class="badge bg-<?= $statusColor ?> text-white w-100"><?= esc($statusLabel) ?></span></td>
                                     <td>
                                         <div class="d-flex justify-content-center">
                                             <ul class="list-unstyled hstack gap-1 mb-0">
                                                 <li>
                                                     <a href="<?= base_url('admin/catalog/suppliers/edit/' . $supplier['id']) ?>"
-                                                       class="btn btn-sm btn-light text-info"
-                                                       title="Editar fornecedor">
+                                                       class="btn btn-sm btn-light text-info" title="Editar fornecedor">
                                                         <i class="mdi mdi-pencil-outline"></i>
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-light text-danger"
+                                                    <button type="button" class="btn btn-sm btn-light text-danger"
                                                             title="Eliminar fornecedor"
                                                             onclick="confirmDelete(<?= $supplier['id'] ?>)">
                                                         <i class="mdi mdi-trash-can-outline"></i>
@@ -215,7 +227,6 @@ Dashboard
                             <?php endforeach; ?>
                             </tbody>
                         </table>
-
                     </div>
                 </div>
             </div>
