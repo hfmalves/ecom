@@ -22,7 +22,7 @@ class CustomersSeeder extends Seeder
 
         $customers = [];
 
-        for ($i = 0; $i < 2000; $i++) {
+        for ($i = 0; $i < 500; $i++) {
             $customers[] = [
                 'group_id'               => rand(1, 3),
                 'name'                   => $faker->name,

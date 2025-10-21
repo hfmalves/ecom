@@ -184,12 +184,6 @@ Dashboard
                                     <td class="text-center">
                                         <ul class="list-unstyled hstack gap-1 mb-0 justify-content-center">
                                             <li>
-                                                <a href="<?= base_url('admin/customers/view/' . $c['id']) ?>"
-                                                   class="btn btn-sm btn-light text-primary" title="Ver Detalhes">
-                                                    <i class="mdi mdi-eye-outline"></i>
-                                                </a>
-                                            </li>
-                                            <li>
                                                 <a href="<?= base_url('admin/customers/edit/' . $c['id']) ?>"
                                                    class="btn btn-sm btn-light text-info" title="Editar Cliente">
                                                     <i class="mdi mdi-pencil-outline"></i>
@@ -231,121 +225,103 @@ Dashboard
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
-<div id="formCustomer" class="d-none">
+<div id="formCustomer" class="modal fade" tabindex="-1" aria-hidden="true">
     <div class="modal-content">
         <div class="modal-header">
             <h5 class="modal-title">Criar Cliente</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
 
         <div class="modal-body"
              x-data="{
                 ...formHandler('/admin/customers/store',
-                  {
+                {
                     id: '',
                     group_id: '',
                     name: '',
                     email: '',
                     password: '',
                     phone: '',
+                    gender: '',
+                    notes: '',
                     is_active: '',
                     is_verified: '',
                     login_2step: '',
                     <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-                  },
-                  { resetOnSuccess: true })
-             }"
-                         x-init="
-                $el.addEventListener('fill-form', e => {
-                  Object.entries(e.detail).forEach(([k,v]) => { if (k in form) form[k] = v })
-                });
-                $el.addEventListener('reset-form', () => {
-                  Object.keys(form).forEach(k => {
-                    if (k !== '<?= csrf_token() ?>') form[k] = ''
-                  })
-                });
-                document.addEventListener('csrf-update', e => {
-                  form[e.detail.token] = e.detail.hash
-                });
-            ">
+                },
+                { resetOnSuccess: true })
+             }">
+
             <form @submit.prevent="submit()">
-                <!-- Nome -->
-                <div class="row mb-3">
-                    <div class="col-md-12" x-data="{ field: 'email' }">
-                        <label class="form-label">Nome *</label>
-                        <input type="text" class="form-control" name="name" x-model="form.name">
-                        <div class="text-danger small" x-text="errors.name"></div>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Nome *</label>
+                    <input type="text" class="form-control" name="name" x-model="form.name">
+                    <div class="text-danger small" x-text="errors.name"></div>
                 </div>
-                <!-- Email e Telefone -->
-                <div class="row mb-3">
-                    <div class="col-md-6" x-data="{ field: 'email' }">
-                        <label class="form-label" :for="field">Email *</label>
-                        <input type="email" class="form-control" :id="field" :name="field" x-model="form[field]">
-                        <div class="text-danger small" x-text="errors[field]"></div>
-                    </div>
-                    <div class="col-md-6" x-data="{ field: 'phone' }">
-                        <label class="form-label" :for="field">Contato *</label>
-                        <input type="text" class="form-control" :id="field" :name="field" x-model="form[field]">
-                        <div class="text-danger small" x-text="errors[field]"></div>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Email *</label>
+                    <input type="email" class="form-control" name="email" x-model="form.email">
+                    <div class="text-danger small" x-text="errors.email"></div>
                 </div>
-                <!-- Grupo, Ativo, Verificado, 2FA -->
-                <div class="row mb-3">
-                    <div class="col-md-6" x-data="{ field: 'group_id' }">
-                        <label class="form-label" :for="field">Grupo do Cliente</label>
-                        <select class="form-select" :id="field" :name="field"
-                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                            <option value="">-- Selecionar --</option>
-                            <?php foreach ($costumers_group ?? [] as $costumer_group): ?>
-                                <option value="<?= $costumer_group['id'] ?>"><?= esc($costumer_group['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <template x-if="errors[field]">
-                            <small class="text-danger" x-text="errors[field]"></small>
-                        </template>
-                    </div>
-
-                    <div class="col-md-6" x-data="{ field: 'is_active' }">
-                        <label class="form-label" :for="field">Ativo</label>
-                        <select class="form-select" :id="field" :name="field"
-                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                            <option value="">-- Selecionar --</option>
-                            <option value="1">Sim</option>
-                            <option value="0">Não</option>
-                        </select>
-                        <template x-if="errors[field]">
-                            <small class="text-danger" x-text="errors[field]"></small>
-                        </template>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Contacto *</label>
+                    <input type="text" class="form-control" name="phone" x-model="form.phone">
+                    <div class="text-danger small" x-text="errors.phone"></div>
                 </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6" x-data="{ field: 'is_verified' }">
-                        <label class="form-label" :for="field">Verificado</label>
-                        <select class="form-select" :id="field" :name="field"
-                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                            <option value="">-- Selecionar --</option>
-                            <option value="1">Sim</option>
-                            <option value="0">Não</option>
-                        </select>
-                        <template x-if="errors[field]">
-                            <small class="text-danger" x-text="errors[field]"></small>
-                        </template>
-                    </div>
-
-                    <div class="col-md-6" x-data="{ field: 'login_2step' }">
-                        <label class="form-label" :for="field">Login em 2 Passos</label>
-                        <select class="form-select" :id="field" :name="field"
-                                x-model="form[field]" :class="{ 'is-invalid': errors[field] }">
-                            <option value="">-- Selecionar --</option>
-                            <option value="1">Sim</option>
-                            <option value="0">Não</option>
-                        </select>
-                        <template x-if="errors[field]">
-                            <small class="text-danger" x-text="errors[field]"></small>
-                        </template>
-                    </div>
+                <div class="col-md-12"
+                     x-data="{ field: 'gender' }"
+                     x-init="$nextTick(() => {
+                         const el = $refs.select;
+                         $(el).select2({
+                             width: '100%',
+                             placeholder: '-- Selecionar --',
+                             dropdownParent: $(el).closest('.modal-content'),
+                             language: 'pt'
+                         });
+                         $(el).val(form[field]).trigger('change.select2');
+                         $(el).on('change', () => form[field] = $(el).val());
+                         $watch('form[field]', val => setTimeout(() => $(el).val(val).trigger('change.select2'), 10));
+                     })">
+                    <label class="form-label" :for="field">Género</label>
+                    <select class="form-select select2" x-ref="select" :id="field" name="gender">
+                        <option value="">-- Selecionar --</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Feminino</option>
+                        <option value="O">Outro</option>
+                    </select>
+                    <template x-if="errors[field]">
+                        <small class="text-danger" x-text="errors[field]"></small>
+                    </template>
+                </div>
+                <div class="col-md-12 mt-3"
+                     x-data="{ field: 'group_id' }"
+                     x-init="$nextTick(() => {
+                         const el = $refs.select;
+                         $(el).select2({
+                             width: '100%',
+                             placeholder: '-- Selecionar --',
+                             dropdownParent: $(el).closest('.modal-content'),
+                             language: 'pt'
+                         });
+                         $(el).val(form[field]).trigger('change.select2');
+                         $(el).on('change', () => form[field] = $(el).val());
+                         $watch('form[field]', val => setTimeout(() => $(el).val(val).trigger('change.select2'), 10));
+                     })">
+                    <label class="form-label" :for="field">Grupo do Cliente</label>
+                    <select class="form-select select2" x-ref="select" :id="field" name="group_id">
+                        <option value="">-- Selecionar --</option>
+                        <?php foreach ($costumers_group ?? [] as $costumer_group): ?>
+                            <option value="<?= $costumer_group['id'] ?>"><?= esc($costumer_group['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <template x-if="errors[field]">
+                        <small class="text-danger" x-text="errors[field]"></small>
+                    </template>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label class="form-label">Notas</label>
+                    <textarea class="form-control" name="notes" x-model="form.notes" rows="2"></textarea>
+                    <div class="text-danger small" x-text="errors.notes"></div>
                 </div>
 
                 <div class="modal-footer mt-3">
@@ -356,8 +332,114 @@ Dashboard
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalDeactivateCustomer" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content"
+             x-data="{
+                form: { id: '', name: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' },
+                loading: false,
+                submit() {
+                    this.loading = true;
+                    fetch('/admin/customers/deactivate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.form)
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        this.loading = false;
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalDeactivateCustomer'));
+                        if (modal) modal.hide();
+                        if (data.message) {
+                            const type = data.status === 'success' ? 'success' : 'error';
+                            showToast(data.message, type);
+                        }
+                    })
+                    .catch(() => this.loading = false);
+                }
+             }"
+             x-init="
+                window.addEventListener('customer-deactivate', e => {
+                    form.id = e.detail.id;
+                    form.name = e.detail.name;
+                });
+             ">
+            <div class="modal-header bg-warning-subtle">
+                <h5 class="modal-title text-warning">Desativar Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <i class="mdi mdi-alert-outline text-warning" style="font-size: 48px;"></i>
+                <p class="mt-2">Tem a certeza que quer desativar este cliente?</p>
+                <p><strong>Nome:</strong> <span x-text="form.name"></span></p>
+            </div>
+
+            <div class="modal-footer">
+                <button @click="submit" type="button" class="btn btn-warning" :disabled="loading">
+                    <span x-show="!loading">Confirmar</span>
+                    <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A processar...</span>
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalDeleteCustomer" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content"
+             x-data="{
+                form: { id: '', name: '', <?= csrf_token() ?>: '<?= csrf_hash() ?>' },
+                loading: false,
+                submit() {
+                    this.loading = true;
+                    fetch('/admin/customers/delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(this.form)
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        this.loading = false;
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalDeleteCustomer'));
+                        if (modal) modal.hide();
+                        if (data.message) {
+                            const type = data.status === 'success' ? 'success' : 'error';
+                            showToast(data.message, type);
+                        }
+                    })
+                    .catch(() => this.loading = false);
+                }
+             }"
+             x-init="
+                window.addEventListener('customer-delete', e => {
+                    form.id = e.detail.id;
+                    form.name = e.detail.name;
+                });
+             ">
+            <div class="modal-header bg-danger-subtle">
+                <h5 class="modal-title text-danger">Eliminar Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body text-center">
+                <i class="mdi mdi-alert-octagram text-danger" style="font-size: 48px;"></i>
+                <p class="mt-2">Tem a certeza que quer eliminar definitivamente este cliente?</p>
+                <p><strong>Nome:</strong> <span x-text="form.name"></span></p>
+            </div>
+
+            <div class="modal-footer">
+                <button @click="submit" type="button" class="btn btn-danger" :disabled="loading">
+                    <span x-show="!loading">Eliminar</span>
+                    <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A processar...</span>
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>

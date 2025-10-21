@@ -71,16 +71,30 @@ class CustumersController extends BaseController
     public function store()
     {
         $data = $this->request->getJSON(true);
-        if (! empty($data['password'])) {
+        if (empty($data['password'])) {
+            $plainPassword = bin2hex(random_bytes(4));
+            $data['password'] = password_hash($plainPassword, PASSWORD_DEFAULT);
+        } else {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
-        $data['is_active']   = $data['is_active']   ?? 1;
-        $data['is_verified'] = $data['is_verified'] ?? 0;
-        $data['login_2step'] = $data['login_2step'] ?? 0;
-        $this->customerModel->setValidationRule(
-            'email',
-            'required|valid_email|is_unique[customers.email]'
-        );
+        if (empty($data['username'])) {
+            if (! empty($data['name'])) {
+                // gera slug curto a partir do nome
+                $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '.', $data['name']));
+                $data['username'] = substr($slug, 0, 20);
+            } elseif (! empty($data['email'])) {
+                $data['username'] = strstr($data['email'], '@', true);
+            } else {
+                $data['username'] = 'user' . random_int(1000, 9999);
+            }
+        }
+        $data['is_active']            = $data['is_active']   ?? 1;
+        $data['is_verified']          = $data['is_verified'] ?? 0;
+        $data['login_2step']          = $data['login_2step'] ?? 0;
+        $data['preferred_language']   = $data['preferred_language'] ?? 'pt_PT';
+        $data['preferred_currency']   = $data['preferred_currency'] ?? 'EUR';
+        $data['source']               = $data['source'] ?? 'ROOT';
+        $this->customerModel->setValidationRule('email', 'required|valid_email|is_unique[customers.email]');
         if (! $this->customerModel->insert($data)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -153,5 +167,72 @@ class CustumersController extends BaseController
             ],
         ]);
     }
+    public function deactivate()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'ID do cliente não enviado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $id = $data['id'];
+        if (! $this->customerModel->update($id, ['is_active' => 0])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao desativar cliente.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Cliente desativado com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+    public function delete()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'ID do cliente não enviado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        $id = $data['id'];
+        if (! $this->customerModel->delete($id)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao eliminar cliente.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Cliente eliminado com sucesso.',
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
 
 }
