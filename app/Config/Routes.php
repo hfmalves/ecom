@@ -104,6 +104,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('edit/(:num)', 'CustumersGroupsController::edit/$1', ['filter' => 'noauth']);
             $routes->post('update', 'CustumersGroupsController::update');
             $routes->post('delete', 'CustumersGroupsController::delete');
+            $routes->post('deactivate', 'CustumersGroupsController::deactivate');
         });
     });
     $routes->group('sales', ['namespace' => 'App\Controllers\Admin\Sales'], function ($routes) {
