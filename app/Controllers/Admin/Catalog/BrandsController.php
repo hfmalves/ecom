@@ -20,17 +20,12 @@ class BrandsController extends BaseController
     }
     public function index()
     {
-        // === Buscar todas as marcas ===
         $brands = $this->brands->findAll();
-
-        // === Agregar dados adicionais ===
         foreach ($brands as &$brand) {
             // total de produtos associados
             $brand['product_count'] = $this->products
                 ->where('brand_id', $brand['id'])
                 ->countAllResults();
-
-            // fornecedor
             $supplier = $this->suppliers
                 ->select('name')
                 ->where('id', $brand['supplier_id'])
@@ -38,13 +33,10 @@ class BrandsController extends BaseController
                 ->getRowArray();
             $brand['supplier_name'] = $supplier['name'] ?? '—';
         }
-
-        // === KPIs ===
         $totalBrands     = count($brands);
         $activeBrands    = array_sum(array_column($brands, 'is_active'));
         $featuredBrands  = array_sum(array_column($brands, 'featured'));
         $totalProducts   = $this->products->countAllResults();
-
         $data = [
             'brands' => $brands,
             'kpi' => [
@@ -54,7 +46,6 @@ class BrandsController extends BaseController
                 'products'  => $totalProducts,
             ],
         ];
-
         return view('admin/catalog/brands/index', $data);
     }
     public function store()
@@ -108,7 +99,6 @@ class BrandsController extends BaseController
         ];
         return view('admin/catalog/brands/edit', $data);
     }
-
     public function update()
     {
         $data = $this->request->getJSON(true);
@@ -124,17 +114,14 @@ class BrandsController extends BaseController
                 ],
             ]);
         }
-
         $this->brands->setValidationRule(
             'name',
             "required|min_length[2]|max_length[150]|is_unique[brands.name,id,{$id}]"
         );
-
         $this->brands->setValidationRule(
             'slug',
             "required|min_length[2]|max_length[150]|is_unique[brands.slug,id,{$id}]"
         );
-
         if (! $this->brands->update($id, $data)) {
             return $this->response->setJSON([
                 'status' => 'error',
@@ -145,7 +132,6 @@ class BrandsController extends BaseController
                 ],
             ]);
         }
-
         return $this->response->setJSON([
             'status'  => 'success',
             'message' => 'Marca atualizada com sucesso!',
@@ -155,6 +141,82 @@ class BrandsController extends BaseController
             ],
         ]);
     }
+    public function uploadLogo()
+    {
+        $file = $this->request->getFile('file');
+        $brandId = $this->request->getPost('brand_id');
+        if (! $file || ! $file->isValid()) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Ficheiro inválido ou não enviado.',
+            ]);
+        }
+        $validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (! in_array($file->getMimeType(), $validTypes)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Formato de imagem inválido. Apenas JPG, PNG ou WEBP são permitidos.',
+            ]);
+        }
+        $uploadPath = FCPATH . 'uploads/brands/';
+        if (! is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+        $newName = 'brand_' . time() . '_' . bin2hex(random_bytes(3)) . '.' . $file->getExtension();
+        if (! $file->move($uploadPath, $newName)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Falha ao mover o ficheiro.',
+            ]);
+        }
+        if ($brandId) {
+            $this->brands->update($brandId, ['logo' => $newName]);
+        }
+        return $this->response->setJSON([
+            'status'    => 'success',
+            'message'   => 'Logo carregado com sucesso!',
+            'url'       => base_url('uploads/brands/' . $newName),
+            'filename'  => $newName,
+        ]);
+    }
+
+
+    public function deleteLogo()
+    {
+        $data = $this->request->getJSON(true);
+        $fileUrl = $data['file'] ?? '';
+        $brandId = $data['brand_id'] ?? null;
+
+        if (empty($fileUrl)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'URL do ficheiro não recebido.',
+            ]);
+        }
+
+        // Extrai o caminho físico correto
+        $filePath = FCPATH . str_replace(base_url(), '', $fileUrl);
+
+        if (is_file($filePath)) {
+            unlink($filePath);
+
+            // Atualiza o campo no model, se tiver ID
+            if ($brandId) {
+                $this->brands->update($brandId, ['logo' => null]);
+            }
+
+            return $this->response->setJSON([
+                'status'  => 'success',
+                'message' => 'Logo removido com sucesso!',
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'error',
+            'message' => 'Ficheiro não encontrado.',
+        ]);
+    }
+
 
 
 }

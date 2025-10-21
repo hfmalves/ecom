@@ -48,10 +48,12 @@ class BrandsModel  extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
+    // Validation
     protected $validationRules = [
-        'supplier_id'      => 'permit_empty|is_natural_no_zero|exists[suppliers.id]',
-        'name'             => 'required|min_length[2]|max_length[150]|is_unique[brands.name]',
-        'slug'             => 'required|min_length[2]|max_length[150]|is_unique[brands.slug]',
+        'id'               => 'permit_empty|is_natural_no_zero|is_not_unique[brands.id]',
+        'supplier_id'      => 'permit_empty|is_natural_no_zero|is_not_unique[suppliers.id]',
+        'name'             => 'required|min_length[2]|max_length[150]|is_unique[brands.name,id,{id}]',
+        'slug'             => 'required|min_length[2]|max_length[150]|is_unique[brands.slug,id,{id}]',
         'description'      => 'permit_empty|string',
         'logo'             => 'permit_empty|max_length[255]',
         'website'          => 'permit_empty|valid_url|max_length[255]',
@@ -65,7 +67,14 @@ class BrandsModel  extends Model
         'created_by'       => 'permit_empty|integer',
         'updated_by'       => 'permit_empty|integer',
     ];
+
     protected $validationMessages = [
+        'id' => [
+            'is_not_unique' => 'O registo selecionado não existe.',
+        ],
+        'supplier_id' => [
+            'is_not_unique' => 'O fornecedor selecionado não existe.',
+        ],
         'name' => [
             'required'   => 'O nome da marca é obrigatório.',
             'min_length' => 'O nome deve ter pelo menos 2 caracteres.',
@@ -93,6 +102,7 @@ class BrandsModel  extends Model
             'in_list'  => 'O campo "Destaque" deve ser 0 (Não) ou 1 (Sim).',
         ],
     ];
+
 
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;

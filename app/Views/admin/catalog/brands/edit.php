@@ -33,15 +33,14 @@ Editar Marca
               website: '<?= esc($brands['website']) ?>',
               featured: '<?= esc($brands['featured']) ?>',
               is_active: '<?= esc($brands['is_active']) ?>',
-              description: '<?= esc($brands['description']) ?>',
-              meta_title: '<?= esc($brands['meta_title']) ?>',
-              meta_description: '<?= esc($brands['meta_description']) ?>',
+              description: '<?= esc($brands['description'], 'js') ?>',
+              meta_title: '<?= esc($brands['meta_title'], 'js') ?>',
+              meta_description: '<?= esc($brands['meta_description'], 'js') ?>',
               sort_order: '<?= esc($brands['sort_order']) ?>',
               <?= csrf_token() ?>: '<?= csrf_hash() ?>'
           }
       )"
       @submit.prevent="submit">
-
     <div class="row">
         <!-- Coluna Principal -->
         <div class="col-lg-8">
@@ -217,17 +216,69 @@ Editar Marca
                     </div>
                 </div>
             </div>
-
             <!-- Logo -->
             <div class="card mb-3">
                 <div class="card-body">
                     <h4 class="card-title">Logo da Marca</h4>
-                    <div x-data="imageUploader({
-                        field: 'logo',
-                        uploadUrl: '<?= base_url('admin/catalog/brands/upload-logo') ?>',
-                        deleteUrl: '<?= base_url('admin/catalog/brands/delete-logo') ?>',
-                        currentImage: '<?= !empty($brands['logo']) ? base_url('uploads/brands/' . $brands['logo']) : '' ?>'
-                    })">
+                    <div
+                            x-data="{
+                                imageUrl: '<?= !empty($brands['logo']) ? base_url('uploads/brands/' . $brands['logo']) : '' ?>',
+                                loading: false,
+                                uploadFile(e) {
+                                    const file = e.target.files[0];
+                                    if (!file) return;
+                                    const formData = new FormData();
+                                    formData.append('file', file);
+                                    formData.append('brand_id', '<?= esc($brands['id']) ?>');
+                                    this.loading = true;
+                                   fetch('<?= base_url('admin/catalog/brands/upload-logo') ?>', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        this.loading = false;
+                                        if (data.status === 'success' && data.url) {
+                                            this.imageUrl = data.url;
+                                            showToast('Logo carregado com sucesso!', 'success');
+                                        } else {
+                                            showToast(data.message || 'Erro ao carregar o logo.', 'error');
+                                        }
+                                    })
+                                    .catch(() => {
+                                        this.loading = false;
+                                        showToast('Erro no envio do ficheiro.', 'error');
+                                    });
+                                },
+                                deleteImage() {
+                                    if (!this.imageUrl) return;
+                                    const payload = {
+                                        file: this.imageUrl,
+                                        brand_id: '<?= esc($brands['id']) ?>'
+                                    };
+                                    this.loading = true;
+                                    fetch('<?= base_url('admin/catalog/brands/delete-logo') ?>', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(payload)
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        this.loading = false;
+                                        if (data.status === 'success') {
+                                            this.imageUrl = '';
+                                            showToast(data.message, 'success');
+                                        } else {
+                                            showToast(data.message || 'Erro ao remover o logo.', 'error');
+                                        }
+                                    })
+                                    .catch(() => {
+                                        this.loading = false;
+                                        showToast('Erro no pedido de remoção.', 'error');
+                                    });
+                                }
+                            }"
+                    >
                         <div class="text-center mb-3">
                             <template x-if="imageUrl">
                                 <img :src="imageUrl" class="rounded border bg-light" style="max-height: 120px;">
@@ -238,71 +289,26 @@ Editar Marca
                                 </div>
                             </template>
                         </div>
+
                         <div class="d-flex justify-content-center gap-2">
                             <input type="file" x-ref="file" class="d-none" @change="uploadFile">
-                            <button type="button" class="btn btn-light" @click="$refs.file.click()">Carregar</button>
-                            <button type="button" class="btn btn-danger" @click="deleteImage" x-show="imageUrl">Remover</button>
+                            <button type="button" class="btn btn-light" @click="$refs.file.click()" :disabled="loading">
+                                <span x-show="!loading">Carregar</span>
+                                <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A enviar...</span>
+                            </button>
+                            <button type="button" class="btn btn-danger" @click="deleteImage" x-show="imageUrl && !loading">
+                                Remover
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Banner -->
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title">Banner Promocional</h4>
-                    <div x-data="imageUploader({
-                        field: 'banner',
-                        uploadUrl: '<?= base_url('admin/catalog/brands/upload-banner') ?>',
-                        deleteUrl: '<?= base_url('admin/catalog/brands/delete-banner') ?>',
-                        currentImage: '<?= !empty($brands['banner']) ? base_url('uploads/brands/' . $brands['banner']) : '' ?>'
-                    })">
-                        <div class="text-center mb-3">
-                            <template x-if="imageUrl">
-                                <img :src="imageUrl" class="rounded border bg-light" style="max-height: 120px;">
-                            </template>
-                            <template x-if="!imageUrl">
-                                <div class="bg-light text-muted text-center rounded p-5">
-                                    <i class="mdi mdi-image-outline fs-1"></i><br>Sem imagem
-                                </div>
-                            </template>
-                        </div>
-                        <div class="d-flex justify-content-center gap-2">
-                            <input type="file" x-ref="file" class="d-none" @change="uploadFile">
-                            <button type="button" class="btn btn-light" @click="$refs.file.click()">Carregar</button>
-                            <button type="button" class="btn btn-danger" @click="deleteImage" x-show="imageUrl">Remover</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </form>
 
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
-<script>
-    function imageUploader({ field, uploadUrl, deleteUrl, currentImage }) {
-        return {
-            imageUrl: currentImage,
-            uploadFile(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const formData = new FormData();
-                formData.append(field, file);
 
-                fetch(uploadUrl, { method: 'POST', body: formData })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === 'success') this.imageUrl = data.url;
-                    });
-            },
-            deleteImage() {
-                fetch(deleteUrl, { method: 'POST', body: JSON.stringify({ file: this.imageUrl }) })
-                    .then(r => r.json())
-                    .then(data => { if (data.status === 'success') this.imageUrl = ''; });
-            }
-        }
-    }
-</script>
 <?= $this->endSection() ?>
