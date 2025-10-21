@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class ShippingMethodsModel extends Model
 {
-    protected $table            = 'shipping_methods';
+    protected $table            = 'conf_shipping';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

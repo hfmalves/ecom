@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class PaymentMethodsModel extends Model
 {
-    protected $table            = 'payment_methods';
+    protected $table            = 'conf_payments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
