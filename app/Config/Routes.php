@@ -114,6 +114,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         $routes->group('orders', function ($routes) {
             $routes->get('/', 'OrdersController::index', ['filter' => 'noauth']);
             $routes->get('edit/(:num)', 'OrdersController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('updateStatus', 'OrdersController::updateStatus', ['filter' => 'noauth']);
         });
         $routes->group('transactions', function ($routes) {
             $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);

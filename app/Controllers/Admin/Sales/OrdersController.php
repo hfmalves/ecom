@@ -15,17 +15,21 @@ use App\Models\Admin\Catalog\ProductsModel;
 
 use App\Models\Admin\Customers\CustomerModel;
 use App\Models\Admin\Customers\CustomerAddressModel;
+use App\Models\Admin\Customers\CustomerGroupModel;
 
 use App\Models\Admin\Config\payments\PaymentMethodsModel;
 use App\Models\Admin\Config\shipping\ShippingMethodsModel;
 
 use App\Models\Admin\Catalog\ProductsVariantsModel;
+
+
 class OrdersController extends BaseController
 {
     protected $ordersModel;
     protected $ordersItemsModel;
     protected $productsModel;
     protected $customerModel;
+    protected $customerGroupModel;
     protected $customerAddressModel;
     protected $paymentMethodsModel;
     protected $shippingMethodsModel;
@@ -33,6 +37,7 @@ class OrdersController extends BaseController
     protected $ordersShipmentItemsModel;
     protected $ordersStatusHistoryModel;
     protected $productsVariantsModel;
+
 
     public function __construct()
     {
@@ -42,29 +47,23 @@ class OrdersController extends BaseController
         $this->productsVariantsModel = new ProductsVariantsModel();
         $this->customerModel = new CustomerModel();
         $this->customerAddressModel = new CustomerAddressModel();
+        $this->customerGroupModel = new CustomerGroupModel();
         $this->paymentMethodsModel = new PaymentMethodsModel();
         $this->shippingMethodsModel = new ShippingMethodsModel();
         $this->ordersShipmentsModel = new OrdersShipmentsModel();
         $this->ordersShipmentItemsModel = new OrdersShipmentItemsModel();
         $this->ordersStatusHistoryModel = new OrdersStatusHistoryModel();
-
     }
-
     public function index()
     {
-        // === KPI DE ENCOMENDAS === //
         $ordersModel = $this->ordersModel;
-
         $kpi = [
-            // Contagem geral
             'total_orders'      => $ordersModel->countAllResults(),
             'pending_orders'    => (clone $ordersModel)->where('status', 'pending')->countAllResults(true),
             'processing_orders' => (clone $ordersModel)->where('status', 'processing')->countAllResults(true),
             'completed_orders'  => (clone $ordersModel)->where('status', 'completed')->countAllResults(true),
             'canceled_orders'   => (clone $ordersModel)->where('status', 'canceled')->countAllResults(true),
             'refunded_orders'   => (clone $ordersModel)->where('status', 'refunded')->countAllResults(true),
-
-            // Financeiros
             'total_revenue'     => number_format((clone $ordersModel)
                 ->selectSum('grand_total')
                 ->get()->getRow()->grand_total ?? 0, 2, ',', ' '),
@@ -90,13 +89,10 @@ class OrdersController extends BaseController
                 2, ',', ' '
             ),
         ];
-
-        // === ENCOMENDAS COMPLETAS === //
         $customers   = $this->customerModel->findAll();
         $addresses   = $this->customerAddressModel->findAll();
         $shipMethods = $this->shippingMethodsModel->findAll();
         $payMethods  = $this->paymentMethodsModel->findAll();
-
         $maps = [
             'customer_id'         => array_column($customers, null, 'id'),
             'billing_address_id'  => array_column($addresses, null, 'id'),
@@ -148,21 +144,27 @@ class OrdersController extends BaseController
             'kpi'    => $kpi,
         ]);
     }
-
     public function edit($id = null)
     {
         if ($id === null) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Encomenda não encontrada');
         }
+
         $order = $this->ordersModel->find($id);
         if (!$order) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Encomenda #$id não encontrada");
         }
-        $order['user']             = $this->customerModel->find($order['customer_id']);
+        $order['user'] = $this->customerModel->find($order['customer_id']);
+        if (!empty($order['user']['group_id'])) {
+            $group = $this->customerGroupModel->find($order['user']['group_id']);
+            $order['user']['group_name'] = $group['name'] ?? '-';
+        } else {
+            $order['user']['group_name'] = '-';
+        }
         $order['billing_address']  = $this->customerAddressModel->find($order['billing_address_id']);
         $order['shipping_address'] = $this->customerAddressModel->find($order['shipping_address_id']);
-        $order['payment_method']   = $this->paymentMethodsModel->find($order['payment_method_id']);
-        $order['shipping_method']  = $this->shippingMethodsModel->find($order['shipping_method_id']);
+        $order['payment_method']  = $this->paymentMethodsModel->find($order['payment_method_id']);
+        $order['shipping_method'] = $this->shippingMethodsModel->find($order['shipping_method_id']);
         $items = $this->ordersItemsModel
             ->where('order_id', $id)
             ->findAll();
@@ -189,11 +191,99 @@ class OrdersController extends BaseController
             ->where('order_id', $id)
             ->orderBy('created_at', 'asc')
             ->findAll();
-
         return view('admin/sales/orders/edit', [
             'order' => $order,
         ]);
     }
+    public function updateStatus()
+    {
+        $data = $this->request->getJSON(true);
+
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'ID da encomenda não enviado.',
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        $id = $data['id'];
+        unset($data['id']);
+
+        // validar se a encomenda existe
+        $order = $this->ordersModel->find($id);
+        if (! $order) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => "Encomenda #{$id} não encontrada.",
+                'csrf'    => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        // defaults
+        $data['status']     = $data['status'] ?? 'pending';
+        $data['comment']    = $data['comment'] ?? '';
+        $data['notify']     = $data['notify'] ?? '0';
+        $data['updated_at'] = date('Y-m-d H:i:s');
+
+        // validação dinâmica
+        $this->ordersModel->setValidationRules([
+            'status' => 'required',
+        ]);
+
+        // atualizar a encomenda
+        if (! $this->ordersModel->update($id, ['status' => $data['status']])) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->ordersModel->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        // inserir histórico
+        $history = [
+            'order_id'   => $id,
+            'status'     => $data['status'],
+            'comment'    => trim($data['comment']),
+            'created_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if (! $this->ordersStatusHistoryModel->insert($history)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->ordersStatusHistoryModel->errors(),
+                'csrf'   => [
+                    'token' => csrf_token(),
+                    'hash'  => csrf_hash(),
+                ],
+            ]);
+        }
+
+        // notificar cliente (futuro email real)
+        if (!empty($data['notify']) && $data['notify'] === '1') {
+            log_message('info', "Notificação de estado enviada para o cliente da encomenda #{$id}.");
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Estado da encomenda atualizado com sucesso!',
+            'id'      => $id,
+            'csrf'    => [
+                'token' => csrf_token(),
+                'hash'  => csrf_hash(),
+            ],
+        ]);
+    }
+
 
 
 

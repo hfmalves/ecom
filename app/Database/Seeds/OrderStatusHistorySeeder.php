@@ -13,7 +13,7 @@ class OrderStatusHistorySeeder extends Seeder
         $orders = $this->db->table('orders')->select('id,status')->get()->getResultArray();
 
         foreach ($orders as $order) {
-            $this->db->table('order_status_history')->insert([
+            $this->db->table('orders_status_history')->insert([
                 'order_id'   => $order['id'],
                 'status'     => $order['status'],
                 'comment'    => $faker->sentence(),

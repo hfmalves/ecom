@@ -315,42 +315,39 @@ Dashboard
                                 </div>
                                 <div class="row mt-3">
                                     <!-- Tipo de Desconto -->
-                                    <div class="col-md-3"
-                                         x-data="{ field: 'discount_type' }"
+                                    <div class="col-md-12 mb-3"
+                                         x-data="{ field: 'status' }"
                                          x-init="$nextTick(() => {
-                                        const el = $refs.select;
-                                        $(el).select2({
-                                            width: '100%',
-                                            minimumResultsForSearch: Infinity
-                                        });
-                                        $(el).val(form[field]).trigger('change');
-                                        $(el).on('change', function() {
-                                            form[field] = $(this).val();
-                                            const base = parseFloat(form.base_price_tax) || 0;
-                                            const val  = parseFloat(form.discount_value) || 0;
-                                            if (form.discount_type === 'percent') {
-                                                form.special_price = (base - (base * val / 100)).toFixed(2);
-                                            } else if (form.discount_type === 'fixed') {
-                                                form.special_price = (base - val).toFixed(2);
-                                            } else {
-                                                form.special_price = base.toFixed(2);
-                                            }
-                                        });
-                                        $watch('form[field]', (val) => {
-                                            $(el).val(val).trigger('change.select2');
-                                        });
-                                     })">
-                                        <label class="form-label" :for="field">Tipo de Desconto</label>
+                                const el = $refs.select;
+                                $(el).select2({
+                                    width: '100%',
+                                    minimumResultsForSearch: Infinity
+                                });
+                                $(el).val(form[field]).trigger('change');
+                                $(el).on('change', function() {
+                                    form[field] = $(this).val();
+                                });
+                                $watch('form[field]', (val) => {
+                                    $(el).val(val).trigger('change.select2');
+                                });
+                             })">
+                                        <label class="form-label" :for="field">Novo Estado *</label>
                                         <select class="form-select select2"
                                                 x-ref="select"
                                                 :id="field"
                                                 :name="field"
                                                 x-model="form[field]"
                                                 :class="{ 'is-invalid': errors[field] }">
-                                            <option value="">-- Selecionar --</option>
-                                            <option value="percent">Percentagem (%)</option>
-                                            <option value="fixed">Valor Fixo (€)</option>
+                                            <option value="">-- Selecionar Estado --</option>
+                                            <option value="pending">Pendente</option>
+                                            <option value="processing">Em processamento</option>
+                                            <option value="completed">Concluída</option>
+                                            <option value="canceled">Cancelada</option>
+                                            <option value="refunded">Reembolsada</option>
                                         </select>
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
                                     </div>
 
                                     <!-- Valor do Desconto -->

@@ -15,8 +15,8 @@ class OrderSeeder extends Seeder
         $this->db->query('SET FOREIGN_KEY_CHECKS = 0;');
         $this->db->table('orders_items')->truncate();
         $this->db->table('orders')->truncate();
-        $this->db->table('shipping_methods')->truncate();
-        $this->db->table('payment_methods')->truncate();
+        $this->db->table('conf_shipping')->truncate();
+        $this->db->table('conf_payments')->truncate();
         $this->db->query('SET FOREIGN_KEY_CHECKS = 1;');
 
         // 🔹 Shipping Methods
@@ -25,7 +25,7 @@ class OrderSeeder extends Seeder
             ['code' => 'ups', 'name' => 'UPS',          'created_at' => date('Y-m-d H:i:s')],
             ['code' => 'dhl', 'name' => 'DHL',          'created_at' => date('Y-m-d H:i:s')],
         ];
-        $this->db->table('shipping_methods')->insertBatch($shippingMethods);
+        $this->db->table('conf_shipping')->insertBatch($shippingMethods);
 
         // 🔹 Payment Methods
         $paymentMethods = [
@@ -34,11 +34,11 @@ class OrderSeeder extends Seeder
             ['code' => 'paypal',     'name' => 'PayPal',     'created_at' => date('Y-m-d H:i:s')],
             ['code' => 'visa',       'name' => 'Visa',       'created_at' => date('Y-m-d H:i:s')],
         ];
-        $this->db->table('payment_methods')->insertBatch($paymentMethods);
+        $this->db->table('conf_payments')->insertBatch($paymentMethods);
 
         // 🔹 Buscar IDs
-        $shippingIds = array_column($this->db->table('shipping_methods')->select('id')->get()->getResultArray(), 'id');
-        $paymentIds  = array_column($this->db->table('payment_methods')->select('id')->get()->getResultArray(), 'id');
+        $shippingIds = array_column($this->db->table('conf_shipping')->select('id')->get()->getResultArray(), 'id');
+        $paymentIds  = array_column($this->db->table('conf_payments')->select('id')->get()->getResultArray(), 'id');
 
         // 🔹 Dados de referência
         $customers = $this->db->table('customers')->get()->getResultArray();
