@@ -20,11 +20,6 @@ use App\Models\Admin\Config\payments\PaymentMethodsModel;
 use App\Models\Admin\Config\shipping\ShippingMethodsModel;
 
 use App\Models\Admin\Catalog\ProductsVariantsModel;
-
-
-
-
-
 class OrdersController extends BaseController
 {
     protected $ordersModel;
@@ -57,10 +52,51 @@ class OrdersController extends BaseController
 
     public function index()
     {
+        // === KPI DE ENCOMENDAS === //
+        $ordersModel = $this->ordersModel;
+
+        $kpi = [
+            // Contagem geral
+            'total_orders'      => $ordersModel->countAllResults(),
+            'pending_orders'    => (clone $ordersModel)->where('status', 'pending')->countAllResults(true),
+            'processing_orders' => (clone $ordersModel)->where('status', 'processing')->countAllResults(true),
+            'completed_orders'  => (clone $ordersModel)->where('status', 'completed')->countAllResults(true),
+            'canceled_orders'   => (clone $ordersModel)->where('status', 'canceled')->countAllResults(true),
+            'refunded_orders'   => (clone $ordersModel)->where('status', 'refunded')->countAllResults(true),
+
+            // Financeiros
+            'total_revenue'     => number_format((clone $ordersModel)
+                ->selectSum('grand_total')
+                ->get()->getRow()->grand_total ?? 0, 2, ',', ' '),
+            'total_discount'    => number_format((clone $ordersModel)
+                ->selectSum('total_discount')
+                ->get()->getRow()->total_discount ?? 0, 2, ',', ' '),
+            'avg_ticket'        => number_format((clone $ordersModel)
+                ->selectAvg('grand_total')
+                ->get()->getRow()->grand_total ?? 0, 2, ',', ' '),
+            'avg_items'         => number_format((clone $ordersModel)
+                ->selectAvg('total_items')
+                ->get()->getRow()->total_items ?? 0, 0, ',', ' '),
+
+            // Dinâmicos / recentes
+            'new_30_days'       => (clone $ordersModel)
+                ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))
+                ->countAllResults(true),
+            'revenue_30_days'   => number_format(
+                (clone $ordersModel)
+                    ->selectSum('grand_total')
+                    ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))
+                    ->get()->getRow()->grand_total ?? 0,
+                2, ',', ' '
+            ),
+        ];
+
+        // === ENCOMENDAS COMPLETAS === //
         $customers   = $this->customerModel->findAll();
         $addresses   = $this->customerAddressModel->findAll();
         $shipMethods = $this->shippingMethodsModel->findAll();
         $payMethods  = $this->paymentMethodsModel->findAll();
+
         $maps = [
             'customer_id'         => array_column($customers, null, 'id'),
             'billing_address_id'  => array_column($addresses, null, 'id'),
@@ -68,22 +104,27 @@ class OrdersController extends BaseController
             'shipping_method_id'  => array_column($shipMethods, null, 'id'),
             'payment_method_id'   => array_column($payMethods, null, 'id'),
         ];
-        $orders = $this->ordersModel->findAll();
+
+        $orders         = $this->ordersModel->findAll();
         $shipments      = $this->ordersShipmentsModel->findAll();
         $shipmentItems  = $this->ordersShipmentItemsModel->findAll();
         $statusHistory  = $this->ordersStatusHistoryModel->findAll();
+
         $mapShipments = [];
         foreach ($shipments as $s) {
             $mapShipments[$s['order_id']][] = $s;
         }
+
         $mapStatusHistory = [];
         foreach ($statusHistory as $h) {
             $mapStatusHistory[$h['order_id']][] = $h;
         }
+
         $mapShipmentItems = [];
         foreach ($shipmentItems as $si) {
             $mapShipmentItems[$si['shipment_id']][] = $si;
         }
+
         foreach ($orders as &$o) {
             foreach ($maps as $field => $map) {
                 if ($field === 'customer_id') {
@@ -103,9 +144,11 @@ class OrdersController extends BaseController
         }
 
         return view('admin/sales/orders/index', [
-            'orders' => $orders
+            'orders' => $orders,
+            'kpi'    => $kpi,
         ]);
     }
+
     public function edit($id = null)
     {
         if ($id === null) {
@@ -146,10 +189,12 @@ class OrdersController extends BaseController
             ->where('order_id', $id)
             ->orderBy('created_at', 'asc')
             ->findAll();
+
         return view('admin/sales/orders/edit', [
             'order' => $order,
         ]);
     }
+
 
 
 

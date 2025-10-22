@@ -7,22 +7,24 @@ Dashboard
     <div class="col-lg-12">
         <div class="d-flex align-items-center">
             <div class="ms-3 flex-grow-1">
-                <h5 class="mb-2 card-title">Hello, Henry Franklin</h5>
-                <p class="text-muted mb-0">Ready to jump back in?</p>
+                <h5 class="mb-2 card-title">Detalhes da Encomenda</h5>
+                <p class="text-muted mb-0">Consulta e gere todas as informações associadas a esta encomenda.</p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <!-- Botão Reordenar -->
-                <a href="<?= base_url('admin/sales/orders/reorder/'.$order['id']) ?>"
-                   class="btn btn-secondary">
-                    Duplicar Encomenda
-                </a>
-
-                <!-- Botão Reembolsar (abre modal) -->
-                <button type="button" x-data="systemModal()" @click="open('#refundModal', 'xl')" class="btn btn-primary">
-                    <i class="mdi mdi-plus me-1"></i> Adicionar
+                <button type="button" class="btn btn-outline-secondary">
+                    <i class="mdi mdi-content-duplicate me-1"></i> Duplicar Encomenda
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        @click="
+                        window.dispatchEvent(new CustomEvent('order-return', {
+                            detail: { id: <?= $order['id'] ?> }
+                        }));
+                        new bootstrap.Modal(document.getElementById('modalCreateReturn')).show();
+                    ">
+                    <i class="mdi mdi-autorenew me-1"></i> Criar Devolução
                 </button>
             </div>
-
         </div>
     </div><!--end col-->
 </div><!--end row-->
@@ -102,7 +104,6 @@ Dashboard
                 </div>
             </div>
             <div class="row">
-                <!-- Morada de Envio -->
                 <div class="col-6">
                     <div class="card">
                         <div class="card-body">
@@ -122,8 +123,6 @@ Dashboard
                         </div>
                     </div>
                 </div>
-
-                <!-- Morada de Faturação -->
                 <div class="col-6">
                     <div class="card">
                         <div class="card-body">
@@ -144,7 +143,6 @@ Dashboard
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <!-- Informação de Pagamento -->
                 <div class="col-6">
