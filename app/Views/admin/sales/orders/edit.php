@@ -10,25 +10,46 @@ Dashboard
                 <h5 class="mb-2 card-title">Detalhes da Encomenda</h5>
                 <p class="text-muted mb-0">Consulta e gere todas as informações associadas a esta encomenda.</p>
             </div>
+
             <div class="d-flex flex-wrap gap-2"
-                 x-data="{ status: '<?= $order['status'] ?>' }">
-                <!-- Duplicar Encomenda -->
-                <button type="button"
-                        class="btn btn-outline-secondary"
+                 x-data="{
+             status: '<?= strtolower($order['status'] ?? 'pending') ?>',
+             shipStatus: '<?= strtolower($order['shipments'][0]['status'] ?? 'pending') ?>',
+             paymentStatus: '<?= strtolower($order['payment']['status'] ?? 'pending') ?>'
+           }">
+                <button class="btn btn-outline-secondary"
+                        x-show="!['canceled','refunded'].includes(status)"
                         @click="duplicateOrder(<?= $order['id'] ?>)">
                     <i class="mdi mdi-content-duplicate me-1"></i> Duplicar Encomenda
                 </button>
-                <!-- Criar Devolução -->
-                <button type="button"
-                        class="btn btn-primary"
-                        x-show="['completed', 'refunded', 'processing'].includes(status)"
+                <button class="btn btn-primary"
+                        x-show="['shipped','delivered','returned'].includes(shipStatus)
+                        && !['canceled','refunded'].includes(status)"
                         @click="
-                        window.dispatchEvent(new CustomEvent('order-return', {
-                        detail: { id: <?= $order['id'] ?> }
-                            }));
-                            new bootstrap.Modal(document.getElementById('modalCreateReturn')).show();
-                        ">
+                  window.dispatchEvent(new CustomEvent('order-return', { detail: { id: <?= $order['id'] ?> } }));
+                  new bootstrap.Modal(document.getElementById('modalCreateReturn')).show();
+                ">
                     <i class="mdi mdi-autorenew me-1"></i> Criar Devolução
+                </button>
+                <button class="btn btn-danger"
+                        x-show="['paid','partial'].includes(paymentStatus)
+                        && !['refunded','canceled'].includes(status)"
+                        @click="
+                  window.dispatchEvent(new CustomEvent('order-refund', { detail: { id: <?= $order['id'] ?> } }));
+                  new bootstrap.Modal(document.getElementById('refundModal')).show();
+                ">
+                    <i class="mdi mdi-cash-refund me-1"></i> Criar Reembolso
+                </button>
+                <button type="button"
+                        class="btn btn-info"
+                        x-show="['delivered','returned'].includes(shipStatus)
+                        && ['paid','partial'].includes(paymentStatus)
+                        && !['refunded','canceled'].includes(status)"
+                        @click="
+                  window.dispatchEvent(new CustomEvent('order-exchange', { detail: { id: <?= $order['id'] ?> } }));
+                  new bootstrap.Modal(document.getElementById('modalCreateExchange')).show();
+                ">
+                    <i class="mdi mdi-compare-horizontal me-1"></i> Criar Troca
                 </button>
             </div>
         </div>
@@ -139,102 +160,235 @@ Dashboard
             </div>
         </div>
         <div class="row">
-            <!-- Informação de Pagamento -->
-            <div class="col-md-6 mb-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h4 class="card-title mb-2">Informação de Pagamento</h4>
-                        <p class="card-title-desc text-muted mb-4">Estado do pagamento</p>
+            <div class="col-md-6 mb-4" x-data="{ paymentStatus: '<?= $order['payment_status'] ?? 'pending' ?>' }">
 
-                        <?php if (!empty($order['payment_method'])): ?>
-                            <div class="mb-3">
-                                <label class="form-label">Método de Pagamento</label>
+            <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Informação de Pagamento</h4>
+                        <p class="card-title-desc text-muted mb-3">Detalhes do processamento</p>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Método</label>
                                 <input type="text" class="form-control"
                                        value="<?= esc($order['payment_method']['name'] ?? '-') ?>" readonly>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Pago em</label>
-                                <input type="text" class="form-control"
-                                       value="<?= !empty($order['paid_at'])
-                                               ? date('d/m/Y H:i', strtotime($order['paid_at']))
-                                               : '-' ?>" readonly>
-                            </div>
-
-                            <div class="mb-0">
-                                <label class="form-label">Estado</label>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Estado</label><br>
                                 <?php
-                                $status = $order['payment_status'] ?? 'pending';
+                                $payment = $order['payment'] ?? [];
+                                $status = strtolower($payment['status'] ?? 'pending');
+
                                 $labels = [
-                                        'paid' => ['Pago', 'success'],
-                                        'pending' => ['Pendente', 'warning'],
-                                        'failed' => ['Falhou', 'danger'],
-                                        'refunded' => ['Reembolsado', 'secondary']
+                                    'pending'    => ['Pendente', 'warning'],
+                                    'processing' => ['A Processar', 'info'],
+                                    'paid'       => ['Pago', 'success'],
+                                    'failed'     => ['Falhou', 'danger'],
+                                    'refunded'   => ['Reembolsado', 'secondary'],
+                                    'canceled'   => ['Cancelado', 'dark'],
                                 ];
+
                                 [$label, $color] = $labels[$status] ?? ['Desconhecido', 'secondary'];
                                 ?>
-                                <span class="badge bg-<?= esc($color) ?>"><?= esc($label) ?></span>
+                                <span class="badge w-100 bg-<?= esc($color) ?>"><?= esc($label) ?></span>
                             </div>
 
-                        <?php else: ?>
-                            <p class="text-muted mb-0">Nenhum pagamento registado</p>
-                        <?php endif; ?>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Referência / Transação</label>
+                                <input type="text" class="form-control"
+                                       value="<?= esc($order['payment']['transaction_id'] ?? '-') ?>" readonly>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Montante Pago</label>
+                                <input type="text" class="form-control"
+                                       value="<?= number_format($order['payment']['amount'] ?? 0, 2, ',', ' ') ?> €" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Pago em</label>
+                                <input type="text" class="form-control"
+                                       value="<?= !empty($order['payment']['paid_at'])
+                                           ? date('d/m/Y H:i', strtotime($order['payment']['paid_at']))
+                                           : '-' ?>" readonly>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Informação de Envio -->
             <div class="col-md-6 mb-4">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h4 class="card-title mb-2">Informação de Envio</h4>
-                        <p class="card-title-desc text-muted mb-4">Estado da expedição</p>
-
-                        <?php if (!empty($order['shipments'][0])):
-                            $shipment = $order['shipments'][0];
-                            ?>
-                            <div class="mb-3">
+                        <h4 class="card-title mb-3">Informação de Envio</h4>
+                        <p class="card-title-desc text-muted mb-3">Estado e dados de expedição</p>
+                        <?php $shipment = $order['shipments'][0] ?? []; ?>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
                                 <label class="form-label">Transportadora</label>
                                 <input type="text" class="form-control"
                                        value="<?= esc($shipment['carrier'] ?? $order['shipping_method']['name'] ?? '-') ?>" readonly>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Tracking</label>
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Estado</label><br>
+                                <?php
+                                $shipStatus = $shipment['status'] ?? 'pending';
+                                $shipLabels = [
+                                    'pending'    => ['Pendente', 'warning'],
+                                    'processing' => ['A Processar', 'info'],
+                                    'shipped'    => ['Enviado', 'primary'],
+                                    'delivered'  => ['Entregue', 'success'],
+                                    'returned'   => ['Devolvido', 'danger'],
+                                    'canceled'   => ['Cancelado', 'secondary'],
+                                ];
+                                [$label, $color] = $shipLabels[$shipStatus] ?? ['Desconhecido', 'dark'];
+                                ?>
+                                <span class="badge w-100 bg-<?= esc($color) ?>"><?= esc($label) ?></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label class="form-label">Código Tracking</label>
                                 <input type="text" class="form-control"
                                        value="<?= esc($shipment['tracking_number'] ?? '-') ?>" readonly>
                             </div>
-
-                            <div class="mb-3">
+                            <div class="col-md-6 mb-2">
                                 <label class="form-label">Expedido em</label>
                                 <input type="text" class="form-control"
                                        value="<?= !empty($shipment['shipped_at'])
-                                               ? date('d/m/Y H:i', strtotime($shipment['shipped_at']))
-                                               : '-' ?>" readonly>
+                                           ? date('d/m/Y H:i', strtotime($shipment['shipped_at']))
+                                           : '-' ?>" readonly>
                             </div>
-
-                            <div class="mb-0">
-                                <label class="form-label">Estado</label>
-                                <?php
-                                $shipStatus = $shipment['status'] ?? 'pending';
-                                $labels = [
-                                        'pending' => ['Pendente', 'warning'],
-                                        'shipped' => ['Enviado', 'info'],
-                                        'delivered' => ['Entregue', 'success'],
-                                        'returned' => ['Devolvido', 'danger'],
-                                ];
-                                [$label, $color] = $labels[$shipStatus] ?? ['Desconhecido', 'secondary'];
-                                ?>
-                                <span class="badge bg-<?= esc($color) ?>"><?= esc($label) ?></span>
-                            </div>
-
-                        <?php else: ?>
-                            <p class="text-muted mb-0">Nenhuma expedição registada</p>
-                        <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-6 mb-4"
+                 x-data="{ paymentStatus: '<?= strtolower($order['payment']['status'] ?? 'pending') ?>' }">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Alterar Método de Pagamento</h4>
+                        <p class="card-title-desc text-muted mb-3">
+                            Selecione um novo método e guarde a alteração.
+                        </p>
+
+                        <!-- Só mostra se o pagamento ainda não estiver concluído -->
+                        <template x-if="['pending','failed'].includes(paymentStatus)">
+                            <form
+                                    x-data="formHandler('<?= base_url('admin/sales/orders/updatePaymentMethod') ?>', {
+                        id: '<?= $order['id'] ?>',
+                        payment_method_id: '<?= $order['payment_method_id'] ?>',
+                        <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                    })"
+                                    @submit.prevent="submit">
+
+                                <div class="mb-3"
+                                     x-data="{ field: 'payment_method_id' }"
+                                     x-init="$nextTick(() => {
+                             const el = $refs.paymentSelect;
+                             $(el).select2({ width: '100%' });
+                             $(el).val(form[field]).trigger('change');
+                             $(el).on('change', () => form[field] = $(el).val());
+                         })">
+                                    <label class="form-label">Novo Método</label>
+                                    <select class="form-select select2"
+                                            x-ref="paymentSelect"
+                                            x-model="form[field]">
+                                        <option value="">-- Selecionar Método --</option>
+                                        <?php foreach ($paymentMethods as $method): ?>
+                                            <option value="<?= $method['id'] ?>">
+                                                <?= esc($method['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary" :disabled="loading">
+                                        <span x-show="!loading">Guardar Alteração</span>
+                                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A atualizar...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </template>
+
+                        <!-- Se estiver pago ou reembolsado, mostra aviso -->
+                        <template x-if="!['pending','failed'].includes(paymentStatus)">
+                            <div class="alert alert-secondary mb-0 text-center py-3">
+                                <i class="mdi mdi-lock-outline me-1"></i>
+                                Este pagamento já foi processado e não pode ser alterado.
+                            </div>
+                        </template>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4"
+                 x-data="{ shipStatus: '<?= strtolower($order['shipments'][0]['status'] ?? 'pending') ?>' }">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Alterar Método de Envio</h4>
+                        <p class="card-title-desc text-muted mb-3">Selecione uma nova transportadora e guarde a alteração.</p>
+
+                        <!-- Mostra o formulário apenas se o envio ainda estiver pendente ou em processamento -->
+                        <template x-if="['pending','processing','returned'].includes(shipStatus)">
+
+                        <form
+                                    x-data="formHandler('<?= base_url('admin/sales/orders/updateShippingMethod') ?>', {
+                        id: '<?= $order['id'] ?>',
+                        shipping_method_id: '<?= $order['shipping_method_id'] ?>',
+                        <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                    })"
+                                    @submit.prevent="submit">
+
+                                <div class="mb-3"
+                                     x-data="{ field: 'shipping_method_id' }"
+                                     x-init="$nextTick(() => {
+                             const el = $refs.shippingSelect;
+                             $(el).select2({ width: '100%' });
+                             $(el).val(form[field]).trigger('change');
+                             $(el).on('change', () => form[field] = $(el).val());
+                         })">
+                                    <label class="form-label">Nova Transportadora</label>
+                                    <select class="form-select select2"
+                                            x-ref="shippingSelect"
+                                            x-model="form[field]">
+                                        <option value="">-- Selecionar Método --</option>
+                                        <?php foreach ($shippingMethods as $method): ?>
+                                            <option value="<?= $method['id'] ?>">
+                                                <?= esc($method['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary" :disabled="loading">
+                                        <span x-show="!loading">Guardar Alteração</span>
+                                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A atualizar...</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </template>
+
+                        <!-- Caso contrário, mostra aviso de bloqueio -->
+                        <template x-if="!['pending','processing', 'returned'].includes(shipStatus)">
+                            <div class="alert alert-secondary mb-0 text-center py-3">
+                                <i class="mdi mdi-lock-outline me-1"></i>
+                                Este envio já foi processado e não pode ser alterado.
+                            </div>
+                        </template>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
 
     </div>
     <!-- Coluna lateral -->
@@ -399,9 +553,7 @@ Dashboard
                     </span>
                 </div>
             </template>
-
         </div>
-
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title mb-5">Histórico da Encomenda</h4>

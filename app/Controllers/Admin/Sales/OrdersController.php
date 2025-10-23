@@ -10,6 +10,7 @@ use App\Models\Admin\Sales\OrdersItemsModel;
 use App\Models\Admin\Sales\OrdersShipmentsModel;
 use App\Models\Admin\Sales\OrdersShipmentItemsModel;
 use App\Models\Admin\Sales\OrdersStatusHistoryModel;
+use App\Models\Admin\Sales\PaymentsModel;
 
 use App\Models\Admin\Catalog\ProductsModel;
 
@@ -36,6 +37,7 @@ class OrdersController extends BaseController
     protected $ordersShipmentsModel;
     protected $ordersShipmentItemsModel;
     protected $ordersStatusHistoryModel;
+    protected $paymentsModel;
     protected $productsVariantsModel;
 
 
@@ -53,10 +55,13 @@ class OrdersController extends BaseController
         $this->ordersShipmentsModel = new OrdersShipmentsModel();
         $this->ordersShipmentItemsModel = new OrdersShipmentItemsModel();
         $this->ordersStatusHistoryModel = new OrdersStatusHistoryModel();
+        $this->paymentsModel = new PaymentsModel();
     }
     public function index()
     {
         $ordersModel = $this->ordersModel;
+
+        // KPIs
         $kpi = [
             'total_orders'      => $ordersModel->countAllResults(),
             'pending_orders'    => (clone $ordersModel)->where('status', 'pending')->countAllResults(true),
@@ -76,8 +81,6 @@ class OrdersController extends BaseController
             'avg_items'         => number_format((clone $ordersModel)
                 ->selectAvg('total_items')
                 ->get()->getRow()->total_items ?? 0, 0, ',', ' '),
-
-            // Dinâmicos / recentes
             'new_30_days'       => (clone $ordersModel)
                 ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))
                 ->countAllResults(true),
@@ -89,10 +92,14 @@ class OrdersController extends BaseController
                 2, ',', ' '
             ),
         ];
+
+        // Carregamentos base
         $customers   = $this->customerModel->findAll();
         $addresses   = $this->customerAddressModel->findAll();
         $shipMethods = $this->shippingMethodsModel->findAll();
         $payMethods  = $this->paymentMethodsModel->findAll();
+
+        // Mapeamentos
         $maps = [
             'customer_id'         => array_column($customers, null, 'id'),
             'billing_address_id'  => array_column($addresses, null, 'id'),
@@ -101,10 +108,18 @@ class OrdersController extends BaseController
             'payment_method_id'   => array_column($payMethods, null, 'id'),
         ];
 
+        // Carregar dados principais
         $orders         = $this->ordersModel->findAll();
+        $payments       = $this->paymentsModel->findAll();
         $shipments      = $this->ordersShipmentsModel->findAll();
         $shipmentItems  = $this->ordersShipmentItemsModel->findAll();
         $statusHistory  = $this->ordersStatusHistoryModel->findAll();
+
+        // Mapas auxiliares
+        $mapPayments = [];
+        foreach ($payments as $p) {
+            $mapPayments[$p['order_id']] = $p;
+        }
 
         $mapShipments = [];
         foreach ($shipments as $s) {
@@ -121,6 +136,7 @@ class OrdersController extends BaseController
             $mapShipmentItems[$si['shipment_id']][] = $si;
         }
 
+        // Enriquecer dados das encomendas
         foreach ($orders as &$o) {
             foreach ($maps as $field => $map) {
                 if ($field === 'customer_id') {
@@ -131,9 +147,32 @@ class OrdersController extends BaseController
                 }
             }
 
+            // Pagamento
+            $o['payment'] = $mapPayments[$o['id']] ?? [
+                'method'   => 'N/A',
+                'status'   => 'pending',
+                'paid_at'  => null,
+            ];
+
+            // Envios
             $o['shipments']      = $mapShipments[$o['id']] ?? [];
             $o['status_history'] = $mapStatusHistory[$o['id']] ?? [];
 
+            // Detalhes do envio
+            if (!empty($o['shipments'])) {
+                $mainShipment         = $o['shipments'][0];
+                $o['shipment_status'] = $mainShipment['status'] ?? 'pending';
+                $o['shipped_at']      = $mainShipment['shipped_at'] ?? null;
+                $o['delivered_at']    = $mainShipment['delivered_at'] ?? null;
+                $o['returned_at']     = $mainShipment['returned_at'] ?? null;
+            } else {
+                $o['shipment_status'] = 'pending';
+                $o['shipped_at']      = null;
+                $o['delivered_at']    = null;
+                $o['returned_at']     = null;
+            }
+
+            // Itens do envio
             foreach ($o['shipments'] as &$s) {
                 $s['items'] = $mapShipmentItems[$s['id']] ?? [];
             }
@@ -144,6 +183,7 @@ class OrdersController extends BaseController
             'kpi'    => $kpi,
         ]);
     }
+
     public function edit($id = null)
     {
         if ($id === null) {
@@ -154,6 +194,8 @@ class OrdersController extends BaseController
         if (!$order) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Encomenda #$id não encontrada");
         }
+
+        // --- Cliente e grupo ---
         $order['user'] = $this->customerModel->find($order['customer_id']);
         if (!empty($order['user']['group_id'])) {
             $group = $this->customerGroupModel->find($order['user']['group_id']);
@@ -161,25 +203,37 @@ class OrdersController extends BaseController
         } else {
             $order['user']['group_name'] = '-';
         }
+
+        // --- Moradas e métodos ---
         $order['billing_address']  = $this->customerAddressModel->find($order['billing_address_id']);
         $order['shipping_address'] = $this->customerAddressModel->find($order['shipping_address_id']);
-        $order['payment_method']  = $this->paymentMethodsModel->find($order['payment_method_id']);
-        $order['shipping_method'] = $this->shippingMethodsModel->find($order['shipping_method_id']);
+        $order['payment_method']   = $this->paymentMethodsModel->find($order['payment_method_id']);
+        $order['shipping_method']  = $this->shippingMethodsModel->find($order['shipping_method_id']);
+
+        // --- 💳 Pagamento real (tabela payments) ---
+        $order['payment'] = $this->paymentsModel
+            ->where('order_id', $id)
+            ->first();
+
+        // --- Itens ---
         $items = $this->ordersItemsModel
             ->where('order_id', $id)
             ->findAll();
+
         foreach ($items as &$item) {
             $product = $this->productsModel->find($item['product_id']);
-            $item['product_name'] = $product['name'] ?? 'Produto #'.$item['product_id'];
+            $item['product_name'] = $product['name'] ?? 'Produto #' . $item['product_id'];
 
             if (!empty($item['variant_id'])) {
                 $variant = $this->productsVariantsModel->find($item['variant_id']);
-                $item['variant_name'] = $variant['sku'] ?? 'Variante #'.$item['variant_id'];
+                $item['variant_name'] = $variant['sku'] ?? 'Variante #' . $item['variant_id'];
             } else {
                 $item['variant_name'] = '-';
             }
         }
         $order['items'] = $items;
+
+        // --- Expedições ---
         $shipments = $this->ordersShipmentsModel->where('order_id', $id)->findAll();
         foreach ($shipments as &$s) {
             $s['items'] = $this->ordersShipmentItemsModel
@@ -187,14 +241,25 @@ class OrdersController extends BaseController
                 ->findAll();
         }
         $order['shipments'] = $shipments;
+
+        // --- Histórico de estado ---
         $order['status_history'] = $this->ordersStatusHistoryModel
             ->where('order_id', $id)
             ->orderBy('created_at', 'asc')
             ->findAll();
+
+        // --- Métodos disponíveis ---
+        $paymentMethods  = $this->paymentMethodsModel->findAll();
+        $shippingMethods = $this->shippingMethodsModel->findAll();
+
+        // --- View ---
         return view('admin/sales/orders/edit', [
             'order' => $order,
+            'paymentMethods' => $paymentMethods,
+            'shippingMethods' => $shippingMethods,
         ]);
     }
+
     public function updateStatus()
     {
         $data = $this->request->getJSON(true);

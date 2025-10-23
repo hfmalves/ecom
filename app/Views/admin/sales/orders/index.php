@@ -191,18 +191,27 @@ Dashboard
                         <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100 align-middle">
                             <thead class="table-light">
                             <tr>
-                                <th>Estado</th>
-                                <th>Cliente</th>
-                                <th>Artigos</th>
-                                <th>Total</th>
-                                <th>Desconto</th>
-                                <th>Pagamento</th>
-                                <th>Envio</th>
-                                <th>Criada em</th>
-                                <th class="text-center">Ações</th>
+                                <th rowspan="2">Estado</th>
+                                <th rowspan="2">Cliente</th>
+                                <th rowspan="2">Artigos</th>
+                                <th rowspan="2">Total</th>
+                                <th rowspan="2">Desconto</th>
+                                <th colspan="3" class="text-center">Pagamento</th>
+                                <th colspan="4" class="text-center">Envios</th>
+                                <th rowspan="2">Criada em</th>
+                                <th rowspan="2" class="text-center">Ações</th>
                             </tr>
-                            </thead>
+                                <tr>
+                                    <th>Método</th>
+                                    <th>Estado</th>
+                                    <th>Data</th>
+                                    <th>Transportadora</th>
+                                    <th>Codigo</th>
+                                    <th>Estado</th>
+                                    <th>Data</th>
 
+                                </tr>
+                            </thead>
                             <tbody>
                             <?php if (!empty($orders)): ?>
                                 <?php foreach ($orders as $o): ?>
@@ -221,9 +230,17 @@ Dashboard
                                             ?>
                                         </td>
                                         <td>
-                                            <strong><?= esc($o['user']['name'] ?? 'Sem cliente') ?></strong><br>
+                                            <?php
+                                            $fullName = trim($o['user']['name'] ?? 'Sem cliente');
+                                            $parts    = explode(' ', $fullName);
+                                            $displayName = count($parts) > 1
+                                                ? "{$parts[0]} " . end($parts)
+                                                : $fullName;
+                                            ?>
+                                            <strong><?= esc($displayName) ?></strong><br>
                                             <small class="text-muted"><?= esc($o['user']['email'] ?? '-') ?></small>
                                         </td>
+
                                         <td class="text-end"><?= number_format($o['total_items'], 0, ',', ' ') ?></td>
                                         <td class="text-end"><?= number_format($o['grand_total'], 2, ',', ' ') ?> €</td>
                                         <td class="text-end">
@@ -239,15 +256,64 @@ Dashboard
                                                     : '<span class="badge w-100 bg-light text-muted">—</span>'
                                             ?>
                                         </td>
+                                        <td class="text-center">
+                                            <?php
+                                            $status = $o['payment']['status'] ?? 'pending';
+                                            $map = [
+                                                'pending'  => 'warning',
+                                                'paid'     => 'success',
+                                                'refunded' => 'info',
+                                                'failed'   => 'danger',
+                                                'partial'  => 'secondary',
+                                            ];
+                                            $color = $map[$status] ?? 'light';
+                                            ?>
+                                            <span class="badge w-100 bg-<?= $color ?>">
+                                            <?= ucfirst($status) ?>
+                                            </span>
+                                        </td>
+                                        <td>
+
+                                            <?php if (!empty($o['payment']['paid_at'])): ?>
+                                                <br>
+                                                <small class="text-muted">
+                                                    <?= date('d/m/Y H:i', strtotime($o['payment']['paid_at'])) ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <?= !empty($o['shipping_method']['name'])
                                                     ? '<span class="badge w-100 bg-info">' . esc($o['shipping_method']['name']) . '</span>'
                                                     : '<span class="badge w-100 bg-light">—</span>' ?>
-                                            <br>
+                                        </td>
+                                        <td>
                                             <?php if (!empty($o['shipments'])): ?>
                                                 <?php foreach ($o['shipments'] as $s): ?>
                                                     <small class="text-muted"><?= esc($s['tracking_number'] ?? '-') ?></small><br>
                                                 <?php endforeach ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php
+                                            $shipStatus = $o['shipment_status'] ?? 'pending';
+                                            $mapShip = [
+                                                'pending'    => 'warning',
+                                                'processing' => 'info',
+                                                'shipped'    => 'primary',
+                                                'delivered'  => 'success',
+                                                'returned'   => 'secondary',
+                                                'canceled'   => 'danger',
+                                            ];
+                                            $shipColor = $mapShip[$shipStatus] ?? 'light';
+                                            ?>
+                                            <span class="badge w-100 bg-<?= $shipColor ?>">
+                                                <?= ucfirst($shipStatus) ?>
+                                            </span>
+
+                                        </td>
+                                        <td>
+                                            <?php if (!empty($o['shipped_at'])): ?>
+                                                <br><small class="text-muted"><?= date('d/m/Y', strtotime($o['shipped_at'])) ?></small>
                                             <?php endif; ?>
                                         </td>
                                         <td>
@@ -255,125 +321,107 @@ Dashboard
                                                     ? date('d/m/Y H:i', strtotime($o['created_at']))
                                                     : '<span class="text-muted">—</span>' ?>
                                         </td>
+                                        <?php
+                                        $paymentStatus = $o['payment']['status'] ?? 'pending';
+                                        $shipStatus    = $o['shipment_status'] ?? 'pending';
+                                        $orderStatus   = $o['status'] ?? 'pending';
+                                        ?>
                                         <td>
                                             <div class="d-flex justify-content-center">
                                                 <ul class="list-unstyled hstack gap-1 mb-0">
+                                                    <!-- Ver Detalhes -->
                                                     <li>
                                                         <a href="<?= base_url('admin/sales/orders/edit/' . $o['id']) ?>"
                                                            class="btn btn-sm btn-light text-primary" title="Ver detalhes">
                                                             <i class="mdi mdi-eye-outline"></i>
                                                         </a>
                                                     </li>
-                                                    <?php
-                                                    switch ($o['status']) {
-                                                        case 'pending': ?>
-                                                            <li>
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-light text-success"
-                                                                        title="Enviar encomenda"
-                                                                        @click="
-                                                                            window.dispatchEvent(new CustomEvent('order-send', {
-                                                                                detail: { id: <?= $o['id'] ?> }
-                                                                            }));
-                                                                            new bootstrap.Modal(document.getElementById('modalSendOrder')).show();
-                                                                        ">
-                                                                    <i class="mdi mdi-truck-fast-outline"></i>
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-light text-warning"
-                                                                        title="Cancelar encomenda"
-                                                                        @click="
-                                                                            window.dispatchEvent(new CustomEvent('order-cancel', {
-                                                                                detail: { id: <?= $o['id'] ?>, name: '<?= addslashes($o['user']['name'] ?? 'Sem nome') ?>' }
-                                                                            }));
-                                                                            new bootstrap.Modal(document.getElementById('modalCancelOrder')).show();
-                                                                        ">
-                                                                    <i class="mdi mdi-cancel"></i>
-                                                                </button>
-                                                            </li>
-                                                            <?php break;
-                                                        case 'processing': ?>
-                                                            <!-- Marcar como concluída -->
-                                                            <li>
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-light text-success"
-                                                                        title="Marcar como concluída"
-                                                                        @click="
-                                                                        window.dispatchEvent(new CustomEvent('order-complete', {
-                                                                            detail: { id: <?= $o['id'] ?> }
-                                                                        }));
-                                                                        new bootstrap.Modal(document.getElementById('modalCompleteOrder')).show();
-                                                                    ">
-                                                                    <i class="mdi mdi-check-circle-outline"></i>
-                                                                </button>
-                                                            </li>
-                                                            <li>
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-light text-warning"
-                                                                        title="Cancelar encomenda"
-                                                                        @click="
-                                                                            window.dispatchEvent(new CustomEvent('order-cancel', {
-                                                                                detail: { id: <?= $o['id'] ?>, name: '<?= addslashes($o['user']['name'] ?? 'Sem nome') ?>' }
-                                                                            }));
-                                                                            new bootstrap.Modal(document.getElementById('modalCancelOrder')).show();
-                                                                        ">
-                                                                    <i class="mdi mdi-cancel"></i>
-                                                                </button>
-                                                            </li>
-                                                            <?php break;
-                                                        case 'completed': ?>
-                                                            <!-- Recomprar -->
-                                                            <li>
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-light text-info"
-                                                                        title="Recomprar encomenda"
-                                                                        @click="
-                                                                            window.dispatchEvent(new CustomEvent('order-rebuy', {
-                                                                                detail: { id: <?= $o['id'] ?> }
-                                                                            }));
-                                                                            new bootstrap.Modal(document.getElementById('modalRebuyOrder')).show();
-                                                                        ">
-                                                                    <i class="mdi mdi-refresh"></i>
-                                                                </button>
-                                                            </li>
 
-                                                            <!-- Fatura -->
-                                                            <li>
-                                                                <a href="<?= base_url('admin/sales/orders/invoice/' . $o['id']) ?>"
-                                                                   class="btn btn-sm btn-light text-secondary" title="Ver fatura">
-                                                                    <i class="mdi mdi-file-document-outline"></i>
-                                                                </a>
-                                                            </li>
-                                                            <?php break;
-                                                        case 'canceled': ?>
-                                                            <li>
-                                                                <button type="button"
-                                                                        class="btn btn-sm btn-light text-info"
-                                                                        title="Recomprar encomenda"
-                                                                        @click="
-                                                                            window.dispatchEvent(new CustomEvent('order-rebuy', {
-                                                                                detail: { id: <?= $o['id'] ?> }
-                                                                            }));
-                                                                            new bootstrap.Modal(document.getElementById('modalRebuyOrder')).show();
-                                                                        ">
-                                                                    <i class="mdi mdi-refresh"></i>
-                                                                </button>
-                                                            </li>
-                                                            <?php break;
-                                                        case 'refunded': ?>
+                                                    <?php if ($orderStatus === 'canceled' || $orderStatus === 'refunded'): ?>
+                                                        <!-- Recomprar ou Nota de crédito -->
+                                                        <?php if ($orderStatus === 'refunded'): ?>
                                                             <li>
                                                                 <a href="<?= base_url('admin/sales/orders/credit-note/' . $o['id']) ?>"
                                                                    class="btn btn-sm btn-light text-secondary" title="Ver nota de crédito">
                                                                     <i class="mdi mdi-file-document-edit-outline"></i>
                                                                 </a>
                                                             </li>
-                                                            <?php break;
-                                                    } ?>
+                                                        <?php else: ?>
+                                                            <li>
+                                                                <button type="button" class="btn btn-sm btn-light text-info"
+                                                                        title="Recomprar encomenda"
+                                                                        @click="
+                                    window.dispatchEvent(new CustomEvent('order-rebuy', {
+                                        detail: { id: <?= $o['id'] ?> }
+                                    }));
+                                    new bootstrap.Modal(document.getElementById('modalRebuyOrder')).show();
+                                ">
+                                                                    <i class="mdi mdi-refresh"></i>
+                                                                </button>
+                                                            </li>
+                                                        <?php endif; ?>
+
+                                                    <?php elseif ($paymentStatus !== 'paid'): ?>
+                                                        <!-- Aguardar pagamento -->
+                                                        <li>
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-light text-warning"
+                                                                    title="Cancelar encomenda"
+                                                                    @click="
+                                window.dispatchEvent(new CustomEvent('order-cancel', {
+                                    detail: { id: <?= $o['id'] ?>, name: '<?= addslashes($o['user']['name'] ?? 'Sem nome') ?>' }
+                                }));
+                                new bootstrap.Modal(document.getElementById('modalCancelOrder')).show();
+                            ">
+                                                                <i class="mdi mdi-cancel"></i>
+                                                            </button>
+                                                        </li>
+
+                                                    <?php elseif ($paymentStatus === 'paid' && $shipStatus === 'pending'): ?>
+                                                        <!-- Enviar encomenda -->
+                                                        <li>
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-light text-success"
+                                                                    title="Preparar / Enviar encomenda"
+                                                                    @click="
+                                window.dispatchEvent(new CustomEvent('order-send', {
+                                    detail: { id: <?= $o['id'] ?> }
+                                }));
+                                new bootstrap.Modal(document.getElementById('modalSendOrder')).show();
+                            ">
+                                                                <i class="mdi mdi-truck-fast-outline"></i>
+                                                            </button>
+                                                        </li>
+
+                                                    <?php elseif ($shipStatus === 'shipped'): ?>
+                                                        <!-- Marcar como entregue -->
+                                                        <li>
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-light text-success"
+                                                                    title="Marcar como entregue"
+                                                                    @click="
+                                window.dispatchEvent(new CustomEvent('order-deliver', {
+                                    detail: { id: <?= $o['id'] ?> }
+                                }));
+                                new bootstrap.Modal(document.getElementById('modalDeliverOrder')).show();
+                            ">
+                                                                <i class="mdi mdi-package-variant-closed-check"></i>
+                                                            </button>
+                                                        </li>
+
+                                                    <?php elseif ($shipStatus === 'delivered' && $orderStatus === 'completed'): ?>
+                                                        <!-- Fatura -->
+                                                        <li>
+                                                            <a href="<?= base_url('admin/sales/orders/invoice/' . $o['id']) ?>"
+                                                               class="btn btn-sm btn-light text-secondary" title="Ver fatura">
+                                                                <i class="mdi mdi-file-document-outline"></i>
+                                                            </a>
+                                                        </li>
+                                                    <?php endif; ?>
                                                 </ul>
                                             </div>
                                         </td>
+
                                     </tr>
                                 <?php endforeach ?>
                             <?php endif ?>
