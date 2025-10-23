@@ -12,7 +12,19 @@ class OrdersShipmentsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['order_id','tracking_number','carrier','shipped_at','created_at'];
+    protected $allowedFields = [
+        'order_id',
+        'tracking_number',
+        'carrier',
+        'tracking_url',
+        'shipping_label_url',
+        'status',
+        'shipped_at',
+        'delivered_at',
+        'returned_at',
+        'comments',
+        'created_at',
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +33,7 @@ class OrdersShipmentsModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -29,15 +41,35 @@ class OrdersShipmentsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'order_id'        => 'required|integer',
-        'tracking_number' => 'permit_empty|max_length[100]',
-        'carrier'         => 'permit_empty|max_length[100]',
-        'shipped_at'      => 'permit_empty|valid_date',
+        'order_id'           => 'required|integer',
+        'tracking_number'    => 'permit_empty|max_length[100]',
+        'carrier'            => 'permit_empty|max_length[100]',
+        'tracking_url'       => 'permit_empty|valid_url_strict|max_length[255]',
+        'shipping_label_url' => 'permit_empty|valid_url_strict|max_length[255]',
+        'status'             => 'required|in_list[pending,processing,shipped,delivered,returned,canceled]',
+        'shipped_at'         => 'permit_empty|valid_date',
+        'delivered_at'       => 'permit_empty|valid_date',
+        'returned_at'        => 'permit_empty|valid_date',
+        'comments'           => 'permit_empty|string',
     ];
 
     protected $validationMessages = [
-        'order_id' => ['required' => 'A encomenda é obrigatória.'],
+        'order_id' => [
+            'required' => 'A encomenda é obrigatória.',
+            'integer'  => 'O ID da encomenda deve ser numérico.',
+        ],
+        'status' => [
+            'required' => 'O estado do envio é obrigatório.',
+            'in_list'  => 'Estado inválido. Use: pending, processing, shipped, delivered, returned ou canceled.',
+        ],
+        'tracking_url' => [
+            'valid_url_strict' => 'O URL de tracking não é válido.',
+        ],
+        'shipping_label_url' => [
+            'valid_url_strict' => 'O URL da etiqueta de envio não é válido.',
+        ],
     ];
+
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 
