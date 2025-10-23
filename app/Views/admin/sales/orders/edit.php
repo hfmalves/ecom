@@ -10,18 +10,24 @@ Dashboard
                 <h5 class="mb-2 card-title">Detalhes da Encomenda</h5>
                 <p class="text-muted mb-0">Consulta e gere todas as informações associadas a esta encomenda.</p>
             </div>
-            <div class="d-flex flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-secondary">
+            <div class="d-flex flex-wrap gap-2"
+                 x-data="{ status: '<?= $order['status'] ?>' }">
+                <!-- Duplicar Encomenda -->
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        @click="duplicateOrder(<?= $order['id'] ?>)">
                     <i class="mdi mdi-content-duplicate me-1"></i> Duplicar Encomenda
                 </button>
+                <!-- Criar Devolução -->
                 <button type="button"
                         class="btn btn-primary"
+                        x-show="['completed', 'refunded', 'processing'].includes(status)"
                         @click="
                         window.dispatchEvent(new CustomEvent('order-return', {
-                            detail: { id: <?= $order['id'] ?> }
-                        }));
-                        new bootstrap.Modal(document.getElementById('modalCreateReturn')).show();
-                    ">
+                        detail: { id: <?= $order['id'] ?> }
+                            }));
+                            new bootstrap.Modal(document.getElementById('modalCreateReturn')).show();
+                        ">
                     <i class="mdi mdi-autorenew me-1"></i> Criar Devolução
                 </button>
             </div>
@@ -288,115 +294,114 @@ Dashboard
                 </div>
             </div>
         </div>
-        <div class="card mt-4">
-            <form id="orderStatusForm"
-                  x-ref="form"
-                  x-data="formHandler(
-          '<?= base_url('admin/sales/orders/updateStatus') ?>',
-          {
-              id: '<?= $order['id'] ?>',
-              status: '',
-              comment: '',
-              notify: '0',
-              <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-          }
-      )"
-                  @submit.prevent="submit">
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <h4 class="card-title">Atualizar Estado da Encomenda</h4>
-                                <p class="card-title-desc">
-                                    Defina o novo estado, adicione um comentário e opte por notificar o cliente.
-                                </p>
+        <div class="card mt-4"
+             x-data="{ status: '<?= $order['status'] ?>' }">
+            <template x-if="!['canceled', 'refunded'].includes(status)">
+                <form id="orderStatusForm"
+                      x-ref="form"
+                      x-data="formHandler(
+                          '<?= base_url('admin/sales/orders/updateStatus') ?>',
+                          {
+                              id: '<?= $order['id'] ?>',
+                              status: '',
+                              comment: '',
+                              notify: '0',
+                              <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                          }
+                      )"
+                      @submit.prevent="submit">
 
-                                <!-- Estado -->
-                                <div class="col-md-12 mb-3"
-                                     x-data="{ field: 'status' }"
-                                     x-init="$nextTick(() => {
-                            const el = $refs.select;
-                            $(el).select2({
-                                width: '100%',
-                                minimumResultsForSearch: Infinity
-                            });
-
-                            // Valor inicial
-                            $(el).val(form[field]).trigger('change');
-
-                            // Quando muda no select2 → atualiza Alpine
-                            $(el).on('change', function () {
-                                const val = $(this).val();
-                                form[field] = val;
-                            });
-
-                            // Quando muda no Alpine → atualiza select2
-                            $watch('form[field]', val => {
-                                $(el).val(val).trigger('change.select2');
-                            });
-                         })">
-                                    <label class="form-label" :for="field">Novo Estado *</label>
-                                    <select class="form-select select2"
-                                            x-ref="select"
-                                            :id="field"
-                                            :name="field"
-                                            x-model="form[field]"
-                                            :class="{ 'is-invalid': errors[field] }">
-                                        <option value="">-- Selecionar Estado --</option>
-                                        <option value="pending">Pendente</option>
-                                        <option value="processing">Em processamento</option>
-                                        <option value="completed">Concluída</option>
-                                        <option value="canceled">Cancelada</option>
-                                        <option value="refunded">Reembolsada</option>
-                                    </select>
-                                    <template x-if="errors[field]">
-                                        <small class="text-danger" x-text="errors[field]"></small>
-                                    </template>
-                                </div>
-
-                                <!-- Comentário -->
-                                <div class="col-md-12 mb-3" x-data="{ field: 'comment' }">
-                                    <label class="form-label" :for="field">Comentário</label>
-                                    <textarea class="form-control"
-                                              :id="field"
-                                              :name="field"
-                                              rows="3"
-                                              placeholder="Comentário opcional"
-                                              x-model="form[field]"
-                                              :class="{ 'is-invalid': errors[field] }"></textarea>
-                                    <template x-if="errors[field]">
-                                        <small class="text-danger" x-text="errors[field]"></small>
-                                    </template>
-                                </div>
-
-                                <!-- Notificar -->
-                                <div class="col-md-12 mb-3" x-data="{ field: 'notify' }">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox"
-                                               :id="field" :name="field"
-                                               x-model="form[field]" true-value="1" false-value="0">
-                                        <label class="form-check-label" :for="field">
-                                            Notificar cliente por email
-                                        </label>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Atualizar Estado da Encomenda</h4>
+                                    <p class="card-title-desc">
+                                        Defina o novo estado, adicione um comentário e opte por notificar o cliente.
+                                    </p>
+                                    <div class="col-md-12 mb-3"
+                                         x-data="{
+                                            field: 'status',
+                                                status: '<?= $order['status'] ?>'
+                                             }"
+                                            x-init="$nextTick(() => {
+                                                const el = $refs.select;
+                                                $(el).select2({
+                                                    width: '100%',
+                                                    minimumResultsForSearch: Infinity
+                                                });
+                                                $(el).val(form[field]).trigger('change');
+                                                $(el).on('change', function () {
+                                                    form[field] = $(this).val();
+                                                });
+                                                $watch('form[field]', val => {
+                                                    $(el).val(val).trigger('change.select2');
+                                                });
+                                             })">
+                                        <label class="form-label" :for="field">Novo Estado *</label>
+                                        <select class="form-select select2"
+                                                x-ref="select"
+                                                :id="field"
+                                                :name="field"
+                                                x-model="form[field]"
+                                                :disabled="['canceled', 'refunded'].includes(status)"
+                                                :class="{
+                                                'is-invalid': errors[field],
+                                                'bg-light text-muted': ['canceled', 'refunded'].includes(status)
+                                            }">
+                                            <option value="">-- Selecionar Estado --</option>
+                                            <option value="pending">Pendente</option>
+                                            <option value="processing">Em processamento</option>
+                                            <option value="completed">Concluída</option>
+                                            <option value="canceled">Cancelada</option>
+                                            <option value="refunded">Reembolsada</option>
+                                        </select>
+                                        <template x-if="errors[field]">
+                                            <small class="text-danger" x-text="errors[field]"></small>
+                                        </template>
+                                        <template x-if="['canceled', 'refunded'].includes(status)">
+                                            <small class="text-danger d-block mt-2">
+                                                Esta encomenda não pode ser atualizada porque está
+                                                <span x-text="status === 'canceled' ? 'cancelada' : 'reembolsada'"></span>.
+                                            </small>
+                                        </template>
                                     </div>
-                                </div>
-
-                                <!-- Botão -->
-                                <div class="modal-footer mt-3">
-                                    <button type="submit" class="btn btn-primary w-100" :disabled="loading">
-                                        <span x-show="!loading">Guardar Atualização</span>
-                                        <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A atualizar...</span>
-                                    </button>
+                                    <div class="col-md-12 mb-3" x-data="{ field: 'notify' }">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   :id="field" :name="field"
+                                                   x-model="form[field]" true-value="1" false-value="0">
+                                            <label class="form-check-label" :for="field">
+                                                Notificar cliente por email
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer mt-3">
+                                        <button type="submit" class="btn btn-primary w-100" :disabled="loading">
+                                            <span x-show="!loading">Guardar Atualização</span>
+                                            <span x-show="loading"><i class="fa fa-spinner fa-spin"></i> A atualizar...</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </form>
+            </template>
+            <template x-if="['canceled', 'refunded'].includes(status)">
+                <div class="p-4 text-center fw-bold"
+                     :class="status === 'canceled' ? 'text-danger' : 'text-info'">
+                    <i :class="status === 'canceled' ? 'fa fa-ban me-2' : 'fa fa-undo me-2'"></i>
+                    <span x-text="status === 'canceled'
+                        ? 'Esta encomenda foi cancelada e não pode ser atualizada.'
+                        : 'Esta encomenda foi devolvida e não pode ser atualizada.'">
+                    </span>
                 </div>
-            </form>
-
+            </template>
 
         </div>
+
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title mb-5">Histórico da Encomenda</h4>
