@@ -89,35 +89,59 @@ class FinancialDocumentsController extends BaseController
     }
     public function edit($id)
     {
+        // Documento fiscal
         $invoice = $this->invoicesModel->find($id);
         if (!$invoice) {
-            return redirect()->to(base_url('admin/sales/invoices'))
+            return redirect()
+                ->to(base_url('admin/sales/invoices'))
                 ->with('error', 'Documento não encontrado.');
         }
+
+        // Encomenda associada
         $order = $this->ordersModel->find($invoice['order_id']);
         if ($order) {
-            // Itens da encomenda
-            $order['items'] = $this->ordersItemsModel
+            // Buscar itens da encomenda
+            $items = $this->ordersItemsModel
                 ->where('order_id', $order['id'])
                 ->findAll();
+
+            // Enriquecer com dados do produto
+            foreach ($items as &$item) {
+                $product = $this->productsModel->find($item['product_id']);
+
+                $item['product_name'] = $product['name'] ?? 'Produto #' . $item['product_id'];
+                $item['sku']          = $product['sku'] ?? '-';
+                $item['variant_name'] = '-'; // ainda não usas variantes
+            }
+
+            $order['items'] = $items;
             $invoice['order'] = $order;
         }
+
+        // Cliente associado
         if (!empty($order['customer_id'])) {
             $invoice['customer'] = $this->customerModel->find($order['customer_id']);
         }
+
+        // Pagamento associado
         $invoice['payment'] = $this->paymentsModel
             ->where('invoice_id', $invoice['id'])
             ->first();
+
+        // Envio associado
         $shipment = $this->ordersShipmentsModel
             ->where('order_id', $invoice['order_id'])
             ->first();
+
         if ($shipment) {
             $invoice['shipment'] = $shipment;
         }
+
         return view('admin/sales/invoices/edit', [
             'invoice' => $invoice,
         ]);
     }
+
 
 
 }
