@@ -59,7 +59,8 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="card-title mb-0">Lista de Documentos Fiscais</h4>
             <button type="button" class="btn btn-primary"
-                    @click="new bootstrap.Modal(document.getElementById('modalCreateInvoice')).show()">
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalCreateInvoice">
                 <i class="mdi mdi-plus me-1"></i> Novo Documento
             </button>
         </div>
