@@ -46,55 +46,37 @@ class OrdersShipmentsController extends BaseController
     }
     public function index()
     {
-        $customers   = $this->customerModel->findAll();
-        $addresses   = $this->customerAddressModel->findAll();
+        $shipments = $this->ordersShipmentsModel
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
+
+        $orders   = $this->ordersModel->findAll();
+        $customers = $this->customerModel->findAll();
         $shipMethods = $this->shippingMethodsModel->findAll();
-        $payMethods  = $this->paymentMethodsModel->findAll();
-        $maps = [
-            'customer_id'         => array_column($customers, null, 'id'),
-            'billing_address_id'  => array_column($addresses, null, 'id'),
-            'shipping_address_id' => array_column($addresses, null, 'id'),
-            'shipping_method_id'  => array_column($shipMethods, null, 'id'),
-            'payment_method_id'   => array_column($payMethods, null, 'id'),
-        ];
-        $orders = $this->ordersModel->where('status', 'processing')->findAll();
-        $shipments      = $this->ordersShipmentsModel->findAll();
-        $shipmentItems  = $this->ordersShipmentItemsModel->findAll();
-        $statusHistory  = $this->ordersStatusHistoryModel->findAll();
-        $mapShipments = [];
-        foreach ($shipments as $s) {
-            $mapShipments[$s['order_id']][] = $s;
-        }
-        $mapStatusHistory = [];
-        foreach ($statusHistory as $h) {
-            $mapStatusHistory[$h['order_id']][] = $h;
-        }
-        $mapShipmentItems = [];
-        foreach ($shipmentItems as $si) {
-            $mapShipmentItems[$si['shipment_id']][] = $si;
-        }
-        foreach ($orders as &$o) {
-            foreach ($maps as $field => $map) {
-                if ($field === 'customer_id') {
-                    $o['user'] = $map[$o['customer_id']] ?? ['name' => 'N/A', 'email' => ''];
-                } else {
-                    $key = str_replace('_id', '', $field);
-                    $o[$key] = $map[$o[$field]] ?? ['name' => 'N/A'];
-                }
-            }
 
-            $o['shipments']      = $mapShipments[$o['id']] ?? [];
-            $o['status_history'] = $mapStatusHistory[$o['id']] ?? [];
+        // Mapas rápidos
+        $mapOrders = array_column($orders, null, 'id');
+        $mapCustomers = array_column($customers, null, 'id');
+        $mapShipMethods = array_column($shipMethods, null, 'id');
 
-            foreach ($o['shipments'] as &$s) {
-                $s['items'] = $mapShipmentItems[$s['id']] ?? [];
+        // Enriquecer envios com info útil
+        foreach ($shipments as &$s) {
+            $order = $mapOrders[$s['order_id']] ?? null;
+            $s['order'] = $order;
+            $s['customer'] = $mapCustomers[$order['customer_id']] ?? null;
+
+            // Obter método de envio da encomenda associada
+            if (!empty($order['shipping_method_id'])) {
+                $s['shipping_method'] = $mapShipMethods[$order['shipping_method_id']] ?? null;
+            } else {
+                $s['shipping_method'] = ['name' => $s['carrier'] ?? '—'];
             }
         }
-
         return view('admin/sales/shipments/index', [
-            'orders' => $orders
+            'shipments' => $shipments
         ]);
     }
+
 
 
 }

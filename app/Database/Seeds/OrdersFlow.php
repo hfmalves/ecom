@@ -23,6 +23,7 @@ class OrdersFlow extends Seeder
             'payments',
             'financial_documents',
             'orders',
+            'orders_shipments'
         ];
 
         foreach ($tables as $table) {
@@ -53,35 +54,36 @@ class OrdersFlow extends Seeder
         foreach ($customers as $cust) {
             if ($counter >= 200) break;
 
-            // Moradas
             $custAddresses = array_values(array_filter($addresses, fn($a) => $a['customer_id'] == $cust['id']));
             if (empty($custAddresses)) continue;
 
             $billingId  = $custAddresses[0]['id'];
             $shippingId = $custAddresses[0]['id'];
 
+            // Escolher shipping e payment aleatórios
+            $shippingMethodId = rand(1, 3);
+            $paymentMethodId  = rand(1, 4);
+
             // Produtos diferentes
             shuffle($products);
             $selected = array_slice($products, 0, rand(2, 5));
 
-            // Calcular totais
             $totalItems = 0;
             $subtotal   = 0;
             $totalTax   = 0;
             $orderItems = [];
 
             foreach ($selected as $p) {
-                $qty = rand(1, 4); // quantidade variável por item
+                $qty = rand(1, 4);
                 $lineSubtotal = $p['base_price'] * $qty;
                 $lineTax = $p['base_price_tax'] * $qty;
-                $lineTotal = $lineSubtotal + $lineTax;
 
                 $orderItems[] = [
                     'product' => $p,
                     'qty'     => $qty,
                     'subtotal'=> $lineSubtotal,
                     'tax'     => $lineTax,
-                    'total'   => $lineTotal,
+                    'total'   => $lineSubtotal + $lineTax,
                 ];
 
                 $totalItems += $qty;
@@ -91,7 +93,6 @@ class OrdersFlow extends Seeder
 
             $grandTotal = $subtotal + $totalTax;
 
-            // Estado da encomenda
             $possibleStatuses = [
                 'pending'    => 25,
                 'processing' => 25,
@@ -99,6 +100,7 @@ class OrdersFlow extends Seeder
                 'canceled'   => 10,
                 'refunded'   => 10,
             ];
+
             $rand = rand(1, 100);
             $accum = 0;
             $status = 'pending';
@@ -130,17 +132,17 @@ class OrdersFlow extends Seeder
                 'grand_total'         => $grandTotal,
                 'billing_address_id'  => $billingId,
                 'shipping_address_id' => $shippingId,
-                'shipping_method_id'  => 1,
-                'payment_method_id'   => 1,
+                'shipping_method_id'  => $shippingMethodId,
+                'payment_method_id'   => $paymentMethodId,
                 'created_at'          => date('Y-m-d H:i:s', strtotime('-' . rand(1, 60) . ' days')),
                 'updated_at'          => date('Y-m-d H:i:s'),
             ];
             $db->table('orders')->insert($order);
             $orderId = $db->insertID();
 
-            // Inserir itens reais
+            // Inserir itens
             foreach ($orderItems as $line) {
-                $p   = $line['product'];
+                $p = $line['product'];
                 $qty = $line['qty'];
 
                 $db->table('orders_items')->insert([
@@ -160,14 +162,14 @@ class OrdersFlow extends Seeder
                 ]);
             }
 
-            // Documento financeiro (fatura)
+            // Documento financeiro
             $db->table('financial_documents')->insert([
                 'order_id'            => $orderId,
                 'customer_id'         => $cust['id'],
                 'billing_address_id'  => $billingId,
                 'shipping_address_id' => $shippingId,
-                'shipping_method_id'  => 1,
-                'payment_method_id'   => 1,
+                'shipping_method_id'  => $shippingMethodId,
+                'payment_method_id'   => $paymentMethodId,
                 'invoice_number'      => str_pad($orderId, 6, '0', STR_PAD_LEFT),
                 'series'              => 'A',
                 'type'                => 'invoice',
@@ -198,11 +200,17 @@ class OrdersFlow extends Seeder
                 'amount'            => $grandTotal,
                 'currency'          => 'EUR',
                 'exchange_rate'     => 1.0,
-                'method'            => 'Multibanco',
-                'payment_method_id' => 1,
+                'method'            => match ($paymentMethodId) {
+                    1 => 'Multibanco',
+                    2 => 'MBWay',
+                    3 => 'PayPal',
+                    4 => 'Visa',
+                    default => 'Multibanco',
+                },
+                'payment_method_id' => $paymentMethodId,
                 'status'            => $paymentStatus,
                 'transaction_id'    => 'TXN-' . str_pad($orderId, 6, '0', STR_PAD_LEFT),
-                'reference'         => 'MB-' . rand(100000, 999999),
+                'reference'         => strtoupper(substr($order['status'], 0, 3)) . '-' . rand(100000, 999999),
                 'notes'             => 'Pagamento ' . $paymentStatus . ' gerado automaticamente.',
                 'created_by'        => 1,
                 'updated_by'        => 1,
@@ -231,6 +239,76 @@ class OrdersFlow extends Seeder
             }
 
             $db->table('orders_status_history')->insertBatch($history);
+            $totalWeight = 0;
+            $totalVolume = 0;
+
+            foreach ($orderItems as $item) {
+                $p = $item['product'];
+                $qty = $item['qty'];
+
+                $w = $p['weight'] ?? 0;
+                $width  = $p['width']  ?? 0;
+                $height = $p['height'] ?? 0;
+                $length = $p['length'] ?? 0;
+
+                $totalWeight += $w * $qty;
+                $totalVolume += ($width * $height * $length) * $qty;
+            }
+            // ============================================================
+            // 4. GERAR ENVIO (orders_shipments)
+            // ============================================================
+            $shippingStatus = match ($status) {
+                'completed'  => 'delivered',
+                'processing' => 'shipped',
+                'pending'    => 'pending',
+                'canceled'   => 'canceled',
+                'refunded'   => 'returned',
+                default      => 'pending',
+            };
+
+            $carrierMap = [
+                1 => 'CTT Expresso',
+                2 => 'UPS',
+                3 => 'DHL'
+            ];
+            $carrier = $carrierMap[$shippingMethodId] ?? 'CTT Expresso';
+
+            $trackingNumber = strtoupper(substr($carrier, 0, 3)) . '-' . rand(100000, 999999);
+            $baseTrackingUrl = match ($carrier) {
+                'CTT Expresso' => 'https://www.ctt.pt/feapl_2/app/open/objectSearch/objectSearch.jspx?objects=',
+                'DHL'          => 'https://www.dhl.com/pt-pt/home/tracking.html?tracking-id=',
+                'UPS'          => 'https://www.ups.com/track?tracknum=',
+                default        => '#',
+            };
+
+            $shippedAt = in_array($shippingStatus, ['shipped', 'delivered', 'returned'])
+                ? date('Y-m-d H:i:s', strtotime('-' . rand(1, 10) . ' days'))
+                : null;
+
+            $deliveredAt = ($shippingStatus === 'delivered')
+                ? date('Y-m-d H:i:s', strtotime('-' . rand(0, 3) . ' days'))
+                : null;
+
+            $returnedAt = ($shippingStatus === 'returned')
+                ? date('Y-m-d H:i:s', strtotime('-' . rand(0, 2) . ' days'))
+                : null;
+
+            $db->table('orders_shipments')->insert([
+                'order_id'           => $orderId,
+                'tracking_number'    => $trackingNumber,
+                'tracking_url'       => $baseTrackingUrl . $trackingNumber,
+                'shipping_label_url' => null,
+                'carrier'            => $carrier,
+                'status'             => $shippingStatus,
+                'shipped_at'         => $shippedAt,
+                'delivered_at'       => $deliveredAt,
+                'returned_at'        => $returnedAt,
+                'comments'           => 'Envio gerado automaticamente pelo seeder.',
+                'created_at'         => date('Y-m-d H:i:s'),
+                'weight'             => $totalWeight,
+                'volume'             => $totalVolume,
+            ]);
+
             $counter++;
         }
 
