@@ -53,28 +53,71 @@ class FinancialDocumentsController extends BaseController
 
     public function index()
     {
+        // === KPIs ===
+        $kpi = [
+            'total'        => $this->invoicesModel->countAllResults(),
+            'paid'         => $this->invoicesModel->where('status', 'paid')->countAllResults(true),
+            'canceled'     => $this->invoicesModel->where('status', 'canceled')->countAllResults(true),
+            'refunded'     => $this->invoicesModel->where('status', 'refunded')->countAllResults(true),
+            'draft'        => $this->invoicesModel->where('status', 'draft')->countAllResults(true),
+            'issued'       => $this->invoicesModel->where('status', 'issued')->countAllResults(true),
+            'last_30_days' => $this->invoicesModel
+                ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-30 days')))
+                ->countAllResults(true),
+            'avg_total'    => number_format(
+                $this->invoicesModel->selectAvg('total', 'avg')->first()['avg'] ?? 0,
+                2, ',', ' '
+            ),
+        ];
+        $invoices  = $this->invoicesModel->orderBy('created_at', 'DESC')->findAll();
         $payments  = $this->paymentsModel->findAll();
-        $invoices  = $this->invoicesModel->findAll();
         $orders    = $this->ordersModel->findAll();
         $customers = $this->customerModel->findAll();
-        $mapInvoices  = array_column($invoices, null, 'id');
+        $mapPayments  = array_column($payments, null, 'invoice_id');
         $mapOrders    = array_column($orders, null, 'id');
         $mapCustomers = array_column($customers, null, 'id');
-        foreach ($payments as &$p) {
-            $invoice = $mapInvoices[$p['invoice_id']] ?? null;
-            $p['invoice'] = $invoice;
-
-            if ($invoice) {
-                $order = $mapOrders[$invoice['order_id']] ?? null;
-                $p['order'] = $order;
-
-                if ($order) {
-                    $p['customer'] = $mapCustomers[$order['customer_id']] ?? ['name'=>'N/A','email'=>''];
-                }
-            }
+        foreach ($invoices as &$inv) {
+            $inv['payment']  = $mapPayments[$inv['id']] ?? null;
+            $inv['order']    = $mapOrders[$inv['order_id']] ?? null;
+            $inv['customer'] = $mapCustomers[$inv['order']['customer_id'] ?? 0] ?? null;
         }
+
         return view('admin/sales/invoices/index', [
-            'payments' => $payments
+            'invoices' => $invoices,
+            'kpi'      => $kpi,
         ]);
     }
+    public function edit($id)
+    {
+        $invoice = $this->invoicesModel->find($id);
+        if (!$invoice) {
+            return redirect()->to(base_url('admin/sales/invoices'))
+                ->with('error', 'Documento não encontrado.');
+        }
+        $order = $this->ordersModel->find($invoice['order_id']);
+        if ($order) {
+            // Itens da encomenda
+            $order['items'] = $this->ordersItemsModel
+                ->where('order_id', $order['id'])
+                ->findAll();
+            $invoice['order'] = $order;
+        }
+        if (!empty($order['customer_id'])) {
+            $invoice['customer'] = $this->customerModel->find($order['customer_id']);
+        }
+        $invoice['payment'] = $this->paymentsModel
+            ->where('invoice_id', $invoice['id'])
+            ->first();
+        $shipment = $this->ordersShipmentsModel
+            ->where('order_id', $invoice['order_id'])
+            ->first();
+        if ($shipment) {
+            $invoice['shipment'] = $shipment;
+        }
+        return view('admin/sales/invoices/edit', [
+            'invoice' => $invoice,
+        ]);
+    }
+
+
 }

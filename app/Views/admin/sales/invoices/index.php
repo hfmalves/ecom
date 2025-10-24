@@ -1,126 +1,194 @@
 <?= $this->extend('layout/main') ?>
-<?= $this->section('title') ?>
-Dashboard
-<?= $this->endSection() ?>
+<?= $this->section('title') ?>Documentos Fiscais<?= $this->endSection() ?>
 <?= $this->section('content') ?>
-<div class="row">
-    <div class="col-12">
-        <div class="card">
+
+<!-- === KPIs === -->
+<div class="row g-3 mb-1">
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
             <div class="card-body">
-                <div class="row mb-2">
-                    <div class="col-sm-4">
-                        <div class="search-box me-2 mb-2 d-inline-block">
-                            <div class="position-relative">
-                                <h4 class="card-title">Default Datatable</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-8">
-                        <div class="text-sm-end">
-                            <button type="button" x-data="systemModal()"
-                                    @click="open('#formCustomer', 'md')"
-                                    class="btn btn-primary">
-                                <i class="fa-solid fa-plus me-1"></i> Adicionar
-                            </button>
-                        </div>
-                    </div><!-- end col-->
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Documentos</h6>
+                    <i class="mdi mdi-file-document-outline text-primary fs-4"></i>
                 </div>
-                <div class="col-sm-12">
-                    <div class="table-responsive">
-                        <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap w-100">
-                            <thead class="table-light">
-                            <tr>
-                                <th>Fatura</th>
-                                <th>Tipo</th>
-                                <th>Estado</th>
-                                <th>Cliente</th>
-                                <th>Total</th>
-                                <th>Desconto</th>
-                                <th>Pago</th>
-                                <th>Método</th>
-                                <th>Data Pagamento</th>
-                                <th>Série</th>
-                                <th>Criada em</th>
-                                <th>Ações</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <?php if (!empty($payments)): ?>
-                                <?php foreach ($payments as $p): ?>
-                                    <?php $invoice = $p['invoice'] ?? []; ?>
-                                    <?php $order   = $p['order'] ?? []; ?>
-                                    <?php $customer= $p['customer'] ?? []; ?>
-                                    <tr>
-                                        <!-- Nº Fatura -->
-                                        <td>
-                                            <?= esc($invoice['invoice_number'] ?? 'N/A') ?><br>
-                                            <small>#<?= esc($invoice['id'] ?? '-') ?></small>
-                                        </td>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total'] ?? 0 ?></h3>
+                <small class="text-muted">registados no sistema</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Pagos</h6>
+                    <i class="mdi mdi-check-circle-outline text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['paid'] ?? 0 ?></h3>
+                <small class="text-muted">documentos liquidados</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Cancelados</h6>
+                    <i class="mdi mdi-close-circle-outline text-danger fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['canceled'] ?? 0 ?></h3>
+                <small class="text-muted">anulados no sistema</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Últimos 30 dias</h6>
+                    <i class="mdi mdi-calendar-month-outline text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['last_30_days'] ?? 0 ?></h3>
+                <small class="text-muted">emitidos recentemente</small>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- === Tabela === -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title mb-0">Lista de Documentos Fiscais</h4>
+            <button type="button" class="btn btn-primary"
+                    @click="new bootstrap.Modal(document.getElementById('modalCreateInvoice')).show()">
+                <i class="mdi mdi-plus me-1"></i> Novo Documento
+            </button>
+        </div>
 
-                                        <!-- Tipo -->
-                                        <td>
-                                            <?php
-                                            $typeLabels = [
-                                                'invoice'     => 'Fatura',
-                                                'receipt'     => 'Recibo',
-                                                'credit_note' => 'Nota de Crédito',
-                                                'debit_note'  => 'Nota de Débito'
-                                            ];
-                                            echo $typeLabels[$invoice['type']] ?? ($invoice['type'] ?? 'N/A');
-                                            ?>
-                                        </td>
+        <div class="table-responsive">
+            <table id="datatable" class="table table-striped table-bordered nowrap w-100 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Fatura</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Desconto</th>
+                    <th>Pago</th>
+                    <th>Método</th>
+                    <th>Data Pagamento</th>
+                    <th>Série</th>
+                    <th>Criada em</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php if (!empty($invoices)): ?>
+                    <?php foreach ($invoices as $inv): ?>
+                        <?php $cust = $inv['customer'] ?? []; $pay = $inv['payment'] ?? []; ?>
+                        <tr>
+                            <td><?= esc($inv['invoice_number'] ?? '-') ?><br><small>#<?= esc($inv['id']) ?></small></td>
+                            <td><?= ucfirst($inv['type'] ?? '-') ?></td>
+                            <td>
+                                <?php
+                                $colors = [
+                                        'draft'    => 'secondary',
+                                        'issued'   => 'info',
+                                        'paid'     => 'success',
+                                        'canceled' => 'danger',
+                                        'refunded' => 'warning',
+                                ];
+                                $labels = [
+                                        'draft'    => 'Rascunho',
+                                        'issued'   => 'Emitida',
+                                        'paid'     => 'Paga',
+                                        'canceled' => 'Cancelada',
+                                        'refunded' => 'Reembolsada',
+                                ];
+                                ?>
+                                <span class="badge bg-<?= $colors[$inv['status']] ?? 'light' ?> w-100">
+                                    <?= $labels[$inv['status']] ?? ucfirst($inv['status']) ?>
+                                </span>
+                            </td>
+                            <td><?= esc($cust['name'] ?? '-') ?><br><small><?= esc($cust['email'] ?? '') ?></small></td>
+                            <td><?= number_format($inv['total'] ?? 0, 2, ',', ' ') ?> €</td>
+                            <td><?= number_format($inv['discount_total'] ?? 0, 2, ',', ' ') ?> €</td>
+                            <td><?= number_format($pay['amount'] ?? 0, 2, ',', ' ') ?> €</td>
+                            <td><?= esc($pay['method'] ?? '-') ?></td>
+                            <td><?= !empty($pay['paid_at']) ? date('d/m/Y H:i', strtotime($pay['paid_at'])) : '-' ?></td>
+                            <td><?= esc($inv['series'] ?? '-') ?></td>
+                            <td><?= !empty($inv['created_at']) ? date('d/m/Y', strtotime($inv['created_at'])) : '-' ?></td>
+                            <td class="text-center">
+                                <a href="<?= base_url('admin/sales/financial_documents/edit/'.$inv['id']) ?>"
+                                   class="btn btn-sm btn-light text-primary">
+                                    <i class="mdi mdi-eye-outline"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach ?>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Modal: Criar Novo Documento Fiscal -->
+<div id="modalCreateInvoice" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content"
+             x-data="formHandler('<?= base_url('admin/sales/invoices/create') ?>', {
+                 type: 'invoice',
+                 series: '',
+                 order_id: '',
+                 notes: '',
+                 <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+             })"
+             @submit.prevent="submit">
 
-                                        <!-- Estado -->
-                                        <td>
-                                            <?php
-                                            $statusLabels = [
-                                                'draft'     => 'Rascunho',
-                                                'issued'    => 'Emitida',
-                                                'paid'      => 'Paga',
-                                                'canceled'  => 'Cancelada',
-                                                'refunded'  => 'Reembolsada'
-                                            ];
-                                            echo $statusLabels[$invoice['status']] ?? ($invoice['status'] ?? 'N/A');
-                                            ?>
-                                        </td>
+            <div class="modal-header">
+                <h5 class="modal-title">Criar Novo Documento Fiscal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-                                        <!-- Cliente -->
-                                        <td>
-                                            <?= esc($customer['name'] ?? 'Sem cliente') ?><br>
-                                            <small><?= esc($customer['email'] ?? '') ?></small>
-                                        </td>
+            <div class="modal-body">
+                <div class="alert alert-info small">
+                    Utilize este formulário para emitir um novo documento (Fatura, Recibo, Nota de Crédito, etc.).
+                </div>
 
-                                        <!-- Totais -->
-                                        <td><?= number_format($invoice['total'] ?? 0, 2, ',', ' ') ?> €</td>
-                                        <td><?= number_format($invoice['discount_total'] ?? 0, 2, ',', ' ') ?> €</td>
-                                        <td><?= number_format($p['amount'] ?? 0, 2, ',', ' ') ?> €</td>
-
-                                        <!-- Método -->
-                                        <td><?= esc($p['method'] ?? '-') ?></td>
-
-                                        <!-- Data de pagamento -->
-                                        <td><?= !empty($p['paid_at']) ? date('d/m/Y H:i', strtotime($p['paid_at'])) : '-' ?></td>
-
-                                        <!-- Série -->
-                                        <td><?= esc($invoice['series'] ?? '-') ?></td>
-
-                                        <!-- Data criação -->
-                                        <td><?= !empty($invoice['created_at']) ? date('d/m/Y', strtotime($invoice['created_at'])) : '-' ?></td>
-
-                                        <!-- Ações -->
-                                        <td>
-                                            <a href="<?= base_url('admin/sales/invoices/view/'.($invoice['id'] ?? 0)) ?>"
-                                               class="btn btn-sm btn-primary w-100">Ver Fatura</a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach ?>
-                            <?php endif; ?>
-                            </tbody>
-                        </table>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" x-model="form.type">
+                            <option value="invoice">Fatura</option>
+                            <option value="receipt">Recibo</option>
+                            <option value="credit_note">Nota de Crédito</option>
+                            <option value="debit_note">Nota de Débito</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Série</label>
+                        <input type="text" class="form-control" placeholder="Ex: A" x-model="form.series">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Encomenda Associada</label>
+                        <input type="number" class="form-control" placeholder="ID da encomenda" x-model="form.order_id">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Notas / Observações</label>
+                        <textarea class="form-control" rows="3" x-model="form.notes"
+                                  placeholder="Informações adicionais..."></textarea>
                     </div>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" :disabled="loading">
+                    <span x-show="!loading"><i class="mdi mdi-content-save-outline me-1"></i> Guardar</span>
+                    <span x-show="loading"><i class="fa fa-spinner fa-spin me-1"></i> A guardar...</span>
+                </button>
+            </div>
         </div>
-    </div> <!-- end col -->
-</div> <!-- end row -->
+    </div>
+</div>
+
 <?= $this->endSection() ?>
