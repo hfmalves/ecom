@@ -22,9 +22,7 @@
         "paypal/paypal-server-sdk": "^1.1",
         "stichoza/google-translate-php": "^5.3",
         "stripe/stripe-php": "^18.0",
-        "teamtnt/tntsearch": "^5.0",
-        "twilio/sdk": "^8.8",
-        "wildbit/postmark-php": "^7.0"
+        "teamtnt/tntsearch": "^5.0"
     },
     "require-dev": {
         "behat/behat": "^3.25",

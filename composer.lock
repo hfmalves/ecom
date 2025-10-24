@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73ab676a28df599cbf334192664ec087",
+    "content-hash": "7c396835a59ec5a8f74f4baebb123f5a",
     "packages": [
         {
             "name": "apimatic/core",
@@ -3547,56 +3547,6 @@
             "time": "2025-08-25T14:33:45+00:00"
         },
         {
-            "name": "twilio/sdk",
-            "version": "8.8.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/twilio/twilio-php",
-                "reference": "8bcc603a4cf92b7f268a97662e9185c0ec31dda5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/8bcc603a4cf92b7f268a97662e9185c0ec31dda5",
-                "reference": "8bcc603a4cf92b7f268a97662e9185c0ec31dda5",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.0",
-                "guzzlehttp/guzzle": "^6.3 || ^7.0",
-                "phpunit/phpunit": ">=7.0 < 10"
-            },
-            "suggest": {
-                "guzzlehttp/guzzle": "An HTTP client to execute the API requests"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Twilio\\": "src/Twilio/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Twilio API Team",
-                    "email": "api@twilio.com"
-                }
-            ],
-            "description": "A PHP wrapper for Twilio's API",
-            "homepage": "https://github.com/twilio/twilio-php",
-            "keywords": [
-                "api",
-                "sms",
-                "twilio"
-            ],
-            "time": "2025-10-14T11:55:16+00:00"
-        },
-        {
             "name": "voku/portable-ascii",
             "version": "2.0.3",
             "source": {
@@ -3669,46 +3619,6 @@
                 }
             ],
             "time": "2024-11-21T01:49:47+00:00"
-        },
-        {
-            "name": "wildbit/postmark-php",
-            "version": "v7.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ActiveCampaign/postmark-php.git",
-                "reference": "f0a53b741833d4b2d1a3827c0bd66e70f4d26d62"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ActiveCampaign/postmark-php/zipball/f0a53b741833d4b2d1a3827c0bd66e70f4d26d62",
-                "reference": "f0a53b741833d4b2d1a3827c0bd66e70f4d26d62",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^7.8",
-                "php": "~8.1 || ~8.2|| ~8.3 || ~8.4"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.40",
-                "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^10.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Postmark\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "The officially supported client for Postmark (http://postmarkapp.com)",
-            "support": {
-                "issues": "https://github.com/ActiveCampaign/postmark-php/issues",
-                "source": "https://github.com/ActiveCampaign/postmark-php/tree/v7.0.0"
-            },
-            "time": "2025-07-11T11:40:30+00:00"
         }
     ],
     "packages-dev": [
