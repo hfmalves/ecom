@@ -124,6 +124,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('shipments', function ($routes) {
             $routes->get('/', 'OrdersShipmentsController::index', ['filter' => 'noauth']);
+            $routes->get('edit/(:num)', 'OrdersShipmentsController::edit/$1', ['filter' => 'noauth']);
         });
         $routes->group('returns', function ($routes) {
             $routes->get('/', 'OrdersReturnController::index', ['filter' => 'noauth']);
