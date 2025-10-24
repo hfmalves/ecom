@@ -13,15 +13,19 @@ Dashboard
 
             <div class="d-flex flex-wrap gap-2"
                  x-data="{
-             status: '<?= strtolower($order['status'] ?? 'pending') ?>',
-             shipStatus: '<?= strtolower($order['shipments'][0]['status'] ?? 'pending') ?>',
-             paymentStatus: '<?= strtolower($order['payment']['status'] ?? 'pending') ?>'
-           }">
+                     status: '<?= strtolower($order['status'] ?? 'pending') ?>',
+                     shipStatus: '<?= strtolower($order['shipments'][0]['status'] ?? 'pending') ?>',
+                     paymentStatus: '<?= strtolower($order['payment']['status'] ?? 'pending') ?>'
+                   }">
                 <button class="btn btn-outline-secondary"
                         x-show="!['canceled','refunded'].includes(status)"
-                        @click="duplicateOrder(<?= $order['id'] ?>)">
+                        @click="
+                          window.dispatchEvent(new CustomEvent('order-duplicate', { detail: { id: <?= $order['id'] ?> } }));
+                          new bootstrap.Modal(document.getElementById('modalDuplicateOrder')).show();
+                        ">
                     <i class="mdi mdi-content-duplicate me-1"></i> Duplicar Encomenda
                 </button>
+
                 <button class="btn btn-primary"
                         x-show="['shipped','delivered','returned'].includes(shipStatus)
                         && !['canceled','refunded'].includes(status)"
@@ -52,6 +56,7 @@ Dashboard
                     <i class="mdi mdi-compare-horizontal me-1"></i> Criar Troca
                 </button>
             </div>
+
         </div>
     </div><!--end col-->
 </div><!--end row-->
@@ -597,67 +602,223 @@ Dashboard
         </div>
     </div>
 </div>
-<div id="refundModal" class="d-none">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title">Criar Reembolso</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
+<div id="refundModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Criar Reembolso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
-        <div class="modal-body">
-            <table class="table table-bordered">
-                <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Produto</th>
-                    <th>Qtd Encomenda</th>
-                    <th>Qtd a Reembolsar</th>
-                    <th>Preço Unit.</th>
-                    <th>Total Linha</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($order['items'] as $idx => $item): ?>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead class="table-light">
                     <tr>
-                        <td><?= $idx + 1 ?></td>
-                        <td><?= esc($item['name'] ?? 'Produto #'.$item['product_id']) ?></td>
-                        <td><?= esc($item['qty']) ?></td>
-                        <td>
-                            <input type="number" class="form-control"
-                                   name="refund[<?= $item['id'] ?>]"
-                                   max="<?= $item['qty'] ?>" min="0" value="0">
-                        </td>
-                        <td><?= number_format($item['price'], 2, ',', ' ') ?> €</td>
-                        <td><?= number_format($item['qty'] * $item['price'], 2, ',', ' ') ?> €</td>
+                        <th>#</th>
+                        <th>Produto</th>
+                        <th>Qtd Encomenda</th>
+                        <th>Qtd a Reembolsar</th>
+                        <th>Preço Unit.</th>
+                        <th>Total Linha</th>
                     </tr>
-                <?php endforeach; ?>
-                </tbody>
-                <tfoot>
-                <tr>
-                    <th colspan="5" class="text-end">Subtotal</th>
-                    <td><?= number_format($order['total_items'], 2, ',', ' ') ?> €</td>
-                </tr>
-                <tr>
-                    <th colspan="5" class="text-end">IVA (23%)</th>
-                    <td><?= number_format($order['total_tax'], 2, ',', ' ') ?> €</td>
-                </tr>
-                <tr>
-                    <th colspan="5" class="text-end">Total Reembolso</th>
-                    <td><b><?= number_format($order['grand_total'], 2, ',', ' ') ?> €</b></td>
-                </tr>
-                </tfoot>
-            </table>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($order['items'] as $idx => $item): ?>
+                        <tr>
+                            <td><?= $idx + 1 ?></td>
+                            <td><?= esc($item['name'] ?? 'Produto #'.$item['product_id']) ?></td>
+                            <td><?= esc($item['qty']) ?></td>
+                            <td>
+                                <input type="number" class="form-control"
+                                       name="refund[<?= $item['id'] ?>]"
+                                       max="<?= $item['qty'] ?>" min="0" value="0">
+                            </td>
+                            <td><?= number_format($item['price'], 2, ',', ' ') ?> €</td>
+                            <td><?= number_format($item['qty'] * $item['price'], 2, ',', ' ') ?> €</td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <th colspan="5" class="text-end">Subtotal</th>
+                        <td><?= number_format($order['total_items'], 2, ',', ' ') ?> €</td>
+                    </tr>
+                    <tr>
+                        <th colspan="5" class="text-end">IVA (23%)</th>
+                        <td><?= number_format($order['total_tax'], 2, ',', ' ') ?> €</td>
+                    </tr>
+                    <tr>
+                        <th colspan="5" class="text-end">Total Reembolso</th>
+                        <td><b><?= number_format($order['grand_total'], 2, ',', ' ') ?> €</b></td>
+                    </tr>
+                    </tfoot>
+                </table>
 
-            <div class="mb-3">
-                <label class="form-label">Motivo</label>
-                <textarea class="form-control" name="reason"
-                          placeholder="Descreve o motivo do reembolso"></textarea>
+                <div class="mb-3">
+                    <label class="form-label">Motivo</label>
+                    <textarea class="form-control" name="reason"
+                              placeholder="Descreve o motivo do reembolso"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary">Confirmar Reembolso</button>
             </div>
         </div>
+    </div>
+</div>
+<div id="modalCreateReturn" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content"
+             x-data="{
+                 form: { order_id: '', reason: '', note: '' },
+                 async submit() {
+                     try {
+                         const res = await fetch('/admin/orders/return', {
+                             method: 'POST',
+                             headers: { 'Content-Type': 'application/json' },
+                             body: JSON.stringify(this.form)
+                         });
+                         const data = await res.json();
+                         if (data.status === 'success') {
+                             showToast('Devolução criada com sucesso.', 'success');
+                             bootstrap.Modal.getInstance($el.closest('.modal')).hide();
+                             document.dispatchEvent(new CustomEvent('order-updated'));
+                         } else {
+                             showToast(data.message || 'Erro ao criar devolução.', 'error');
+                         }
+                     } catch {
+                         showToast('Erro de comunicação com o servidor.', 'error');
+                     }
+                 }
+             }"
+             x-init="$el.addEventListener('order-return', e => form.order_id = e.detail.id)">
+            <div class="modal-header">
+                <h5 class="modal-title">Criar Devolução</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="submit()">
+                    <div class="mb-3">
+                        <label>Motivo da devolução</label>
+                        <input type="text" class="form-control" x-model="form.reason" placeholder="Ex: Produto defeituoso">
+                    </div>
+                    <div class="mb-3">
+                        <label>Observações</label>
+                        <textarea class="form-control" x-model="form.note"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Submeter Devolução</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalCreateExchange" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content"
+             x-data="{
+                 form: { order_id: '', reason: '', note: '' },
+                 async submit() {
+                     try {
+                         const res = await fetch('/admin/orders/exchange', {
+                             method: 'POST',
+                             headers: { 'Content-Type': 'application/json' },
+                             body: JSON.stringify(this.form)
+                         });
+                         const data = await res.json();
+                         if (data.status === 'success') {
+                             showToast('Troca registada com sucesso.', 'success');
+                             bootstrap.Modal.getInstance($el.closest('.modal')).hide();
+                             document.dispatchEvent(new CustomEvent('order-updated'));
+                         } else {
+                             showToast(data.message || 'Erro ao registar troca.', 'error');
+                         }
+                     } catch {
+                         showToast('Erro de comunicação com o servidor.', 'error');
+                     }
+                 }
+             }"
+             x-init="$el.addEventListener('order-exchange', e => form.order_id = e.detail.id)">
+            <div class="modal-header">
+                <h5 class="modal-title">Criar Troca</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="submit()">
+                    <div class="mb-3">
+                        <label>Motivo da troca</label>
+                        <input type="text" class="form-control" x-model="form.reason" placeholder="Ex: Tamanho incorreto">
+                    </div>
+                    <div class="mb-3">
+                        <label>Observações</label>
+                        <textarea class="form-control" x-model="form.note"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-info">Confirmar Troca</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="modalDuplicateOrder" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content"
+             x-data="{
+                 form: { order_id: '', include_items: true, include_customer: false, note: '' },
+                 async submit() {
+                     try {
+                         const res = await fetch('/admin/orders/duplicate', {
+                             method: 'POST',
+                             headers: { 'Content-Type': 'application/json' },
+                             body: JSON.stringify(this.form)
+                         });
+                         const data = await res.json();
+                         if (data.status === 'success') {
+                             showToast('Encomenda duplicada com sucesso.', 'success');
+                             bootstrap.Modal.getInstance($el.closest('.modal')).hide();
+                             document.dispatchEvent(new CustomEvent('order-updated'));
+                         } else {
+                             showToast(data.message || 'Erro ao duplicar encomenda.', 'error');
+                         }
+                     } catch {
+                         showToast('Erro de comunicação com o servidor.', 'error');
+                     }
+                 }
+             }"
+             x-init="$el.addEventListener('order-duplicate', e => form.order_id = e.detail.id)">
+            <div class="modal-header">
+                <h5 class="modal-title">Duplicar Encomenda</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form @submit.prevent="submit()">
+                    <p class="text-muted mb-3">Selecione as opções desejadas antes de duplicar.</p>
 
-        <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button class="btn btn-primary">Confirmar Reembolso</button>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="includeItems" x-model="form.include_items">
+                        <label class="form-check-label" for="includeItems">Incluir produtos da encomenda original</label>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="includeCustomer" x-model="form.include_customer">
+                        <label class="form-check-label" for="includeCustomer">Associar ao mesmo cliente</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Nota interna</label>
+                        <textarea class="form-control" x-model="form.note" placeholder="Opcional..."></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-success" type="submit">Duplicar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
