@@ -233,11 +233,7 @@ Envios
                 <?php endif; ?>
             </div>
         </div>
-
-
-
     </div>
-
     <!-- Coluna lateral -->
     <div class="col-lg-4">
         <div class="card">
@@ -266,76 +262,95 @@ Envios
                     </div>
                 </div>
             </div>
-
         </div>
         <div class="card"
              x-data="{
+                status: '<?= strtolower($shipment['status'] ?? 'pending') ?>',
+                errors: {},
+                form: {
+                    id: '<?= $shipment['id'] ?>',
+                    shipping_method_id: '<?= $shipment['shipping_method_id'] ?? '' ?>',
+                    tracking_number: '<?= addslashes($shipment['tracking_number'] ?? '') ?>',
                     status: '<?= strtolower($shipment['status'] ?? 'pending') ?>',
-                    form: {
-                        id: '<?= $shipment['id'] ?>',
-                        carrier: '<?= addslashes($shipment['carrier'] ?? '') ?>',
-                        tracking_number: '<?= addslashes($shipment['tracking_number'] ?? '') ?>',
-                        status: '<?= strtolower($shipment['status'] ?? 'pending') ?>',
-                        comments: '<?= addslashes($shipment['comments'] ?? '') ?>',
-                        <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-                    },
-                    async submit() {
-                        try {
-                            const res = await fetch('<?= base_url('admin/sales/shipments/update') ?>', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(this.form)
-                            });
-                            const data = await res.json();
-                            if (data.status === 'success') {
-                                showToast('Envio atualizado com sucesso.', 'success');
-                                setTimeout(() => location.reload(), 800);
-                            } else {
-                                showToast(data.message || 'Erro ao atualizar envio.', 'error');
-                            }
-                        } catch (e) {
-                            showToast('Falha de comunicação com o servidor.', 'error');
+                    comments: '<?= addslashes($shipment['comments'] ?? '') ?>',
+                    <?= csrf_token() ?>: '<?= csrf_hash() ?>'
+                },
+                async submit() {
+                    try {
+                        const res = await fetch('<?= base_url('admin/sales/shipments/update') ?>', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.form)
+                        });
+
+                        const data = await res.json();
+
+                        if (data.status === 'success') {
+                            this.errors = {};
+                            showToast('Envio atualizado com sucesso.', 'success');
+                        } else if (data.status === 'error' && data.errors) {
+                            this.errors = data.errors;
+                            showToast('Verifica os campos com erro.', 'warning');
+                        } else {
+                            showToast(data.message || 'Erro ao atualizar envio.', 'error');
                         }
+                    } catch (e) {
+                        showToast('Falha de comunicação com o servidor.', 'error');
                     }
-                 }">
+                }
+             }">
             <div class="card-body">
                 <h4 class="card-title mb-3">Atualizar Envio</h4>
                 <p class="text-muted mb-3">Permite editar apenas transportadora, tracking e estado (caso ainda não esteja concluído).</p>
-                <template x-if="!['delivered','returned','canceled'].includes(status)">
-                    <form @submit.prevent="submit">
 
+                <template x-if="!['delivered','returned','canceled'].includes(status)">
+                    <form @submit.prevent="submit()">
+
+                        <!-- Transportadora -->
                         <div class="mb-3"
-                             x-data="{ field: 'carrier' }"
+                             x-data="{ field: 'shipping_method_id', previous: form.shipping_method_id }"
                              x-init="$nextTick(() => {
-                                const el = $refs.select;
-                                $(el).select2({
-                                    width: '100%',
-                                    minimumResultsForSearch: Infinity
-                                });
-                                $(el).val(form[field]).trigger('change');
-                                $(el).on('change', function() {
-                                    form[field] = $(this).val();
-                                });
-                                $watch('form[field]', (val) => {
-                                    $(el).val(val).trigger('change.select2');
-                                });
-                             })">
+                        const el = $refs.select;
+                        $(el).select2({
+                            width: '100%',
+                            minimumResultsForSearch: Infinity
+                        });
+                        $(el).val(form[field]).trigger('change');
+                        $(el).on('change', function() {
+                            const newVal = $(this).val();
+                            if (newVal !== previous) {
+                                form.tracking_number = '';
+                                form.status = '';
+                                previous = newVal;
+                            }
+                            form[field] = newVal;
+                        });
+                        $watch('form[field]', (val) => {
+                            $(el).val(val).trigger('change.select2');
+                        });
+                     })">
                             <label class="form-label" :for="field">Transportadora</label>
                             <select class="form-select select2"
                                     x-ref="select"
                                     :name="field"
                                     x-model="form[field]">
                                 <option value="">-- Selecionar --</option>
-                                <option value="CTT Expresso">CTT Expresso</option>
-                                <option value="UPS">UPS</option>
-                                <option value="DHL">DHL</option>
+                                <?php foreach ($shippingMethods as $method): ?>
+                                    <option value="<?= esc($method['id']) ?>">
+                                        <?= esc($method['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
+                            <div class="text-danger small" x-text="errors.shipping_method_id"></div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Código Tracking</label>
                             <input type="text" class="form-control" x-model="form.tracking_number"
                                    placeholder="Ex: CTT-123456">
+                            <div class="text-danger small" x-text="errors.tracking_number"></div>
                         </div>
+
+                        <!-- Estado -->
                         <div class="mb-3"
                              x-data="{ field: 'status' }"
                              x-init="$nextTick(() => {
@@ -357,6 +372,7 @@ Envios
                                     x-ref="select"
                                     :name="field"
                                     x-model="form[field]">
+                                <option value="">-- Selecionar --</option>
                                 <option value="pending">Pendente</option>
                                 <option value="processing">Em Processamento</option>
                                 <option value="shipped">Enviado</option>
@@ -364,12 +380,16 @@ Envios
                                 <option value="returned">Devolvido</option>
                                 <option value="canceled">Cancelado</option>
                             </select>
+                            <div class="text-danger small" x-text="errors.status"></div>
                         </div>
+                        <!-- Comentários -->
                         <div class="mb-3">
                             <label class="form-label">Comentários</label>
                             <textarea class="form-control" x-model="form.comments" rows="2"
                                       placeholder="Notas internas..."></textarea>
+                            <div class="text-danger small" x-text="errors.comments"></div>
                         </div>
+
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary w-100">
                                 <span>Guardar Alterações</span>
@@ -377,12 +397,76 @@ Envios
                         </div>
                     </form>
                 </template>
+
                 <template x-if="['delivered','returned','canceled'].includes(status)">
                     <div class="alert alert-secondary text-center py-3 mb-0">
                         <i class="mdi mdi-lock-outline me-1"></i>
                         Este envio encontra-se finalizado e não pode ser alterado.
                     </div>
                 </template>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-3">Histórico do Envio</h4>
+                <div class="row">
+                    <?php if (!empty($shipment['history'])): ?>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle mb-0">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width: 120px;">Data</th>
+                                    <th class="text-center" style="width: 130px;">Estado</th>
+                                    <th class="text-center" style="width: 160px;">Transportadora</th>
+                                    <th class="text-center" style="width: 180px;">Tracking</th>
+                                    <th>Comentários</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                <?php foreach ($shipment['history'] as $h): ?>
+                                    <tr>
+                                        <td class="text-center"><?= esc(date('d/m/Y H:i', strtotime($h['created_at']))) ?></td>
+                                        <td class="text-center">
+                                            <?php
+                                            $statusClasses = [
+                                                'pending'    => 'bg-secondary',
+                                                'processing' => 'bg-info text-dark',
+                                                'shipped'    => 'bg-primary',
+                                                'delivered'  => 'bg-success',
+                                                'returned'   => 'bg-warning text-dark',
+                                                'canceled'   => 'bg-danger',
+                                            ];
+
+                                            $statusLabels = [
+                                                'pending'    => 'Pendente',
+                                                'processing' => 'Em processamento',
+                                                'shipped'    => 'Enviado',
+                                                'delivered'  => 'Entregue',
+                                                'returned'   => 'Devolvido',
+                                                'canceled'   => 'Cancelado',
+                                            ];
+
+                                            $status = $h['status'] ?? 'pending';
+                                            ?>
+                                            <span class="badge <?= esc($statusClasses[$status] ?? 'bg-secondary') ?>">
+        <?= esc($statusLabels[$status] ?? ucfirst($status)) ?>
+    </span>
+                                        </td>
+                                        <td class="text-center"><?= esc($h['carrier'] ?: '-') ?></td>
+                                        <td class="text-center"><?= esc($h['tracking'] ?: '-') ?></td>
+                                        <td><?= esc($h['comment'] ?: '-') ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-secondary text-center py-2 mb-0">
+                            Sem histórico registado.
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>

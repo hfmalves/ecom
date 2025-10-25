@@ -15,6 +15,7 @@ use App\Models\Admin\Sales\OrdersModel;
 use App\Models\Admin\Sales\OrdersShipmentItemsModel;
 use App\Models\Admin\Sales\OrdersShipmentsModel;
 use App\Models\Admin\Sales\OrdersStatusHistoryModel;
+use App\Models\Admin\Sales\OrdersShipmentHistoryModel;
 
 class OrdersShipmentsController extends BaseController
 {
@@ -29,6 +30,7 @@ class OrdersShipmentsController extends BaseController
     protected $ordersShipmentsModel;
     protected $ordersShipmentItemsModel;
     protected $ordersStatusHistoryModel;
+    protected $ordersShipmentHistoryModel;
     protected $productsVariantsModel;
 
     public function __construct()
@@ -45,6 +47,7 @@ class OrdersShipmentsController extends BaseController
         $this->ordersShipmentsModel = new OrdersShipmentsModel();
         $this->ordersShipmentItemsModel = new OrdersShipmentItemsModel();
         $this->ordersStatusHistoryModel = new OrdersStatusHistoryModel();
+        $this->ordersShipmentHistoryModel = new OrdersShipmentHistoryModel();
     }
     public function index()
     {
@@ -92,26 +95,19 @@ class OrdersShipmentsController extends BaseController
             'kpi'       => $kpi,
         ]);
     }
-
     public function edit($id = null)
     {
         if ($id === null) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Envio não encontrado');
         }
-
-        // --- Envio ---
         $shipment = $this->ordersShipmentsModel->find($id);
         if (!$shipment) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Envio #$id não encontrado");
         }
-
-        // --- Encomenda associada ---
         $order = $this->ordersModel->find($shipment['order_id']);
         if (!$order) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException("Encomenda associada ao envio #$id não encontrada");
         }
-
-        // --- Cliente e grupo ---
         $customer = $this->customerModel->find($order['customer_id']);
         if ($customer) {
             $groupName = '-';
@@ -121,20 +117,13 @@ class OrdersShipmentsController extends BaseController
             }
             $customer['group_name'] = $groupName;
         }
-
-        // --- Métodos de envio e pagamento ---
         $paymentMethod  = $this->paymentMethodsModel->find($order['payment_method_id']);
         $shippingMethod = $this->shippingMethodsModel->find($order['shipping_method_id']);
-
-        // --- Moradas ---
         $billingAddress  = $this->customerAddressModel->find($order['billing_address_id']);
         $shippingAddress = $this->customerAddressModel->find($order['shipping_address_id']);
-
-        // --- Itens da encomenda ---
         $items = $this->ordersItemsModel
             ->where('order_id', $order['id'])
             ->findAll();
-
         foreach ($items as &$item) {
             $product = $this->productsModel->find($item['product_id']);
             $item['product_name'] = $product['name'] ?? 'Produto #' . $item['product_id'];
@@ -147,8 +136,6 @@ class OrdersShipmentsController extends BaseController
                 $item['variant_name'] = '-';
             }
         }
-
-        // --- Dados do envio ---
         $shipment['order']          = $order;
         $shipment['customer']       = $customer;
         $shipment['payment_method'] = $paymentMethod;
@@ -158,16 +145,10 @@ class OrdersShipmentsController extends BaseController
         $shipment['items'] = $items;
 
         // --- Histórico de alterações no envio (se tiveres tabela própria, senão ignora) ---
-        if (property_exists($this, 'ordersShipmentHistoryModel')) {
-            $shipment['history'] = $this->ordersShipmentHistoryModel
-                ->where('shipment_id', $id)
-                ->orderBy('created_at', 'asc')
-                ->findAll();
-        } else {
-            $shipment['history'] = [];
-        }
-
-        // --- Opções auxiliares ---
+        $shipment['history'] = $this->ordersShipmentHistoryModel
+            ->where('shipment_id', $shipment['id'])
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
         $shippingMethods = $this->shippingMethodsModel->findAll();
         $statuses = [
             'pending'    => 'Pendente',
@@ -185,5 +166,93 @@ class OrdersShipmentsController extends BaseController
             'statuses' => $statuses,
         ]);
     }
+    public function update()
+    {
+        $data = $this->request->getJSON(true);
+
+        if (empty($data['id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'ID do envio não enviado.',
+            ]);
+        }
+
+        $id = (int) $data['id'];
+        unset($data['id']);
+
+        $shipment = $this->ordersShipmentsModel->find($id);
+        if (! $shipment) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => "Envio #{$id} não encontrado.",
+            ]);
+        }
+
+        // --- Buscar nome da transportadora ---
+        $carrierName = $shipment['carrier'] ?? '';
+        if (!empty($data['shipping_method_id'])) {
+            $shippingMethod = model(ShippingMethodsModel::class)->find($data['shipping_method_id']);
+            if ($shippingMethod) {
+                $carrierName = $shippingMethod['name'];
+            }
+        }
+
+        // --- Dados consolidados ---
+        $data = [
+            'shipping_method_id' => (int)($data['shipping_method_id'] ?? 0),
+            'carrier'            => $carrierName,
+            'tracking_number'    => trim($data['tracking_number'] ?? ''),
+            'status'             => strtolower(trim($data['status'] ?? 'pending')),
+            'comments'           => trim($data['comments'] ?? ''),
+            'updated_at'         => date('Y-m-d H:i:s'),
+        ];
+
+        // --- Validação ---
+        if (! $this->ordersShipmentsModel->validate($data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->ordersShipmentsModel->errors(),
+            ]);
+        }
+
+        // --- Atualização ---
+        if (! $this->ordersShipmentsModel->update($id, $data)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'errors' => $this->ordersShipmentsModel->errors(),
+            ]);
+        }
+
+        // --- Histórico ---
+        if (property_exists($this, 'ordersShipmentHistoryModel')) {
+            $this->ordersShipmentHistoryModel->insert([
+                'shipment_id' => $id,
+                'status'      => $data['status'],
+                'carrier'     => $data['carrier'],
+                'tracking'    => $data['tracking_number'],
+                'comment'     => $data['comments'],
+                'created_at'  => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        // --- Atualiza estado da encomenda associada ---
+        if (! empty($shipment['order_id'])) {
+            $this->ordersModel->update($shipment['order_id'], [
+                'status'     => $data['status'],
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status'  => 'success',
+            'message' => 'Envio atualizado com sucesso!',
+            'id'      => $id,
+        ]);
+    }
+
+
+
+
+
 
 }

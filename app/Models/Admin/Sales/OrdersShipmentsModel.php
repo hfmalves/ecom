@@ -15,16 +15,22 @@ class OrdersShipmentsModel extends Model
     protected $allowedFields = [
         'order_id',
         'tracking_number',
-        'carrier',
         'tracking_url',
         'shipping_label_url',
+        'carrier',
         'status',
         'shipped_at',
         'delivered_at',
         'returned_at',
+        'weight',
+        'volume',
+        'shipping_method_id',
         'comments',
         'created_at',
+        'updated_at',
+        'deleted_at',
     ];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -43,13 +49,16 @@ class OrdersShipmentsModel extends Model
     protected $validationRules = [
         'order_id'           => 'required|integer',
         'tracking_number'    => 'permit_empty|max_length[100]',
-        'carrier'            => 'permit_empty|max_length[100]',
         'tracking_url'       => 'permit_empty|valid_url_strict|max_length[255]',
         'shipping_label_url' => 'permit_empty|valid_url_strict|max_length[255]',
+        'carrier'            => 'permit_empty|max_length[100]',
         'status'             => 'required|in_list[pending,processing,shipped,delivered,returned,canceled]',
         'shipped_at'         => 'permit_empty|valid_date',
         'delivered_at'       => 'permit_empty|valid_date',
         'returned_at'        => 'permit_empty|valid_date',
+        'weight'             => 'permit_empty|decimal',
+        'volume'             => 'permit_empty|decimal',
+        'shipping_method_id' => 'permit_empty|integer',
         'comments'           => 'permit_empty|string',
     ];
 
