@@ -13,6 +13,7 @@ class OrdersModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields = [
+        'customer_id',
         'user_id', 'status', 'total_items', 'total_tax', 'total_discount',
         'grand_total', 'billing_address_id', 'shipping_address_id',
         'shipping_method_id', 'payment_method_id', 'created_at', 'updated_at', 'deleted_at'
