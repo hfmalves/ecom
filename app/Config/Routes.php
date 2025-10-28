@@ -113,7 +113,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
     $routes->group('sales', ['namespace' => 'App\Controllers\Admin\Sales'], function ($routes) {
         $routes->group('orders', function ($routes) {
             $routes->get('/', 'OrdersController::index', ['filter' => 'noauth']);
-            $routes->post('create', 'OrdersController::create', ['filter' => 'noauth']);
+            $routes->get('create', 'OrdersController::create', ['filter' => 'noauth']);
             $routes->get('edit/(:num)', 'OrdersController::edit/$1', ['filter' => 'noauth']);
             $routes->post('updateStatus', 'OrdersController::updateStatus', ['filter' => 'noauth']);
         });

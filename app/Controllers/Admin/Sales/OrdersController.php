@@ -185,61 +185,10 @@ class OrdersController extends BaseController
     }
     public function create()
     {
-        log_message('error', '--- [CREATE] Método iniciado ---');
 
-        // Aceita POST normal ou AJAX (fetch)
-        if (! in_array(strtolower($this->request->getMethod()), ['post', 'ajax'])) {
-            log_message('error', '[CREATE] Rejeitado: método != POST/AJAX');
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Método inválido']);
-        }
-
-        $db = db_connect();
-        $db->transBegin();
-        log_message('error', '[CREATE] Ligação à BD e transação iniciada');
-
-        try {
-            $data = [
-                'customer_id'        => null,
-                'user_id'            => 1,
-                'status'             => 'pending',
-                'total_items'        => 0,
-                'total_tax'          => 0,
-                'total_discount'     => 0,
-                'grand_total'        => 0,
-                'billing_address_id' => 1,
-                'shipping_method_id' => 1,
-                'payment_method_id'  => 1,
-                'created_at'         => date('Y-m-d H:i:s'),
-            ];
-            $this->ordersModel->insert($data);
-            $orderId = $this->ordersModel->getInsertID();
-            if (! $orderId) {
-                throw new \Exception('Falha ao criar encomenda.');
-            }
-            $this->ordersStatusHistoryModel->insert([
-                'order_id'   => $orderId,
-                'status'     => 'pending',
-                'comment'    => 'Encomenda criada.',
-                'notify'     => 0,
-                'created_at' => date('Y-m-d H:i:s'),
-            ]);
-            $db->transCommit();
-            log_message('error', '[CREATE] Commit OK, encomenda #' . $orderId);
-            return $this->response->setJSON([
-                'status'   => 'success',
-                'message'  => 'Encomenda criada com sucesso.',
-                'redirect' => base_url('admin/sales/orders/edit/' . $orderId),
-            ]);
-        } catch (\Throwable $e) {
-            $db->transRollback();
-            log_message('error', '[CREATE][ERRO FATAL] ' . $e->getMessage());
-
-            return $this->response->setJSON([
-                'status'  => 'error',
-                'message' => 'Ocorreu um erro ao criar a encomenda.',
-            ]);
-        }
     }
+
+
 
 
     public function edit($id = null)
@@ -317,7 +266,6 @@ class OrdersController extends BaseController
             'shippingMethods' => $shippingMethods,
         ]);
     }
-
     public function updateStatus()
     {
         $data = $this->request->getJSON(true);
