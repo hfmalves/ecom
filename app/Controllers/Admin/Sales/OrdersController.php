@@ -185,9 +185,88 @@ class OrdersController extends BaseController
     }
     public function create()
     {
+        $this->productsModel = new ProductsModel();
+        $this->productsVariantsModel = new ProductsVariantsModel();
 
+        $allProducts = $this->productsModel->findAll();
+
+        $groupedProducts = [
+            'simple'       => [],
+            'configurable' => [],
+            'virtual'      => [],
+            'pack'         => [],
+        ];
+
+        $now = date('Y-m-d H:i:s');
+
+        foreach ($allProducts as $product) {
+            // preço base
+            $product['price'] = $product['base_price'];
+
+            // verifica se há promoção válida
+            if (!empty($product['special_price']) &&
+                !empty($product['special_price_start']) &&
+                !empty($product['special_price_end'])) {
+
+                if ($now >= $product['special_price_start'] && $now <= $product['special_price_end']) {
+                    $product['price'] = $product['special_price'];
+                }
+            }
+
+            switch ($product['type']) {
+                case 'configurable':
+                    $variants = $this->productsVariantsModel
+                        ->where('product_id', $product['id'])
+                        ->findAll();
+
+                    foreach ($variants as &$variant) {
+                        $variant['price'] = $variant['base_price'];
+
+                        if (!empty($variant['special_price']) &&
+                            !empty($variant['special_price_start']) &&
+                            !empty($variant['special_price_end'])) {
+
+                            if ($now >= $variant['special_price_start'] && $now <= $variant['special_price_end']) {
+                                $variant['price'] = $variant['special_price'];
+                            }
+                        }
+                    }
+                    unset($variant);
+
+                    $product['variants'] = $variants;
+                    $groupedProducts['configurable'][] = $product;
+                    break;
+
+                case 'simple':
+                    $groupedProducts['simple'][] = $product;
+                    break;
+
+                case 'virtual':
+                    $groupedProducts['virtual'][] = $product;
+                    break;
+
+                case 'pack':
+                    $groupedProducts['pack'][] = $product;
+                    break;
+            }
+        }
+
+        // dados adicionais
+        $customers         = $this->customerModel->findAll();
+        $customerGroups    = $this->customerGroupModel->findAll();
+        $customerAddresses = $this->customerAddressModel->findAll();
+        $paymentMethods    = $this->paymentMethodsModel->findAll();
+        $shippingMethods   = $this->shippingMethodsModel->findAll();
+
+        return view('admin/sales/orders/create', [
+            'productsByType'      => $groupedProducts,
+            'customers'           => $customers,
+            'customerGroups'      => $customerGroups,
+            'customerAddresses'   => $customerAddresses,
+            'paymentMethods'      => $paymentMethods,
+            'shippingMethods'     => $shippingMethods,
+        ]);
     }
-
 
 
 
