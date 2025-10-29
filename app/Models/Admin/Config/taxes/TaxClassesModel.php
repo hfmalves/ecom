@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class TaxClassesModel  extends Model
 {
-    protected $table            = 'tax_classes';
+    protected $table            = 'conf_taxes';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';

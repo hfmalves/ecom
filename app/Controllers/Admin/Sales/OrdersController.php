@@ -22,6 +22,7 @@ use App\Models\Admin\Config\payments\PaymentMethodsModel;
 use App\Models\Admin\Config\shipping\ShippingMethodsModel;
 
 use App\Models\Admin\Catalog\ProductsVariantsModel;
+use App\Models\Admin\Config\taxes\TaxClassesModel;
 
 
 class OrdersController extends BaseController
@@ -39,6 +40,7 @@ class OrdersController extends BaseController
     protected $ordersStatusHistoryModel;
     protected $paymentsModel;
     protected $productsVariantsModel;
+    protected $taxClassesModel;
 
 
     public function __construct()
@@ -56,6 +58,7 @@ class OrdersController extends BaseController
         $this->ordersShipmentItemsModel = new OrdersShipmentItemsModel();
         $this->ordersStatusHistoryModel = new OrdersStatusHistoryModel();
         $this->paymentsModel = new PaymentsModel();
+        $this->taxClassesModel = new TaxClassesModel();
     }
     public function index()
     {
@@ -257,7 +260,7 @@ class OrdersController extends BaseController
         $customerAddresses = $this->customerAddressModel->findAll();
         $paymentMethods    = $this->paymentMethodsModel->findAll();
         $shippingMethods   = $this->shippingMethodsModel->findAll();
-
+        $taxRates          = $this->taxClassesModel->findAll();
         return view('admin/sales/orders/create', [
             'productsByType'      => $groupedProducts,
             'customers'           => $customers,
@@ -265,6 +268,7 @@ class OrdersController extends BaseController
             'customerAddresses'   => $customerAddresses,
             'paymentMethods'      => $paymentMethods,
             'shippingMethods'     => $shippingMethods,
+            'taxRates'            => $taxRates,
         ]);
     }
 

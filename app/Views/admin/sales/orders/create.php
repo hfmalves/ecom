@@ -19,84 +19,128 @@ Dashboard
         <div class="card"
              id="productCard"
              x-data='{
-        products: <?= json_encode($productsByType, JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
-        flatProducts: [],
-        selectedProduct: "",
-        orderItems: [],
-        orderTotal: 0,
+                products: <?= json_encode($productsByType, JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+                flatProducts: [],
+                selectedProduct: "",
+                orderItems: [],
+                orderTotal: 0,
+                subtotal: 0,
+                ivaTotal: 0,
+                totalComIva: 0,
+                taxCountryId: null,
+                init() {
+                    const self = this;
+                    this.flatProducts = Object.values(this.products)
+                        .flat()
+                        .map(p => {
+                            if (p.type === "configurable" && p.variants) {
+                                return p.variants.map(v => ({
+                                    id: v.id,
+                                    sku: v.sku,
+                                    name: v.name ?? "",
+                                    type: "variant",
+                                    price: parseFloat(v.price ?? 0),
+                                    country_id: v.country_id ?? null
+                                }));
+                            }
+                            return {
+                                id: p.id,
+                                sku: p.sku,
+                                name: p.name ?? "",
+                                type: p.type,
+                                price: parseFloat(p.price ?? 0),
+                                country_id: p.country_id ?? null
+                            };
+                        })
+                        .flat();
+                    $("#product_id").select2({ width: "100%" })
+                        .on("change", function (e) {
+                            self.selectedProduct = e.target.value;
+                        });
+                    this.$watch("orderItems", () => {
+                        setTimeout(() => {
+                            $(".tax-select").select2({
+                                width: "100%",
+                                minimumResultsForSearch: Infinity,
+                                placeholder: "-- Selecione --"
+                            })
+                            .off("change") // evita duplicar eventos
+                            .on("change", function () {
+                                const id = $(this).attr("id").replace("tax_", "");
+                                const sel = $(this).find(":selected");
+                                const rate = parseFloat(sel.data("rate") || 0);
+                                const item = self.orderItems.find(i => i.id == id);
+                                if (item) {
+                                    item.tax_id = $(this).val();
+                                    item.tax_rate = rate;
+                                    self.updateLine(item);
+                                }
+                            });
+                        }, 10);
+                    });
+                },
+                addProduct() {
+                    const prod = this.flatProducts.find(p => p.id == this.selectedProduct);
+                    if (!prod) return;
+                    const existing = this.orderItems.find(i => i.id == prod.id);
+                    if (existing) {
+                        existing.qty++;
+                        existing.total = (existing.qty * existing.price).toFixed(2);
+                    } else {
+                        if (this.orderItems.length === 0 && prod.country_id)
+                            this.taxCountryId = prod.country_id;
 
-        init() {
-            // Achata os produtos e variantes
-            this.flatProducts = Object.values(this.products)
-                .flat()
-                .map(p => {
-                    if (p.type === "configurable" && p.variants) {
-                        return p.variants.map(v => ({
-                            id: v.id,
-                            sku: v.sku,
-                            name: v.name ?? "",
-                            type: "variant",
-                            price: parseFloat(v.price ?? 0)
-                        }));
+                        if (this.taxCountryId && prod.country_id && prod.country_id !== this.taxCountryId) {
+                            showToast("As taxas de imposto devem pertencer ao mesmo país.", "error");
+                            $("#product_id").val(null).trigger("change");
+                            this.selectedProduct = "";
+                            return;
+                        }
+
+                        this.orderItems.push({
+                            ...prod,
+                            qty: 1,
+                            tax_id: "",
+                            tax_rate: 0,
+                            total: prod.price
+                        });
                     }
-                    return {
-                        id: p.id,
-                        sku: p.sku,
-                        name: p.name ?? "",
-                        type: p.type,
-                        price: parseFloat(p.price ?? 0)
-                    };
-                })
-                .flat();
 
-            const self = this;
-            $("#product_id").select2({ width: "100%" })
-                .on("change", function(e) {
-                    self.selectedProduct = e.target.value;
-                });
-        },
+                    this.calculateTotals();
+                    $("#product_id").val(null).trigger("change");
+                    this.selectedProduct = "";
+                },
 
-        addProduct() {
-            const prod = this.flatProducts.find(p => p.id == this.selectedProduct);
-            if (!prod) return;
+                updateLine(item) {
+                    const rate = parseFloat(item.tax_rate || 0);
+                    const lineTotal = item.qty * item.price * (1 + rate / 100);
+                    item.total = parseFloat(lineTotal);
+                    this.calculateTotals();
+                },
 
-            const existing = this.orderItems.find(i => i.id == prod.id);
-            if (existing) {
-                existing.qty++;
-                existing.total = (existing.qty * existing.price).toFixed(2);
-            } else {
-                this.orderItems.push({
-                    ...prod,
-                    qty: 1,
-                    total: parseFloat(prod.price).toFixed(2)
-                });
-            }
+                removeItem(id) {
+                    this.orderItems = this.orderItems.filter(i => i.id != id);
+                    if (this.orderItems.length === 0) this.taxCountryId = null;
+                    this.calculateTotals();
+                },
+                calculateTotals() {
+                    let subtotal = 0, ivaTotal = 0;
+                    this.orderItems.forEach(i => {
+                        const base = i.qty * i.price;
+                        const iva = base * (i.tax_rate || 0) / 100;
+                        subtotal += base;
+                        ivaTotal += iva;
+                    });
+                    this.subtotal = subtotal.toFixed(2);
+                    this.ivaTotal = ivaTotal.toFixed(2);
+                    this.totalComIva = (subtotal + ivaTotal).toFixed(2);
+                }
+            }'
 
-            this.calculateTotals();
 
-            // limpa o select
-            $("#product_id").val(null).trigger("change");
-            this.selectedProduct = "";
-        },
 
-        updateLine(item) {
-            item.total = (item.qty * item.price).toFixed(2);
-            this.calculateTotals();
-        },
-
-        removeItem(id) {
-            this.orderItems = this.orderItems.filter(i => i.id != id);
-            this.calculateTotals();
-        },
-
-        calculateTotals() {
-            this.orderTotal = this.orderItems
-                .reduce((sum, i) => sum + parseFloat(i.total || 0), 0)
-                .toFixed(2);
-        }
-     }'
              x-init="init()"
-        >
+            >
             <div class="card-body">
                 <!-- SELECT DE PRODUTOS -->
                 <div class="input-group mb-3">
@@ -126,7 +170,6 @@ Dashboard
                     </select>
                     <button type="button" class="btn btn-primary" @click="addProduct">Adicionar</button>
                 </div>
-
                 <!-- TABELA -->
                 <table class="table table-sm table-striped align-middle mt-3">
                     <thead>
@@ -136,12 +179,13 @@ Dashboard
                         <th>Nome</th>
                         <th style="width: 100px;">Qtd</th>
                         <th style="width: 120px;">Preço (€)</th>
+                        <th style="width: 140px;">Taxa de Imposto</th>
                         <th style="width: 120px;">Total (€)</th>
                         <th style="width: 40px;"></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <template x-for="item in orderItems" :key="item.id">
+                    <template x-for="(item, idx) in orderItems" :key="item.id">
                         <tr>
                             <td x-text="item.type"></td>
                             <td x-text="item.sku"></td>
@@ -153,7 +197,22 @@ Dashboard
                                        @input="updateLine(item)">
                             </td>
                             <td x-text="item.price.toFixed(2) + ' €'"></td>
-                            <td x-text="item.total + ' €'"></td>
+                            <td>
+                                <select class="form-select form-select-sm tax-select"
+                                        :id="'tax_'+item.id"
+                                        x-model="item.tax_id">
+                                    <option value="">-- Selecione --</option>
+                                    <?php foreach ($taxRates as $tax): ?>
+                                        <option value="<?= $tax['id'] ?>"
+                                                data-rate="<?= $tax['rate'] ?>">
+                                            <?= esc($tax['name']) ?> (<?= $tax['rate'] ?>%)
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+
+
+                            </td>
+                            <td x-text="item.total.toFixed(2) + ' €'"></td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-danger" @click="removeItem(item.id)">
                                     <i class="bi bi-x"></i>
@@ -165,8 +224,18 @@ Dashboard
 
                     <tfoot>
                     <tr>
-                        <th colspan="5" class="text-end">Total da Encomenda:</th>
-                        <th x-text="orderTotal + ' €'"></th>
+                        <th colspan="6" class="text-end">Subtotal:</th>
+                        <th x-text="subtotal + ' €'"></th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-end">IVA Total:</th>
+                        <th x-text="ivaTotal + ' €'"></th>
+                        <th></th>
+                    </tr>
+                    <tr>
+                        <th colspan="6" class="text-end">Total da Encomenda:</th>
+                        <th x-text="totalComIva + ' €'"></th>
                         <th></th>
                     </tr>
                     </tfoot>
@@ -179,17 +248,14 @@ Dashboard
              x-data='{
                 selectedCustomer: null,
                 addresses: <?= json_encode($customerAddresses, JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
-
                 shipping: { selected: "", form: { street: "", city: "", postcode: "", country: "" }, newMode: false, locked: false },
                 billing:  { selected: "", form: { street: "", city: "", postcode: "", country: "" }, newMode: false, locked: false },
                 useSameBilling: false,
-
                 get filtered() {
                     return this.selectedCustomer
                         ? this.addresses.filter(a => a.customer_id == this.selectedCustomer)
                         : [];
                 },
-
                 createNewMode: false,
                     init() {
                         const self = this;
@@ -214,7 +280,6 @@ Dashboard
                     this.billing  = { selected: "", form: { street: "", city: "", postcode: "", country: "" }, newMode: false, locked: false };
                     this.useSameBilling = false;
                 },
-
                 forceNewAddresses() {
                     this.shipping.newMode = true;
                     this.billing.newMode  = true;
@@ -223,7 +288,6 @@ Dashboard
                     this.shipping.form = { street: "", city: "", postcode: "", country: "" };
                     this.billing.form  = { street: "", city: "", postcode: "", country: "" };
                 },
-
                 fillForm(target, addrId) {
                     const ref = this[target];
                     if (!addrId) {
@@ -240,26 +304,20 @@ Dashboard
                 }
              }'
              x-init="init()"
-        >
-
+            >
             <!-- ==================== MORADA DE ENVIO ==================== -->
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Morada de Envio</h4>
                         <p class="card-title-desc">Endereço do cliente para envio</p>
-
                         <!-- sem cliente -->
                         <template x-if="!selectedCustomer && !shipping.locked && !createNewMode">
-
                         <p class="text-muted mb-0">Selecione um cliente para carregar moradas.</p>
                         </template>
-
                         <!-- com cliente -->
                         <template x-if="selectedCustomer || shipping.locked || createNewMode">
-
-                        <div>
-                                <!-- SELECT -->
+                            <div>
                                 <template x-if="filtered.length > 0 && !shipping.newMode">
                                     <select id="shipping_address_id" class="form-control mb-3"
                                             x-model="shipping.selected"
@@ -271,7 +329,38 @@ Dashboard
                                     </select>
                                 </template>
 
-                                <!-- CHECK Criar Nova -->
+                                <template x-if="shipping.newMode || shipping.selected">
+                                    <div class="mt-3">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Rua</label>
+                                                    <input type="text" class="form-control" x-model="shipping.form.street">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Código Postal</label>
+                                                    <input type="text" class="form-control" x-model="shipping.form.postcode">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Cidade</label>
+                                                    <input type="text" class="form-control" x-model="shipping.form.city">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-2">
+                                                    <label class="form-label">País</label>
+                                                    <input type="text" class="form-control" x-model="shipping.form.country">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                                 <div class="form-check mb-2">
                                     <input type="checkbox" id="newShippingCheck" class="form-check-input"
                                            x-model="shipping.newMode"
@@ -279,57 +368,26 @@ Dashboard
                                            @change="shipping.selected=''; shipping.form={street:'',city:'',postcode:'',country:''}">
                                     <label for="newShippingCheck" class="form-check-label">Criar nova morada</label>
                                 </div>
-
-                                <!-- CHECK Usar mesma morada -->
                                 <div class="form-check mb-3">
                                     <input type="checkbox" id="sameAddressCheck" class="form-check-input" x-model="useSameBilling">
                                     <label for="sameAddressCheck" class="form-check-label">Usar mesma morada para faturação</label>
                                 </div>
-
-                                <!-- CAMPOS -->
-                                <template x-if="shipping.newMode || shipping.selected">
-                                    <div class="mt-3">
-                                        <div class="mb-2">
-                                            <label class="form-label">Rua</label>
-                                            <input type="text" class="form-control" x-model="shipping.form.street">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Cidade</label>
-                                            <input type="text" class="form-control" x-model="shipping.form.city">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Código Postal</label>
-                                            <input type="text" class="form-control" x-model="shipping.form.postcode">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">País</label>
-                                            <input type="text" class="form-control" x-model="shipping.form.country">
-                                        </div>
-                                    </div>
-                                </template>
                             </div>
                         </template>
                     </div>
                 </div>
             </div>
-
             <!-- ==================== MORADA DE FATURAÇÃO ==================== -->
             <div class="col-6">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Morada de Faturação</h4>
                         <p class="card-title-desc">Dados do cliente para faturação</p>
-
-                        <!-- sem cliente -->
                         <template x-if="!selectedCustomer && !billing.locked && !createNewMode">
                             <p class="text-muted mb-0">Selecione um cliente para carregar moradas.</p>
                         </template>
-
-                        <!-- com cliente -->
                         <template x-if="(selectedCustomer || billing.locked || createNewMode) && !useSameBilling">
-
-                        <div>
-                                <!-- SELECT -->
+                            <div>
                                 <template x-if="filtered.length > 0 && !billing.newMode">
                                     <select id="billing_address_id" class="form-control mb-3"
                                             x-model="billing.selected"
@@ -341,7 +399,38 @@ Dashboard
                                     </select>
                                 </template>
 
-                                <!-- CHECK Criar Nova -->
+                                <template x-if="billing.newMode || billing.selected">
+                                    <div class="mt-3">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Rua</label>
+                                                    <input type="text" class="form-control" x-model="billing.form.street">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Código Postal</label>
+                                                    <input type="text" class="form-control" x-model="billing.form.postcode">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="mb-2">
+                                                    <label class="form-label">Cidade</label>
+                                                    <input type="text" class="form-control" x-model="billing.form.city">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-2">
+                                                    <label class="form-label">País</label>
+                                                    <input type="text" class="form-control" x-model="billing.form.country">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
                                 <div class="form-check mb-2">
                                     <input type="checkbox" id="newBillingCheck" class="form-check-input"
                                            x-model="billing.newMode"
@@ -349,41 +438,88 @@ Dashboard
                                            @change="billing.selected=''; billing.form={street:'',city:'',postcode:'',country:''}">
                                     <label for="newBillingCheck" class="form-check-label">Criar nova morada</label>
                                 </div>
-
-                                <!-- CAMPOS -->
-                                <template x-if="billing.newMode || billing.selected">
-                                    <div class="mt-3">
-                                        <div class="mb-2">
-                                            <label class="form-label">Rua</label>
-                                            <input type="text" class="form-control" x-model="billing.form.street">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Cidade</label>
-                                            <input type="text" class="form-control" x-model="billing.form.city">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">Código Postal</label>
-                                            <input type="text" class="form-control" x-model="billing.form.postcode">
-                                        </div>
-                                        <div class="mb-2">
-                                            <label class="form-label">País</label>
-                                            <input type="text" class="form-control" x-model="billing.form.country">
-                                        </div>
-                                    </div>
-                                </template>
                             </div>
                         </template>
-
                         <template x-if="(selectedCustomer || createNewMode) && useSameBilling">
                             <div class="alert alert-info mt-3 p-2">
                                 A morada de faturação será igual à morada de envio.
                             </div>
                         </template>
-
                     </div>
                 </div>
             </div>
         </div>
+        <!-- ==================== MÉTODOS DE ENVIO E PAGAMENTO ==================== -->
+        <div class="row" id="shippingPaymentCard"
+             x-data='{
+        shippingMethods: <?= json_encode($shippingMethods ?? [], JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+        paymentMethods: <?= json_encode($paymentMethods ?? [], JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+        selectedShipping: "",
+        selectedPayment: "",
+        init() {
+            const self = this;
+
+            // Select2 - Métodos de Envio
+            $("#shipping_method_id").select2({
+                width: "100%",
+                placeholder: "-- Selecione o método de envio --"
+            }).on("change", function(e) {
+                self.selectedShipping = e.target.value;
+            });
+
+            // Select2 - Métodos de Pagamento
+            $("#payment_method_id").select2({
+                width: "100%",
+                placeholder: "-- Selecione o método de pagamento --"
+            }).on("change", function(e) {
+                self.selectedPayment = e.target.value;
+            });
+        }
+     }'
+             x-init="init()">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Método de Envio</h4>
+                        <p class="card-title-desc">Escolha o método de entrega da encomenda.</p>
+                        <select id="shipping_method_id" class="form-control">
+                            <option value="">-- Selecione --</option>
+                            <?php if (!empty($shippingMethods)): ?>
+                                <?php foreach ($shippingMethods as $method): ?>
+                                    <option value="<?= esc($method['id']) ?>">
+                                        <?= esc($method['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <option disabled>Sem métodos disponíveis</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Método de Pagamento</h4>
+                        <p class="card-title-desc">Escolha como o cliente irá pagar a encomenda.</p>
+                        <select id="payment_method_id" class="form-control">
+                            <option value="">-- Selecione --</option>
+                            <?php if (!empty($paymentMethods)): ?>
+                                <?php foreach ($paymentMethods as $method): ?>
+                                    <option value="<?= esc($method['id']) ?>">
+                                        <?= esc($method['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <option disabled>Sem métodos disponíveis</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     <!-- Coluna lateral -->
     <div class="col-4">
@@ -395,7 +531,6 @@ Dashboard
                 selectedCustomer: null,
                 createNew: false,
                 customer: { name: "", email: "", phone: "", gender: "", group_id: "", notes: "" },
-
                 init() {
                     const self = this;
                     const $select = $("#customer_id").select2({
@@ -455,12 +590,9 @@ Dashboard
              }'
              x-init="init()"
         >
-
-
         <div class="card-body">
                 <h4 class="card-title">Informação do Cliente</h4>
                 <p class="card-title-desc">Dados principais da conta do cliente</p>
-
                 <!-- CLIENTE -->
                 <div class="mb-3">
                     <label for="customer_id" class="form-label">Cliente</label>
@@ -477,25 +609,22 @@ Dashboard
                         <?php endforeach; ?>
                     </select>
                 </div>
-
-            <!-- CHECKBOX CRIAR NOVO -->
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="createNewCustomer" x-model="createNew"
-                       @change="
-       if (createNew) {
-           resetForm();
-           $('#customer_id').val(null).trigger('change');
-           window.dispatchEvent(new CustomEvent('customer-cleared')); // 🔥 dispara evento global
-       } else {
-           window.dispatchEvent(new CustomEvent('customer-reset')); // 🔥 evento inverso
-       }
-   ">
-
-                <label class="form-check-label" for="createNewCustomer">
-                    Criar novo cliente
-                </label>
-            </div>
-
+                <!-- CHECKBOX CRIAR NOVO -->
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="createNewCustomer" x-model="createNew"
+                           @change="
+                               if (createNew) {
+                                   resetForm();
+                                   $('#customer_id').val(null).trigger('change');
+                                   window.dispatchEvent(new CustomEvent('customer-cleared')); // 🔥 dispara evento global
+                               } else {
+                                   window.dispatchEvent(new CustomEvent('customer-reset')); // 🔥 evento inverso
+                               }
+                           ">
+                    <label class="form-check-label" for="createNewCustomer">
+                        Criar novo cliente
+                    </label>
+                </div>
                 <!-- CLIENTE EXISTENTE -->
                 <template x-if="!createNew">
                     <div>
@@ -533,7 +662,6 @@ Dashboard
                         </div>
                     </div>
                 </template>
-
                 <!-- NOVO CLIENTE -->
                 <template x-if="createNew">
                     <div>
@@ -586,11 +714,9 @@ Dashboard
                      const customerEl = document.querySelector('#customerCard');
                      const addressEl  = document.querySelector('#addressCard');
                      const productEl  = document.querySelector('#productCard');
-
                      const customer = customerEl?._x?.$data ?? {};
                      const address  = addressEl?._x?.$data ?? {};
                      const products = productEl?._x?.$data ?? {};
-
                      const payload = {
                          <?= csrf_token() ?>: '<?= csrf_hash() ?>',
                          customer: customer.customer ?? {},
@@ -601,7 +727,6 @@ Dashboard
                          orderItems: products.orderItems ?? [],
                          orderTotal: products.orderTotal ?? 0
                      };
-
                      try {
                          this.loading = true;
                          const res = await fetch('<?= base_url('admin/sales/orders/store') ?>', {
@@ -609,7 +734,6 @@ Dashboard
                              headers: { 'Content-Type': 'application/json' },
                              body: JSON.stringify(payload)
                          });
-
                          const data = await res.json();
                          this.loading = false;
 
@@ -626,7 +750,6 @@ Dashboard
                  },
                  loading: false
             }">
-
             <div class="card-body text-end">
                 <button type="button"
                         class="btn btn-success btn-lg px-5"
@@ -637,9 +760,7 @@ Dashboard
                 </button>
             </div>
         </div>
-
     </div>
-
 </div>
 
 <?= $this->endSection() ?>
