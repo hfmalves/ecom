@@ -14,18 +14,19 @@ class OrdersItemsModel extends Model
     protected $protectFields    = true;
     protected $allowedFields = [
         'order_id',
-        'cart_id',
         'product_id',
         'variant_id',
+        'name',
+        'sku',
         'qty',
-        'price',       // sem imposto
-        'price_tax',   // com imposto
+        'price',
+        'price_tax',
         'discount',
-        'subtotal',
-        'row_total',   // valor final do item (qty * (price_tax - discount))
+        'row_total',
         'created_at',
         'updated_at'
     ];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

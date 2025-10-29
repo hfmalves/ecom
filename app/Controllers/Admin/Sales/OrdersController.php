@@ -190,32 +190,23 @@ class OrdersController extends BaseController
     {
         $this->productsModel = new ProductsModel();
         $this->productsVariantsModel = new ProductsVariantsModel();
-
         $allProducts = $this->productsModel->findAll();
-
         $groupedProducts = [
             'simple'       => [],
             'configurable' => [],
             'virtual'      => [],
             'pack'         => [],
         ];
-
         $now = date('Y-m-d H:i:s');
-
         foreach ($allProducts as $product) {
-            // preço base
             $product['price'] = $product['base_price'];
-
-            // verifica se há promoção válida
             if (!empty($product['special_price']) &&
                 !empty($product['special_price_start']) &&
                 !empty($product['special_price_end'])) {
-
                 if ($now >= $product['special_price_start'] && $now <= $product['special_price_end']) {
                     $product['price'] = $product['special_price'];
                 }
             }
-
             switch ($product['type']) {
                 case 'configurable':
                     $variants = $this->productsVariantsModel
@@ -253,8 +244,6 @@ class OrdersController extends BaseController
                     break;
             }
         }
-
-        // dados adicionais
         $customers         = $this->customerModel->findAll();
         $customerGroups    = $this->customerGroupModel->findAll();
         $customerAddresses = $this->customerAddressModel->findAll();
@@ -271,9 +260,189 @@ class OrdersController extends BaseController
             'taxRates'            => $taxRates,
         ]);
     }
+    public function store()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Pedido inválido.'
+            ]);
+        }
+        // ==================== VALIDAÇÕES PRÉVIAS ====================
+        // 1️⃣ Tem produtos?
+        if (empty($data['orderItems']) || count($data['orderItems']) === 0) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'A encomenda deve conter pelo menos um produto.'
+            ]);
+        }
+        // 2️⃣ Todos os produtos têm taxa de imposto?
+        foreach ($data['orderItems'] as $item) {
+            if (empty($item['tax_rate']) || $item['tax_rate'] == 0) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Um ou mais produtos não têm taxa de imposto definida.'
+                ]);
+            }
+        }
+        // 3️⃣ Morada de envio
+        if (empty($data['shipping']['selected']) &&
+            empty($data['shipping']['form']['street']) &&
+            empty($data['shipping']['form']['city'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'A morada de envio é obrigatória.'
+            ]);
+        }
+        // 4️⃣ Morada de faturação
+        if (empty($data['useSameBilling'])) {
+            if (empty($data['billing']['selected']) &&
+                empty($data['billing']['form']['street']) &&
+                empty($data['billing']['form']['city'])) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'A morada de faturação é obrigatória.'
+                ]);
+            }
+        }
+        // 5️⃣ Métodos de envio/pagamento
+        if (empty($data['shipping_method_id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Selecione um método de envio.'
+            ]);
+        }
+        if (empty($data['payment_method_id'])) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Selecione um método de pagamento.'
+            ]);
+        }
+        // ==================== CLIENTE ====================
+        $customerId = $data['selectedCustomer'] ?? null;
+        if ($data['createNew'] === true && !empty($data['customer'])) {
+            $customerData = [
+                'name'     => trim($data['customer']['name'] ?? ''),
+                'email'    => trim($data['customer']['email'] ?? ''),
+                'phone'    => trim($data['customer']['phone'] ?? ''),
+                'gender'   => $data['customer']['gender'] ?? '',
+                'group_id' => $data['customer']['group_id'] ?? null,
+                'notes'    => $data['customer']['notes'] ?? '',
+            ];
+            if (! $this->customerModel->insert($customerData)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Erro ao criar cliente.',
+                    'errors'  => $this->customerModel->errors()
+                ]);
+            }
+            $customerId = $this->customerModel->getInsertID();
+        }
+        if (!$customerId) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Cliente inválido ou não selecionado.'
+            ]);
+        }
+        // ==================== MORADAS ====================
+        $shippingId = null;
+        $billingId  = null;
+        // Morada de Envio
+        if (!empty($data['shipping']['selected'])) {
+            $shippingId = $data['shipping']['selected'];
+        } else {
+            $shippingData = [
+                'customer_id' => $customerId,
+                'type'        => 'shipping',
+                'street'      => $data['shipping']['form']['street'] ?? '',
+                'city'        => $data['shipping']['form']['city'] ?? '',
+                'postcode'    => $data['shipping']['form']['postcode'] ?? '',
+                'country'     => $data['shipping']['form']['country'] ?? '',
+                'is_default'  => 0,
+            ];
+            if (! $this->customerAddressModel->insert($shippingData)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Erro na morada de envio.',
+                    'errors'  => $this->customerAddressModel->errors()
+                ]);
+            }
+            $shippingId = $this->customerAddressModel->getInsertID();
+        }
+        // Morada de Faturação
+        if (!empty($data['useSameBilling'])) {
+            $billingId = $shippingId;
+        } elseif (!empty($data['billing']['selected'])) {
+            $billingId = $data['billing']['selected'];
+        } else {
+            $billingData = [
+                'customer_id' => $customerId,
+                'type'        => 'billing',
+                'street'      => $data['billing']['form']['street'] ?? '',
+                'city'        => $data['billing']['form']['city'] ?? '',
+                'postcode'    => $data['billing']['form']['postcode'] ?? '',
+                'country'     => $data['billing']['form']['country'] ?? '',
+                'is_default'  => 0,
+            ];
 
+            if (! $this->customerAddressModel->insert($billingData)) {
+                return $this->response->setJSON([
+                    'status'  => 'error',
+                    'message' => 'Erro na morada de faturação.',
+                    'errors'  => $this->customerAddressModel->errors()
+                ]);
+            }
 
-
+            $billingId = $this->customerAddressModel->getInsertID();
+        }
+        // ==================== ENCOMENDA ====================
+        $orderData = [
+            'customer_id'         => $customerId,
+            'user_id'             => session('user_id') ?? 1,
+            'billing_address_id'  => $billingId,
+            'shipping_address_id' => $shippingId,
+            'shipping_method_id'  => $data['shipping_method_id'] ?? null,
+            'payment_method_id'   => $data['payment_method_id'] ?? null,
+            'total_items'         => count($data['orderItems'] ?? []),
+            'total_tax'           => $data['ivaTotal'] ?? 0,
+            'grand_total'         => $data['orderTotal'] ?? 0,
+            'status'              => 'pending',
+        ];
+        if (! $this->ordersModel->insert($orderData)) {
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'Erro ao criar encomenda.',
+                'errors'  => $this->ordersModel->errors()
+            ]);
+        }
+        $orderId = $this->ordersModel->getInsertID();
+        // ==================== ITENS ====================
+        foreach ($data['orderItems'] as $item) {
+            $this->ordersItemsModel->insert([
+                'order_id'   => $orderId,
+                'product_id' => $item['id'] ?? null,
+                'variant_id' => null,
+                'qty'        => $item['qty'] ?? 1,
+                'price'      => $item['price'] ?? 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+        }
+        // ==================== OK ====================
+        // ==================== HISTÓRICO DE ESTADO ====================
+        $this->ordersStatusHistoryModel->insert([
+            'order_id'  => $orderId,
+            'status'    => 'pending',
+            'comment'   => 'Encomenda criada automaticamente.',
+            'created_at'=> date('Y-m-d H:i:s'),
+        ]);
+        return $this->response->setJSON([
+            'status'   => 'success',
+            'message'  => 'Encomenda criada com sucesso.',
+            'redirect' => base_url('admin/sales/orders/edit/' . $orderId )
+        ]);
+    }
     public function edit($id = null)
     {
         if ($id === null) {
@@ -437,8 +606,6 @@ class OrdersController extends BaseController
             ],
         ]);
     }
-
-
 
 
 

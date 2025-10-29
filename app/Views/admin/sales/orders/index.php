@@ -179,14 +179,10 @@ Dashboard
                     </div>
                     <div class="col-sm-8">
                         <div class="text-sm-end">
-                            <button type="button"
-                                    class="btn btn-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#modalCreateOrder">
+                            <a href="<?= base_url('admin/sales/orders/create') ?>"
+                               class="btn btn-primary">
                                 <i class="bx bx-plus-circle me-1"></i> Nova Encomenda
-                            </button>
-
-
+                            </a>
                         </div>
                     </div><!-- end col-->
                 </div>
@@ -437,154 +433,7 @@ Dashboard
         </div>
     </div> <!-- end col -->
 </div> <!-- end row -->
-<!-- Modal Nova Encomenda -->
-<div id="modalCreateOrder" class="modal fade" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Criar Encomenda</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4"
-                 x-data="{
-                     products: [],
-                     newProduct: { name: '', qty: 1, price: 0 },
-                     initSelect() {
-                       const self = this;
-                       if (this._select2Init) return; // evita duplicar
-                       this._select2Init = true;
-
-                       $(this.$refs.productSelect)
-                         .select2({
-                           dropdownParent: $('#modalCreateOrder'),
-                           width: '100%',
-                           placeholder: '-- Selecionar Produto --'
-                         })
-                         .on('select2:select', function (e) {
-                           const data = e.params.data.element.dataset;
-                           self.newProduct.name = data.name;
-                           self.newProduct.price = parseFloat(data.price || 0);
-                         });
-                     },
-                     addProduct() {
-                       if (!this.newProduct.name || this.newProduct.price <= 0) return;
-                       this.products.push({ ...this.newProduct });
-                       this.newProduct = { name: '', qty: 1, price: 0 };
-                       $(this.$refs.productSelect).val('').trigger('change');
-                     },
-                     removeProduct(i) { this.products.splice(i, 1); },
-                     get total() { return this.products.reduce((s, p) => s + p.qty * p.price, 0); }
-                   }"
-                 x-init="$nextTick(() => { $data.initSelect() })"
-                >
-                <div id="basic-example">
-                    <h3>Produtos</h3>
-                    <section>
-                        <p>Conteúdo dos produtos</p>
-                        <div class="mb-3 d-flex align-items-center">
-                            <select x-ref="productSelect" class="form-select me-2" style="width: 50%">
-                                <option value="">-- Selecionar Produto --</option>
-                                <?php foreach ($products ?? [] as $p): ?>
-                                    <option value="<?= $p['id'] ?>"
-                                            data-name="<?= esc($p['name']) ?>"
-                                            data-price="<?= esc($p['price']) ?>">
-                                        <?= esc($p['name']) ?> — <?= number_format($p['price'], 2, ',', '.') ?> €
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-
-                            <input type="number" class="form-control me-2" placeholder="Qtd" min="1" x-model.number="newProduct.qty" style="width: 100px">
-                            <input type="number" class="form-control me-2" placeholder="Preço (€)" min="0" step="0.01" x-model.number="newProduct.price" style="width: 150px">
-                            <button type="button" class="btn btn-outline-primary" @click="addProduct">Adicionar</button>
-                        </div>
-
-                        <div class="table-responsive border rounded">
-                            <table class="table table-sm mb-0">
-                                <thead class="table-light">
-                                <tr>
-                                    <th>Produto</th>
-                                    <th class="text-center">Qtd</th>
-                                    <th class="text-end">Preço (€)</th>
-                                    <th class="text-end">Total (€)</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <template x-if="products.length === 0">
-                                    <tr><td colspan="5" class="text-center text-muted">Nenhum produto adicionado.</td></tr>
-                                </template>
-                                <template x-for="(p, i) in products" :key="i">
-                                    <tr>
-                                        <td x-text="p.name"></td>
-                                        <td class="text-center" x-text="p.qty"></td>
-                                        <td class="text-end" x-text="p.price.toFixed(2)"></td>
-                                        <td class="text-end" x-text="(p.qty * p.price).toFixed(2)"></td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-danger" @click="removeProduct(i)">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </template>
-                                </tbody>
-                                <tfoot class="table-light">
-                                <tr>
-                                    <th colspan="3" class="text-end">Total</th>
-                                    <th class="text-end" x-text="total.toFixed(2) + ' €'"></th>
-                                    <th></th>
-                                </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </section>
-                    <h3>Cliente</h3>
-                    <section>
-                        <p>Conteúdo do cliente</p>
-                    </section>
-                    <h3>Moradas</h3>
-                    <section>
-                        <p>Conteúdo das moradas</p>
-                    </section>
-                    <h3>Métodos</h3>
-                    <section>
-                        <p>Conteúdo dos métodos</p>
-                    </section>
-                    <h3>Confirmar</h3>
-                    <section>
-                        <p>Conteúdo da confirmação</p>
-                    </section>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?= $this->endSection() ?>
 <?= $this->section('content-script') ?>
-<script src="<?= base_url('assets/libs/jquery-steps/build/jquery.steps.min.js') ?>"></script>
-<script src="<?= base_url('assets/js/pages/form-wizard.init.js') ?>"></script>
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('formHandler', (url, initForm, options) => ({
-            ...formHandler(url, initForm, {
-                ...options,
-                addProduct(name) {
-                    if (!name) return;
-                    this.form.items.push({ name, qty: 1, price: 0 });
-                    this.searchTerm = '';
-                    this.calcTotals();
-                },
-                calcTotals() {
-                    this.form.grand_total = this.form.items.reduce((t, i) => t + (i.qty * i.price), 0);
-                    this.form.total_items = this.form.items.reduce((t, i) => t + i.qty, 0);
-                }
-            })
-        }));
-    });
-
-</script>
 <?= $this->endSection() ?>
 
