@@ -1,0 +1,76 @@
+<?php
+log_message('error', '[DEBUG: VIEW $company] ' . print_r($company ?? 'SEM VAR', true));
+log_message('error', '[DEBUG: VIEW $data] ' . print_r($data ?? 'SEM VAR', true));
+?>
+<html>
+<head>
+    <style>
+        body { font-family: 'Helvetica', sans-serif; font-size: 12px; color: #333; }
+        .header, .footer { text-align: center; margin-bottom: 20px; }
+        .company, .client { width: 48%; display: inline-block; vertical-align: top; }
+        .company { font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+        th { background: #f4f4f4; }
+        .right { text-align: right; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2>FATURA</h2>
+    <p>
+        Série: <?= esc($document['series']) ?> |
+        Nº <?= esc($document['invoice_number']) ?> |
+        Data: <?= esc($document['date']) ?>
+    </p>
+</div>
+
+<div>
+    <div class="company">
+        <strong><?= esc($company['name']) ?></strong><br>
+        <?= esc($company['address']) ?><br>
+        NIF: <?= esc($company['vat'] ?? '[sem NIF]') ?><br>
+        Email: <?= esc($company['email'] ?? '') ?>
+    </div>
+
+    <div class="client">
+        <strong>Cliente:</strong><br>
+        <?= esc($customer['name']) ?><br>
+        Telefone: <?= esc($customer['phone']) ?><br>
+        Email: <?= esc($customer['email']) ?><br>
+        ID Interno: <?= esc($customer['id']) ?><br>
+        Grupo: <?= esc($customer['group_id']) ?>
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>IVA</th><th>Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($items as $item): ?>
+        <tr>
+            <td><?= esc($item['id']) ?></td>
+            <td><?= esc($item['qty']) ?></td>
+            <td class="right"><?= number_format($item['price'], 2, ',', ' ') ?> €</td>
+            <td class="right"><?= number_format($item['price'], 0) ?>%</td>
+            <td class="right"><?= number_format($item['updated_at'], 2, ',', ' ') ?> €</td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
+</table>
+
+<p><strong>Método de Pagamento:</strong> <?= esc($payment['method'] ?? '—') ?></p>
+
+<table>
+    <tr><td class="right">Subtotal:</td><td class="right"><?= number_format($document['subtotal'], 2, ',', ' ') ?> €</td></tr>
+    <tr><td class="right">IVA:</td><td class="right"><?= number_format($document['vat_total'], 2, ',', ' ') ?> €</td></tr>
+    <tr><td class="right">Descontos:</td><td class="right"><?= number_format($document['discount_total'], 2, ',', ' ') ?> €</td></tr>
+    <tr><th class="right">Total:</th><th class="right"><?= number_format($document['grand_total'], 2, ',', ' ') ?> €</th></tr>
+</table>
+
+<p><em><?= esc($document['notes'] ?? 'Documento interno sem validade fiscal.') ?></em></p>
+</body>
+</html>

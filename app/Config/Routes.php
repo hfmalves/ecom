@@ -125,6 +125,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('financial_documents', function ($routes) {
             $routes->get('/', 'FinancialDocumentsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'FinancialDocumentsController::store');
             $routes->get('edit/(:num)', 'FinancialDocumentsController::edit/$1', ['filter' => 'noauth']);
         });
         $routes->group('shipments', function ($routes) {

@@ -137,14 +137,15 @@
 <div id="modalCreateInvoice" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content"
-             x-data="formHandler('<?= base_url('admin/sales/invoices/create') ?>', {
+             x-data="formHandler('<?= base_url('admin/sales/financial_documents/store') ?>', {
                  type: 'invoice',
                  series: '',
                  order_id: '',
+                 is_fiscal: 0,
+                 external_provider: '',
                  notes: '',
                  <?= csrf_token() ?>: '<?= csrf_hash() ?>'
-             })"
-             @submit.prevent="submit">
+             })">
 
             <div class="modal-header">
                 <h5 class="modal-title">Criar Novo Documento Fiscal</h5>
@@ -159,21 +160,46 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Tipo</label>
-                        <select class="form-select" x-model="form.type">
+                        <select class="form-select" x-model="form.type" required>
                             <option value="invoice">Fatura</option>
                             <option value="receipt">Recibo</option>
                             <option value="credit_note">Nota de Crédito</option>
                             <option value="debit_note">Nota de Débito</option>
                         </select>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Série</label>
-                        <input type="text" class="form-control" placeholder="Ex: A" x-model="form.series">
+                        <input type="text" class="form-control" placeholder="Ex: A" x-model="form.series" required>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Encomenda Associada</label>
-                        <input type="number" class="form-control" placeholder="ID da encomenda" x-model="form.order_id">
+                        <input type="number" class="form-control" placeholder="ID da encomenda" x-model="form.order_id" required>
                     </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Sistema Fiscal</label>
+                        <select class="form-select" x-model="form.external_provider">
+                            <option value="">-- Nenhum (interno) --</option>
+                            <option value="moloni">Moloni</option>
+                            <option value="invoicexpress">InvoiceXpress</option>
+                            <option value="sage">Sage</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox"
+                                   x-model="form.is_fiscal"
+                                   :true-value="1" :false-value="0"
+                                   id="chkFiscal">
+                            <label class="form-check-label" for="chkFiscal">
+                                Marcar como documento fiscal real
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="col-12">
                         <label class="form-label">Notas / Observações</label>
                         <textarea class="form-control" rows="3" x-model="form.notes"
@@ -181,9 +207,12 @@
                     </div>
                 </div>
             </div>
+
             <div class="modal-footer">
                 <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" :disabled="loading">
+
+                <!-- 👇 Aqui está a mudança: chamamos o submit diretamente no clique -->
+                <button type="button" class="btn btn-primary" :disabled="loading" @click="submit">
                     <span x-show="!loading"><i class="mdi mdi-content-save-outline me-1"></i> Guardar</span>
                     <span x-show="loading"><i class="fa fa-spinner fa-spin me-1"></i> A guardar...</span>
                 </button>
@@ -191,5 +220,7 @@
         </div>
     </div>
 </div>
+
+
 
 <?= $this->endSection() ?>
