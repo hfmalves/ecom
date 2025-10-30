@@ -46,7 +46,7 @@ class PaymentsModel extends Model
 
     // Validation
     protected $validationRules = [
-        'invoice_id'        => 'required|integer',
+        'invoice_id'        => 'permit_empty|integer',
         'order_id'          => 'permit_empty|integer',
         'amount'            => 'required|decimal',
         'currency'          => 'required|max_length[10]',

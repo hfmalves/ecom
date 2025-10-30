@@ -120,6 +120,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('transactions', function ($routes) {
             $routes->get('/', 'PaymentsController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'PaymentsController::store');
             $routes->get('edit/(:num)', 'PaymentsController::edit/$1', ['filter' => 'noauth']);
         });
         $routes->group('financial_documents', function ($routes) {

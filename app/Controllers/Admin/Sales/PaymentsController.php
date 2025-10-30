@@ -70,18 +70,13 @@ class PaymentsController extends BaseController
                 ' '
             ),
         ];
-
-        // === Dados principais ===
         $payments  = $this->paymentsModel->orderBy('created_at', 'DESC')->findAll();
         $invoices  = $this->invoicesModel->findAll();
         $orders    = $this->ordersModel->findAll();
         $customers = $this->customerModel->findAll();
-
-        // Mapas para acesso rápido
         $mapInvoices  = array_column($invoices, null, 'id');
         $mapOrders    = array_column($orders, null, 'id');
         $mapCustomers = array_column($customers, null, 'id');
-
         foreach ($payments as &$p) {
             $invoice = $mapInvoices[$p['invoice_id']] ?? null;
             $p['invoice'] = $invoice;
@@ -93,12 +88,100 @@ class PaymentsController extends BaseController
                 }
             }
         }
-
+        $eligibleOrders = $this->ordersModel
+            ->whereNotIn('status', ['completed', 'processing', 'refunded'])
+            ->findAll();
+        $paidPayments = $this->paymentsModel
+            ->where('status', 'paid')
+            ->findAll();
+        $paidOrderIds = array_unique(array_column($paidPayments, 'order_id'));
+        $ordersForManualPayment = array_filter($eligibleOrders, function ($order) use ($paidOrderIds) {
+            return !in_array($order['id'], $paidOrderIds);
+        });
+        // === Enviar tudo para a view ===
         return view('admin/sales/payments/index', [
             'payments' => $payments,
             'kpi'      => $kpi,
+            'orders'   => $ordersForManualPayment,
+            'payments_methods' => $this->paymentMethodsModel->findAll(),
         ]);
     }
+    public function store()
+    {
+        if (!$this->request->is('post')) {
+            return redirect()->back()->with('error', 'Método inválido');
+        }
+
+        $data = $this->request->getJSON(true);
+
+        if (empty($data['order_id']) || empty($data['method']) || empty($data['amount'])) {
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'Campos obrigatórios em falta.'
+            ]);
+        }
+
+        // Buscar método de pagamento
+        $method = $this->paymentMethodsModel
+            ->where('name', $data['method'])
+            ->first();
+
+        $useGateway = $method['use_gateway'] ?? 0;
+
+        // === 🔹 GERAÇÃO AUTOMÁTICA DE transaction_id E reference (quando manual) ===
+        $transactionId = $data['transaction_id'] ?? null;
+        $reference = $data['reference'] ?? null;
+
+        if ($useGateway == 0) {
+            $micro = str_replace('.', '', microtime(true));
+            if (empty($transactionId)) {
+                $transactionId = 'TRM-' . $micro;
+            }
+            if (empty($reference)) {
+                $reference = 'TRM-' . substr($micro, -8) . '-' . random_int(100, 999);
+            }
+        }
+        $paymentData = [
+            'invoice_id'         => null, // opcional
+            'order_id'           => (int) $data['order_id'],
+            'payment_method_id'  => (int) ($data['payment_method_id'] ?? 0),
+            'amount'             => (float) $data['amount'],
+            'currency'           => $data['currency'] ?? 'EUR',
+            'method'             => $data['method'],
+            'transaction_id'     => $transactionId,
+            'reference'          => $reference,
+            'status'             => $data['status'],
+            'notes'              => $data['comment'] ?? null,
+            'gateway'            => $useGateway,
+            'created_at'         => date('Y-m-d H:i:s'),
+            'created_by'         => session('user.id') ?? null,
+        ];
+        if (!$this->paymentsModel->insert($paymentData)) {
+            log_message('error', 'Erro ao inserir pagamento: ' . print_r($this->paymentsModel->errors(), true));
+            return $this->response->setStatusCode(400)->setJSON([
+                'status' => 'error',
+                'message' => 'Erro ao criar pagamento.',
+                'errors' => $this->paymentsModel->errors()
+            ]);
+        }
+        $paymentId = $this->paymentsModel->getInsertID();
+        if ($data['status'] === 'paid') {
+            $this->ordersModel
+                ->where('id', $data['order_id'])
+                ->set(['status' => 'processing'])
+                ->update();
+        }
+
+        return $this->response->setJSON([
+            'status' => 'success',
+            'message' => 'Transação criada com sucesso.',
+            'payment_id' => $paymentId,
+            'transaction_id' => $transactionId,
+            'reference' => $reference
+        ]);
+    }
+
+
     public function edit($id = null)
     {
         if ($id === null) {

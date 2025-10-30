@@ -85,32 +85,18 @@
                         <?php $customer = $p['customer'] ?? []; ?>
                         <tr>
                             <td><?= esc($p['id']) ?></td>
-
-                            <!-- Cliente -->
                             <td>
                                 <?= esc($customer['name'] ?? '—') ?><br>
                                 <small class="text-muted"><?= esc($customer['email'] ?? '') ?></small>
                             </td>
-
-                            <!-- Valor -->
                             <td class="text-end">
                                 <?= number_format($p['amount'] ?? 0, 2, ',', ' ') ?>
                                 <?= esc($p['currency'] ?? 'EUR') ?>
                             </td>
-
-                            <!-- Método -->
                             <td><?= esc($p['method'] ?? '-') ?></td>
-
-                            <!-- Transação -->
                             <td><?= esc($p['transaction_id'] ?? '-') ?></td>
-
-                            <!-- Referência -->
                             <td><?= esc($p['reference'] ?? '-') ?></td>
-
-                            <!-- Câmbio -->
                             <td class="text-center"><?= esc($p['exchange_rate'] ?? '1.0000') ?></td>
-
-                            <!-- Estado -->
                             <td>
                                 <?php
                                 $colors = [
@@ -132,11 +118,7 @@
                                     <?= esc($labels[$p['status']] ?? ucfirst($p['status'])) ?>
                                 </span>
                             </td>
-
-                            <!-- Pago em -->
                             <td><?= !empty($p['paid_at']) ? date('d/m/Y H:i', strtotime($p['paid_at'])) : '-' ?></td>
-
-                            <!-- Ações -->
                             <td class="text-center">
                                 <a href="<?= base_url('admin/sales/transactions/edit/'.$p['id']) ?>"
                                    class="btn btn-sm btn-light text-primary" title="Ver detalhes">
@@ -154,7 +136,7 @@
 <div id="modalCreatePayment" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content"
-             x-data="formHandler('<?= base_url('admin/sales/payments/create') ?>', {
+             x-data="formHandler('<?= base_url('admin/sales/transactions/store') ?>', {
                  order_id: '',
                  amount: '',
                  method: '',
@@ -164,45 +146,110 @@
                  comment: '',
                  <?= csrf_token() ?>: '<?= csrf_hash() ?>'
              })">
-
             <div class="modal-header">
                 <h5 class="modal-title">Nova Transação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
             <form @submit.prevent="submit">
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Encomenda</label>
-                            <input type="number" class="form-control" x-model="form.order_id"
-                                   placeholder="ID da encomenda">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Valor (€)</label>
-                            <input type="number" step="0.01" class="form-control" x-model="form.amount">
-                        </div>
-                    </div>
+                            <select
+                                    id="orderSelect"
+                                    class="form-select"
+                                    x-model="form.order_id"
+                                    x-init="
+                                    $nextTick(() => {
+                                        const el = $el;
+                                        $(el).select2({
+                                            dropdownParent: $('#modalCreatePayment'),
+                                            width: '100%',
+                                            placeholder: '-- Selecionar Encomenda --',
+                                            allowClear: true
+                                        });
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Método</label>
-                            <select class="form-select" x-model="form.method">
-                                <option value="">-- Selecionar --</option>
-                                <option>Multibanco</option>
-                                <option>MBWay</option>
-                                <option>Visa</option>
-                                <option>Transferência</option>
-                                <option>Loja</option>
+                                        $(el).on('change', (e) => {
+                                            form.order_id = e.target.value;
+
+                                            // Buscar total associado à encomenda selecionada
+                                            const selected = $(el).find('option:selected');
+                                            const total = parseFloat(selected.data('total') || 0);
+                                            form.amount = total > 0 ? total : 0;
+                                        });
+                                    })
+                                "
+                            >
+                                <option value="">-- Selecionar Encomenda --</option>
+                                <?php foreach ($orders as $o): ?>
+                                    <option
+                                            value="<?= esc($o['id']) ?>"
+                                            data-total="<?= esc($o['grand_total']) ?>">
+                                        #<?= esc($o['id']) ?> — Total: <?= number_format($o['grand_total'], 2, ',', ' ') ?> €
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Valor (€)</label>
+                            <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    class="form-control"
+                                    x-model="form.amount"
+                                    x-bind:readonly="!form.order_id"
+                                    x-bind:class="!form.order_id ? 'bg-light' : ''"
+                            >
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Método</label>
+                            <select
+                                    class="form-select"
+                                    x-model="form.method"
+                                    x-init="
+                                    $nextTick(() => {
+                                        const el = $el;
+                                        $(el).select2({
+                                            dropdownParent: $('#modalCreatePayment'),
+                                            width: '100%',
+                                            placeholder: '-- Selecionar --',
+                                            allowClear: true
+                                        });
+
+                                        $(el).on('change', (e) => {
+                                            const selected = $(el).find('option:selected');
+                                            form.method = e.target.value;
+                                            form.payment_method_id = selected.data('id') || null;
+                                            form.use_gateway = selected.data('gateway') || 0;
+
+                                            // Ajuste dinâmico do estado
+                                            if (form.use_gateway == 1) {
+                                                form.status = 'pending';
+                                            }
+                                        });
+                                    })
+                                "
+                            >
+                            <option value="">-- Selecionar --</option>
+                                <?php foreach ($payments_methods as $m): ?>
+                                    <option
+                                            value="<?= esc($m['name']) ?>"
+                                            data-id="<?= esc($m['id']) ?>"
+                                            data-gateway="<?= esc($m['use_gateway']) ?>">
+                                        <?= esc($m['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3" x-show="form.use_gateway == 0">
                             <label class="form-label">Referência</label>
                             <input type="text" class="form-control" x-model="form.reference"
                                    placeholder="Referência ou código da operação">
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Moeda</label>
@@ -210,23 +257,59 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Estado</label>
-                            <select class="form-select" x-model="form.status">
+                            <select
+                                    class="form-select"
+                                    x-model="form.status"
+                                    x-init="
+                                    $nextTick(() => {
+                                        const el = $el;
+
+                                        // gera as opções consoante o gateway
+                                        const renderOptions = (gateway) => {
+                                            if (gateway == 1) {
+                                                return `
+                                                    <option value='pending'>Pendente</option>
+                                                `;
+                                            } else {
+                                                return `
+                                                    <option value='paid'>Pago</option>
+                                                    <option value='refunded'>Reembolsado</option>
+                                                    <option value='partial'>Parcial</option>
+                                                `;
+                                            }
+                                        };
+                                        const initSelect2 = () => {
+                                            $(el).select2({
+                                                dropdownParent: $('#modalCreatePayment'),
+                                                width: '100%',
+                                                placeholder: '-- Selecionar Estado --',
+                                                allowClear: true
+                                            }).on('change', (e) => form.status = e.target.value);
+                                        };
+                                        initSelect2();
+                                        $watch('form.use_gateway', value => {
+                                            $(el).off('change.select2').select2('destroy');
+                                            $(el).html(renderOptions(value));
+                                            form.status = (value == 1) ? 'pending' : 'paid';
+                                            initSelect2();
+                                            $(el).val(form.status).trigger('change.select2');
+                                            $(el).prop('disabled', value == 1);
+                                        });
+                                    })
+                                "
+                            >
                                 <option value="paid">Pago</option>
-                                <option value="pending">Pendente</option>
-                                <option value="failed">Falhou</option>
                                 <option value="refunded">Reembolsado</option>
                                 <option value="partial">Parcial</option>
                             </select>
                         </div>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Comentário</label>
                         <textarea class="form-control" x-model="form.comment"
                                   placeholder="Notas internas (opcional)"></textarea>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success" :disabled="loading">
@@ -238,5 +321,4 @@
         </div>
     </div>
 </div>
-
 <?= $this->endSection() ?>
