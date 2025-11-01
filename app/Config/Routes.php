@@ -135,6 +135,10 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('returns', function ($routes) {
             $routes->get('/', 'OrdersReturnController::index', ['filter' => 'noauth']);
+            $routes->post('store', 'OrdersReturnController::store');
+            $routes->get('edit/(:num)', 'OrdersReturnController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('saveItems', 'OrdersReturnController::saveItems', ['filter' => 'noauth']);
+            $routes->post('removeItems', 'OrdersReturnController::removeItems', ['filter' => 'noauth']);
         });
         $routes->group('cart', function ($routes) {
             $routes->get('/', 'OrdersCartController::index', ['filter' => 'noauth']);

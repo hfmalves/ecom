@@ -47,7 +47,7 @@ class OrdersReturnsModel extends Model
         'customer_id'  => 'required|integer',
         'rma_number'   => 'permit_empty|string|max_length[50]',
         'reason'       => 'permit_empty|string',
-        'status'       => 'required|in_list[requested,approved,rejected,refunded,completed]',
+        'status'       => 'required|in_list[requested,approved,rejected,refunded,completed,pending]',
         'resolution'   => 'permit_empty|in_list[refund,replacement,store_credit]',
         'refund_amount'=> 'permit_empty|decimal',
         'handled_by'   => 'permit_empty|integer',

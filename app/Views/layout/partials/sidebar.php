@@ -46,7 +46,7 @@
                         <li><a href="<?= base_url('admin/sales/orders') ?>">Encomendas</a></li>
                         <li><a href="<?= base_url('admin/sales/shipments') ?>">Envios</a></li>
                         <li><a href="<?= base_url('admin/sales/transactions') ?>">Transações</a></li>
-                        <li><a href="<?= base_url('admin/sales/financial_documents') ?>">Documentos Fiscais</a></li>
+                        <!--<li><a href="<?= base_url('admin/sales/financial_documents') ?>">Documentos Fiscais</a></li> -->
                         <li><a href="<?= base_url('admin/sales/returns') ?>">Devoluções</a></li>
                         <li><a href="<?= base_url('admin/sales/cart') ?>">Carrinhos</a></li>
                     </ul>
