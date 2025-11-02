@@ -2,8 +2,105 @@
 <?= $this->section('title') ?>
 Dashboard
 <?= $this->endSection() ?>
-
 <?= $this->section('content') ?>
+<div class="row g-3 mb-1">
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total de Devoluções</h6>
+                    <i class="mdi mdi-restore text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total_returns'] ?></h3>
+                <small class="text-muted">todas as devoluções</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Aprovadas</h6>
+                    <i class="mdi mdi-check-circle text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['approved'] ?></h3>
+                <small class="text-muted">devoluções validadas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Pendentes</h6>
+                    <i class="mdi mdi-timer-sand text-warning fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['pending'] ?></h3>
+                <small class="text-muted">aguardam decisão</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Rejeitadas</h6>
+                    <i class="mdi mdi-close-circle text-danger fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['rejected'] ?></h3>
+                <small class="text-muted">devoluções não aceites</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Reabastecidos</h6>
+                    <i class="mdi mdi-database-import text-success fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['total_restocked'] ?></h3>
+                <small class="text-muted">itens voltaram ao stock</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Total Reembolsado</h6>
+                    <i class="mdi mdi-cash-refund text-primary fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0">€<?= $kpi['total_refunded'] ?></h3>
+                <small class="text-muted">valor total devolvido</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Condição: Novo</h6>
+                    <i class="mdi mdi-package-variant text-info fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['new_condition'] ?></h3>
+                <small class="text-muted">itens em bom estado</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="card border-0 shadow-sm hover-scale">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h6 class="text-muted">Defeituosos/Danificados</h6>
+                    <i class="mdi mdi-alert-circle text-danger fs-4"></i>
+                </div>
+                <h3 class="fw-semibold mb-0"><?= $kpi['damaged_items'] ?></h3>
+                <small class="text-muted">não reintegráveis</small>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -16,11 +113,10 @@ Dashboard
                     <div class="col-sm-8 text-sm-end">
                         <button type="button" class="btn btn-primary"
                                 data-bs-toggle="modal" data-bs-target="#modalCreateRma">
-                            <i class="mdi mdi-plus me-1"></i> Nova RMA
+                            <i class="mdi mdi-plus me-1"></i> Novo RMA
                         </button>
                     </div>
                 </div>
-
                 <div class="table-responsive">
                     <table id="datatable" class="table table-striped table-bordered nowrap w-100 align-middle">
                         <thead class="table-light">
@@ -67,33 +163,25 @@ Dashboard
                                 ?>
                                 <tr>
                                     <td><strong><?= esc($r['rma_number'] ?? 'RMA-'.$r['id']) ?></strong></td>
-
                                     <td>
                                         #<?= esc($r['order']['id'] ?? '-') ?><br>
                                         <small class="text-muted">
                                             <?= number_format($r['order']['grand_total'] ?? 0, 2, ',', ' ') ?> €
                                         </small>
                                     </td>
-
                                     <td>
                                         <?= esc($r['customer']['name'] ?? 'Sem cliente') ?><br>
                                         <small class="text-muted"><?= esc($r['customer']['email'] ?? '') ?></small>
                                     </td>
-
                                     <td class="text-end"><?= $totalQty ?></td>
-
                                     <td class="text-end"><?= number_format($totalRefund, 2, ',', ' ') ?> €</td>
-
                                     <td><?= esc($r['reason'] ?? '-') ?></td>
-
                                     <td>
                                         <span class="badge bg-<?= $colors[$status] ?? 'light' ?> w-100">
                                             <?= esc($labels[$status] ?? ucfirst($status)) ?>
                                         </span>
                                     </td>
-
                                     <td><?= !empty($r['created_at']) ? date('d/m/Y H:i', strtotime($r['created_at'])) : '-' ?></td>
-
                                     <td class="text-center">
                                         <a href="<?= base_url('admin/sales/returns/edit//'.$r['id']) ?>"
                                            class="btn btn-sm btn-light text-primary" title="Ver detalhes">
@@ -106,17 +194,10 @@ Dashboard
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
-<!-- Botão -->
-<button type="button" class="btn btn-primary"
-        data-bs-toggle="modal" data-bs-target="#modalCreateRma">
-    <i class="mdi mdi-plus me-1"></i> Nova RMA
-</button>
-
 <!-- Modal Nova RMA -->
 <div id="modalCreateRma" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -132,7 +213,6 @@ Dashboard
                 <h5 class="modal-title">Nova Devolução (RMA)</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
             <form @submit.prevent="submit">
                 <div class="modal-body">
                     <div class="row">
@@ -153,7 +233,7 @@ Dashboard
                                             allowClear: true
                                         }).on('change', e => form.order_id = e.target.value);
                                     })
-                                "
+        "
                             >
                                 <option value="">-- Selecionar Encomenda --</option>
                                 <?php foreach ($orders as $o): ?>
@@ -161,11 +241,14 @@ Dashboard
                                         <option value="<?= esc($o['id']) ?>">
                                             #<?= esc($o['id']) ?> — <?= esc($o['customer']['name']) ?>
                                         </option>
-
                                     <?php endif; ?>
                                 <?php endforeach; ?>
                             </select>
+                            <small class="text-danger" x-show="errors.order_id" x-text="errors.order_id"></small>
+
                         </div>
+
+                        <!-- Resolução -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Resolução</label>
                             <select class="form-select" x-model="form.resolution">
@@ -174,19 +257,26 @@ Dashboard
                                 <option value="replacement">Substituição</option>
                                 <option value="store_credit">Crédito em Loja</option>
                             </select>
+                            <small class="text-danger" x-show="errors.resolution" x-text="errors.resolution"></small>
                         </div>
+
+                        <!-- Motivo -->
+                        <div class="mb-3">
+                            <label class="form-label">Motivo</label>
+                            <textarea class="form-control" x-model="form.reason"
+                                      placeholder="Descreve o motivo da devolução..." rows="3"></textarea>
+                            <small class="text-danger" x-show="errors.reason" x-text="errors.reason"></small>
+                        </div>
+
+                        <!-- Notas -->
+                        <div class="mb-3">
+                            <label class="form-label">Notas Internas (opcional)</label>
+                            <textarea class="form-control" x-model="form.notes"
+                                      placeholder="Observações internas, visíveis apenas pela equipa..." rows="2"></textarea>
+                            <small class="text-danger" x-show="errors.notes" x-text="errors.notes"></small>
+                        </div>
+
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Motivo</label>
-                        <textarea class="form-control" x-model="form.reason"
-                                  placeholder="Descreve o motivo da devolução..." rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Notas Internas (opcional)</label>
-                        <textarea class="form-control" x-model="form.notes"
-                                  placeholder="Observações internas, visíveis apenas pela equipa..." rows="2"></textarea>
-                    </div>
-                </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>

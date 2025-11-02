@@ -47,20 +47,28 @@ class OrdersReturnsModel extends Model
         'customer_id'  => 'required|integer',
         'rma_number'   => 'permit_empty|string|max_length[50]',
         'reason'       => 'permit_empty|string',
-        'status'       => 'required|in_list[requested,approved,rejected,refunded,completed,pending]',
-        'resolution'   => 'permit_empty|in_list[refund,replacement,store_credit]',
+        'status'       => 'required|in_list[requested,approved,rejected,refunded,completed,pending,received]',
+        'notes'        => 'required|string|max_length[1000]',
+        'notify_client'=> 'permit_empty|in_list[0,1,true,false]',
+        'resolution'   => 'required|in_list[refund,replacement,store_credit]',
+
         'refund_amount'=> 'permit_empty|decimal',
         'handled_by'   => 'permit_empty|integer',
-        'notes'        => 'permit_empty|string',
     ];
 
     protected $validationMessages = [
         'status' => [
             'required' => 'O estado da devolução é obrigatório.',
-            'in_list'  => 'Estado inválido. Valores possíveis: requested, approved, rejected, refunded, completed.',
+            'in_list'  => 'Estado inválido.',
         ],
         'resolution' => [
-            'in_list' => 'Resolução inválida. Valores possíveis: refund, replacement, store_credit.',
+            'required' => 'A resolução é obrigatória.',
+            'in_list'  => 'Resolução inválida. Valores possíveis: refund, replacement, store_credit.',
+        ],
+        'notes' => [
+            'required' => 'As notas internas são obrigatórias.',
+            'string'   => 'O campo notas deve ser texto.',
+            'max_length' => 'As notas não podem ultrapassar 1000 caracteres.',
         ],
     ];
 

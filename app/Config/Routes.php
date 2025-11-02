@@ -137,6 +137,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('/', 'OrdersReturnController::index', ['filter' => 'noauth']);
             $routes->post('store', 'OrdersReturnController::store');
             $routes->get('edit/(:num)', 'OrdersReturnController::edit/$1', ['filter' => 'noauth']);
+            $routes->post('update', 'OrdersReturnController::update');
             $routes->post('saveItems', 'OrdersReturnController::saveItems', ['filter' => 'noauth']);
             $routes->post('removeItems', 'OrdersReturnController::removeItems', ['filter' => 'noauth']);
         });
