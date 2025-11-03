@@ -178,34 +178,6 @@
                                                 <i class="mdi mdi-pencil-outline"></i>
                                             </a>
                                         </li>
-
-                                        <!-- Marcar como Abandonado (só se ativo) -->
-                                        <li x-show="status === 'active'">
-                                            <button type="button" class="btn btn-sm btn-light text-warning"
-                                                    @click="
-                                                        window.dispatchEvent(new CustomEvent('cart-abandon', {
-                                                            detail: { id: <?= $c['id'] ?> }
-                                                        }));
-                                                        new bootstrap.Modal(document.getElementById('modalAbandonCart')).show();
-                                                    "
-                                                    title="Marcar como Abandonado">
-                                                <i class="mdi mdi-cart-off"></i>
-                                            </button>
-                                        </li>
-
-                                        <!-- Eliminar Carrinho (não se convertido) -->
-                                        <li x-show="status !== 'converted'">
-                                            <button type="button" class="btn btn-sm btn-light text-danger"
-                                                    @click="
-                                                        window.dispatchEvent(new CustomEvent('cart-delete', {
-                                                            detail: { id: <?= $c['id'] ?> }
-                                                        }));
-                                                        new bootstrap.Modal(document.getElementById('modalDeleteCart')).show();
-                                                    "
-                                                    title="Eliminar Carrinho">
-                                                <i class="mdi mdi-trash-can-outline"></i>
-                                            </button>
-                                        </li>
                                     </ul>
                                 </td>
                             </tr>
