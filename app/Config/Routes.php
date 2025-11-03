@@ -145,9 +145,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             // Lista de carrinhos
             $routes->get('/', 'OrdersCartController::index', ['filter' => 'noauth']);
             $routes->get('edit/(:num)', 'OrdersCartController::edit/$1', ['filter' => 'noauth']);
-            $routes->post('update', 'OrdersCartController::update');
-            $routes->post('abandon', 'OrdersCartController::abandon', ['filter' => 'noauth']);
-            $routes->post('delete', 'OrdersCartController::delete', ['filter' => 'noauth']);
         });
     });
     $routes->group('marketing', ['namespace' => 'App\Controllers\Admin\Marketing'], function ($routes) {
