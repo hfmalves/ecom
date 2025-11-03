@@ -16,6 +16,7 @@ class Coupons extends Model
         'code',
         'type',
         'value',
+        'max_discount_value',
         'max_uses',
         'max_uses_per_customer',
         'min_order_value',
@@ -23,10 +24,12 @@ class Coupons extends Model
         'max_orders',
         'customer_id',
         'customer_group_id',
+        'email_limit',
         'scope',
         'stackable',
         'is_active',
         'description',
+        'starts_at',
         'expires_at',
         'created_at',
         'updated_at',
@@ -48,11 +51,18 @@ class Coupons extends Model
 
     // Validation
     protected $validationRules = [
-        'code'       => 'required|min_length[3]|max_length[50]|is_unique[coupons.code,id,{id}]',
-        'type'       => 'required|in_list[percent,fixed]',
-        'value'      => 'required|decimal',
-        'max_uses'   => 'permit_empty|integer',
-        'expires_at' => 'permit_empty|valid_date',
+        'code'               => 'required|min_length[3]|max_length[50]|is_unique[coupons.code,id,{id}]',
+        'type'               => 'required|in_list[percent,fixed]',
+        'value'              => 'required|decimal',
+        'max_discount_value' => 'permit_empty|decimal',
+        'max_uses'           => 'permit_empty|integer',
+        'max_uses_per_customer' => 'permit_empty|integer',
+        'min_order_value'    => 'permit_empty|decimal',
+        'max_order_value'    => 'permit_empty|decimal',
+        'max_orders'         => 'permit_empty|integer',
+        'email_limit'        => 'permit_empty|valid_email',
+        'starts_at'          => 'permit_empty|valid_date',
+        'expires_at'         => 'permit_empty|valid_date',
     ];
     protected $validationMessages = [
         'code' => [
@@ -69,8 +79,29 @@ class Coupons extends Model
             'required' => 'O valor do cupão é obrigatório.',
             'decimal'  => 'O valor do cupão deve ser numérico.',
         ],
+        'max_discount_value' => [
+            'decimal' => 'O valor máximo de desconto deve ser numérico.',
+        ],
         'max_uses' => [
             'integer' => 'O número máximo de utilizações deve ser inteiro.',
+        ],
+        'max_uses_per_customer' => [
+            'integer' => 'O número máximo de utilizações por cliente deve ser inteiro.',
+        ],
+        'min_order_value' => [
+            'decimal' => 'O valor mínimo da encomenda deve ser numérico.',
+        ],
+        'max_order_value' => [
+            'decimal' => 'O valor máximo da encomenda deve ser numérico.',
+        ],
+        'max_orders' => [
+            'integer' => 'O limite de encomendas deve ser inteiro.',
+        ],
+        'email_limit' => [
+            'valid_email' => 'O e-mail associado ao cupão deve ser válido.',
+        ],
+        'starts_at' => [
+            'valid_date' => 'A data de início deve ser uma data válida.',
         ],
         'expires_at' => [
             'valid_date' => 'A data de expiração deve ser uma data válida.',

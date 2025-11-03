@@ -148,9 +148,18 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
     });
     $routes->group('marketing', ['namespace' => 'App\Controllers\Admin\Marketing'], function ($routes) {
-        $routes->group('coupons', function ($routes) {
-            $routes->get('/', 'CouponsController::index', ['filter' => 'noauth']);
+        $routes->group('coupons', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'CouponsController::index');
+            $routes->get('edit/(:num)', 'CouponsController::edit/$1');
+            $routes->post('update', 'CouponsController::update');
+            $routes->post('addCategory', 'CouponsController::addCategory');
+            $routes->post('updateCategoryInclude', 'CouponsController::updateCategoryInclude');
+            $routes->post('deleteCategory', 'CouponsController::deleteCategory');
+            $routes->post('addProduct', 'CouponsController::addProduct');
+            $routes->post('updateProductInclude', 'CouponsController::updateProductInclude');
+            $routes->post('deleteProduct', 'CouponsController::deleteProduct');
         });
+
         $routes->group('campaigns', function ($routes) {
             $routes->get('/', 'CampaignsController::index', ['filter' => 'noauth']);
         });

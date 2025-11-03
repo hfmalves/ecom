@@ -15,9 +15,7 @@ class CouponsCategoryModel extends Model
     protected $allowedFields = [
         'coupon_id',
         'category_id',
-        'created_at',
-        'updated_at',
-        'deleted_at',
+        'include'
     ];
 
     protected bool $allowEmptyInserts = false;

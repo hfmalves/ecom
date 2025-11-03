@@ -15,9 +15,7 @@ class CouponsProductModel extends Model
     protected $allowedFields = [
         'coupon_id',
         'product_id',
-        'created_at',
-        'updated_at',
-        'deleted_at',
+        'include'
     ];
 
 
