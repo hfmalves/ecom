@@ -4,9 +4,9 @@ namespace App\Models\Admin\Marketing;
 
 use CodeIgniter\Model;
 
-class CampaignProductModel extends Model
+class CampaignGroupModel extends Model
 {
-    protected $table            = 'campaigns_product';
+    protected $table            = 'campaigns_groups';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
@@ -14,9 +14,12 @@ class CampaignProductModel extends Model
     protected $protectFields    = true;
     protected $allowedFields = [
         'campaign_id',
-        'product_id',
-        'variant_id',
+        'group_id',
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
+
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -32,9 +35,10 @@ class CampaignProductModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
+
     protected $validationRules = [
         'campaign_id' => 'required|integer',
-        'product_id'  => 'required|integer'
+        'group_id'    => 'required|integer'
     ];
 
     protected $validationMessages = [
@@ -42,9 +46,9 @@ class CampaignProductModel extends Model
             'required' => 'O ID da campanha é obrigatório.',
             'integer'  => 'O ID da campanha deve ser numérico.',
         ],
-        'product_id' => [
-            'required' => 'O produto é obrigatório.',
-            'integer'  => 'O ID do produto deve ser numérico.',
+        'group_id' => [
+            'required' => 'O grupo é obrigatório.',
+            'integer'  => 'O ID do grupo deve ser numérico.',
         ],
     ];
     protected $skipValidation       = false;
