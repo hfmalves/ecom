@@ -166,8 +166,23 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('edit/(:num)', 'CampaignsController::edit/$1');
             $routes->post('update', 'CampaignsController::update');
         });
-        $routes->group('cart-rules', function ($routes) {
-            $routes->get('/', 'CartRulesController::index', ['filter' => 'noauth']);
+        $routes->group('cart-rules', ['namespace' => 'App\Controllers\Admin\Marketing'], function ($routes) {
+            $routes->get('/', 'CartRulesController::index');
+            $routes->post('store', 'CartRulesController::store');
+            $routes->get('edit/(:num)', 'CartRulesController::edit/$1');
+            $routes->post('update', 'CartRulesController::update');
+            $routes->post('delete', 'CartRulesController::delete');
+            $routes->post('deactivate', 'CartRulesController::deactivate');
+
+            $routes->post('addCategory', 'CartRulesController::addCategory');
+            $routes->post('updateCategoryInclude', 'CartRulesController::updateCategoryInclude');
+            $routes->post('deleteCategory', 'CartRulesController::deleteCategory');
+            $routes->post('addProduct', 'CartRulesController::addProduct');
+            $routes->post('updateProductInclude', 'CartRulesController::updateProductInclude');
+            $routes->post('deleteProduct', 'CartRulesController::deleteProduct');
+            $routes->post('addGroup', 'CartRulesController::addGroup');
+            $routes->post('updateGroupInclude', 'CartRulesController::updateGroupInclude');
+            $routes->post('deleteGroup', 'CartRulesController::deleteGroup');
         });
     });
     $routes->group('reports', function ($routes) {
