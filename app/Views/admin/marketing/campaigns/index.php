@@ -263,7 +263,6 @@
         </div>
     </div>
 </div>
-
 <!-- Modal Desativar -->
 <div class="modal fade" id="modalDeactivateCampaign" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md">

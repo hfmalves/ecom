@@ -163,6 +163,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         $routes->group('campaigns', function ($routes) {
             $routes->get('/', 'CampaignsController::index', ['filter' => 'noauth']);
             $routes->post('store', 'CampaignsController::store');
+            $routes->get('edit/(:num)', 'CampaignsController::edit/$1');
+            $routes->post('update', 'CampaignsController::update');
         });
         $routes->group('catalog-rules', function ($routes) {
             $routes->get('/', 'PriceRulesCatalogController::index', ['filter' => 'noauth']);
