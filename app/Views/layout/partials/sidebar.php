@@ -61,7 +61,7 @@
                     <ul class="sub-menu" aria-expanded="false">
                         <li><a href="<?= base_url('admin/marketing/coupons') ?>">Cupões de Desconto</a></li>
                         <li><a href="<?= base_url('admin/marketing/campaigns') ?>">Promoções</a></li>
-                        <li><a href="<?= base_url('admin/marketing/catalog-rules') ?>">Regras de Preço do Catálogo</a></li>
+                        <!--<li><a href="<?= base_url('admin/marketing/catalog-rules') ?>">Regras de Preço do Catálogo</a></li>-->
                         <li><a href="<?= base_url('admin/marketing/cart-rules') ?>">Regras de Carrinho</a></li>
                     </ul>
                 </li>
