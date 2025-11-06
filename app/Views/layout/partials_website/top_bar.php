@@ -1,0 +1,44 @@
+<div class="tf-topbar bg-black">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-7 col-lg-8">
+                <div class="topbar-left">
+                    <h6 class="text-up text-white fw-normal text-line-clamp-1">Up to 50% off Lorem ipsum dolor
+                        sit amet, consectetur
+                        adipiscing elit</h6>
+                    <div class="group-btn">
+                        <a href="shop-default.html" class="tf-btn-line style-white letter-space-0">Men</a>
+                        <a href="shop-default.html" class="tf-btn-line style-white letter-space-0">Women</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-5 col-lg-4 d-none d-lg-block">
+                <ul class="topbar-right topbar-option-list">
+                    <li class="h6">
+                        <a href="faq.html" class="text-white link">Help & FAQs</a>
+                    </li>
+                    <li class="br-line"></li>
+                    <li class="h6">
+                        <a href="faq.html" class="text-white link">Factory</a>
+                    </li>
+                    <li class="br-line d-none d-xl-inline-flex"></li>
+                    <li class="tf-currencies d-none d-xl-block">
+                        <select class="tf-dropdown-select style-default color-white type-currencies">
+                            <option selected data-thumbnail="images/country/us.png">USD</option>
+                            <option data-thumbnail="images/country/vie.png">VND</option>
+                        </select>
+                    </li>
+                    <li class="br-line d-none d-xl-inline-flex"></li>
+                    <li class="tf-languages d-none d-xl-block">
+                        <select class="tf-dropdown-select style-default color-white type-languages">
+                            <option>English</option>
+                            <option>العربية</option>
+                            <option>简体中文</option>
+                            <option>اردو</option>
+                        </select>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div><?php

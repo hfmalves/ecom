@@ -5,11 +5,7 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->group('/', ['namespace' => 'App\Controllers\Website'], function ($routes) {
-    $routes->get('/', 'AuthController::login');
-    $routes->get('shop', 'ShopController::index');
-    $routes->get('product/(:segment)', 'ProductController::view/$1');
-});
+
 $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
     $routes->group('auth', ['namespace' => 'App\Controllers\Admin\Auth'], function ($routes) {
         $routes->get('login', 'AuthController::login', ['filter' => 'noauth']);
@@ -23,7 +19,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         $routes->post('reset', 'ForgotPasswordController::attemptReset', ['filter' => 'noauth']);
         $routes->get('logout', 'Auth::logoutController', ['filter' => 'auth']);
     });
-    $routes->get('/', 'Dashboard::index', ['filter' => 'auth']);
     $routes->get('dashboard', 'DashboardController::index', ['filter' => 'auth']);
     $routes->group('catalog', ['namespace' => 'App\Controllers\Admin\Catalog'], function ($routes) {
         $routes->group('products', function ($routes) {
@@ -308,4 +303,9 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->get('/', 'LegalController::index', ['filter' => 'noauth']);
         });
     });
+});
+
+$routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
+    $routes->get('/', 'HomeController::index');
+    $routes->get('produtos', 'ShopController::index');
 });
