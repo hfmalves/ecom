@@ -4,7 +4,7 @@
                             <span class="toolbar-icon">
                                 <i class="icon icon-storefront"></i>
                             </span>
-            <span class="toolbar-label">Shop</span>
+            <span class="toolbar-label">Inicio</span>
         </a>
     </div>
     <div class="toolbar-item">
@@ -12,7 +12,7 @@
                             <span class="toolbar-icon">
                                 <i class="icon icon-magnifying-glass"></i>
                             </span>
-            <span class="toolbar-label">Search</span>
+            <span class="toolbar-label">Pesquisa</span>
         </a>
     </div>
     <div class="toolbar-item">
@@ -20,7 +20,7 @@
                             <span class="toolbar-icon">
                                 <i class="icon icon-user"></i>
                             </span>
-            <span class="toolbar-label">Account</span>
+            <span class="toolbar-label">Conta</span>
         </a>
     </div>
     <div class="toolbar-item">
@@ -38,7 +38,7 @@
                                 <i class="icon icon-shopping-cart-simple"></i>
                                 <span class="toolbar-count">24</span>
                             </span>
-            <span class="toolbar-label">Cart</span>
+            <span class="toolbar-label">Carrinho</span>
         </a>
     </div>
 </div>
