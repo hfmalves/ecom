@@ -3,7 +3,7 @@
 namespace App\Controllers\Website;
 
 use App\Controllers\BaseController;
-use App\Models\Website\SliderModel;
+use App\Models\Website\ModuleSliderModel;
 
 class SliderController extends BaseController
 {
@@ -11,7 +11,7 @@ class SliderController extends BaseController
 
     public function __construct()
     {
-        $this->slider = new SliderModel();
+        $this->slider = new ModuleSliderModel();
     }
 
     public function index()

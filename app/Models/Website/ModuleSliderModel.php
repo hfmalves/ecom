@@ -4,7 +4,7 @@ namespace App\Models\Website;
 
 use CodeIgniter\Model;
 
-class SliderModel extends Model
+class ModuleSliderModel extends Model
 {
     protected $table            = 'website_module_sliders';
     protected $primaryKey       = 'id';
