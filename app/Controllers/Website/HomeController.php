@@ -9,6 +9,9 @@ use App\Models\Website\ModuleSliderModel;
 use App\Models\Website\ModuleIconsModel;
 use App\Models\Website\ModuleCategoryModel;
 use App\Models\Website\ModuleBannerProductsPositionsModel;
+use App\Models\Website\ModuleProductLoopLinkModel;
+use App\Models\Website\ModuleProductLoopCategoryModel;
+use App\Models\Website\ModuleProductLoopCategoryProductsModel;
 
 use App\Models\Admin\Catalog\CategoriesModel;
 use App\Models\Admin\Catalog\ProductsModel;
@@ -38,6 +41,10 @@ class HomeController extends BaseController
 
         $this->categoriesModel   = new CategoriesModel();
         $this->productsModel     = new ProductsModel();
+
+        $this->moduleLoopModel       = new ModuleProductLoopLinkModel();
+        $this->moduleLoopCatModel    = new ModuleProductLoopCategoryModel();
+        $this->moduleLoopProdModel   = new ModuleProductLoopCategoryProductsModel();
     }
     public function index()
     {
@@ -187,10 +194,48 @@ class HomeController extends BaseController
                     PRODUCT LOOP LINK
                 ------------------------------------------ */
                 case 'product_loop_link':
-                    $module['data'] = $this->productsModel
-                        ->limit(12)
+
+                    // Buscar o módulo (deverá haver só 1)
+                    $block = $this->moduleLoopModel
+                        ->where('is_active', 1)
+                        ->first();
+
+                    if (!$block) {
+                        $module['data'] = [];
+                        break;
+                    }
+
+                    // Buscar as categorias do módulo
+                    $categories = $this->moduleLoopCatModel
+                        ->where('module_id', $block['id'])
+                        ->orderBy('sort_order', 'ASC')
                         ->findAll();
+
+                    foreach ($categories as &$cat) {
+
+                        // Buscar produtos dessa categoria interna
+                        $productLinks = $this->moduleLoopProdModel
+                            ->where('module_category_id', $cat['id'])
+                            ->orderBy('sort_order', 'ASC')
+                            ->findAll();
+
+                        // Extrair IDs de produto
+                        $productIds = array_column($productLinks, 'product_id');
+
+                        // Buscar produtos reais
+                        $cat['products'] = !empty($productIds)
+                            ? $this->productsModel
+                                ->whereIn('id', $productIds)
+                                ->findAll()
+                            : [];
+                    }
+
+                    $module['title']    = $block['title'];
+                    $module['subtitle'] = $block['subtitle'];
+                    $module['data']     = $categories;
+
                     break;
+
             }
         }
 
