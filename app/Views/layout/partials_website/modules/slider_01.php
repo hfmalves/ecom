@@ -5,12 +5,22 @@
 
         <div class="swiper-wrapper">
 
-            <?php foreach ($slides as $s): ?>
+            <?php foreach ($data as $s): ?>
+
+                <?php
+                $img = (
+                        !empty($s['image']) &&
+                        is_file(FCPATH . 'assets/website/uploads/slides/' . $s['image'])
+                )
+                        ? base_url('assets/website/uploads/slides/' . $s['image'])
+                        : 'https://placehold.co/1920x1080?text=Sem+Imagem';
+                ?>
+
                 <div class="swiper-slide">
                     <div class="slider-wrap">
 
                         <div class="sld_image">
-                            <img src="<?= esc($s['image']) ?>"
+                            <img src="<?= esc($img) ?>"
                                  alt="<?= esc($s['title']) ?>"
                                  class="lazyload scale-item scale-item-1">
                         </div>
@@ -44,9 +54,7 @@
                     </div>
                 </div>
             <?php endforeach; ?>
-
         </div>
-
-        <div class="sw-dot-default tf-sw-pagination"></div>
     </div>
 </div>
+

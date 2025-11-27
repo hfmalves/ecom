@@ -4,150 +4,200 @@ namespace App\Controllers\Website;
 
 use App\Controllers\BaseController;
 
-// Website
 use App\Models\Website\MenuModel;
 use App\Models\Website\ModuleSliderModel;
 use App\Models\Website\ModuleIconsModel;
 use App\Models\Website\ModuleCategoryModel;
 use App\Models\Website\ModuleBannerProductsPositionsModel;
 
-// Catálogo
 use App\Models\Admin\Catalog\CategoriesModel;
 use App\Models\Admin\Catalog\ProductsModel;
+
+use App\Models\Website\ModuleHomeModel; // novo model
 
 class HomeController extends BaseController
 {
     protected $menuModel;
+    protected $modulesModel;
     protected $sliderModel;
-    protected $moduleIconsModel;
-
-    protected $blockModel;   // website_module_categories
-    protected $bannerModel;  // website_module_banner_products_positions
-
+    protected $iconsModel;
+    protected $categoryBlockModel;
+    protected $bannerModel;
     protected $categoriesModel;
     protected $productsModel;
 
     public function __construct()
     {
-        // Website
-        $this->menuModel        = new MenuModel();
-        $this->sliderModel      = new ModuleSliderModel();
-        $this->moduleIconsModel = new ModuleIconsModel();
+        $this->menuModel         = new MenuModel();
+        $this->modulesModel      = new ModuleHomeModel();
 
-        // Categorias da homepage
-        $this->blockModel       = new ModuleCategoryModel();
+        $this->sliderModel       = new ModuleSliderModel();
+        $this->iconsModel        = new ModuleIconsModel();
+        $this->categoryBlockModel = new ModuleCategoryModel();
+        $this->bannerModel       = new ModuleBannerProductsPositionsModel();
 
-        // Banner LEFT/RIGHT
-        $this->bannerModel      = new ModuleBannerProductsPositionsModel();
-
-        // Catálogo
-        $this->categoriesModel  = new CategoriesModel();
-        $this->productsModel    = new ProductsModel();
+        $this->categoriesModel   = new CategoriesModel();
+        $this->productsModel     = new ProductsModel();
     }
     public function index()
     {
-        /* ============================
-         * MENU
-         * ============================ */
+        // menu (não mexo)
         $items = $this->menuModel
             ->where('is_active', 1)
             ->orderBy('parent_id ASC, sort_order ASC')
             ->findAll();
+
         $tree = [];
         foreach ($items as $item) {
             $tree[$item['parent_id']][] = $item;
         }
-        /* ============================
-         * SLIDES
-         * ============================ */
-        $slides = $this->sliderModel
-            ->orderBy('sort_order ASC')
-            ->findAll();
-        $realPath   = FCPATH . 'assets/website/uploads/slides/';
-        $publicPath = 'assets/website/uploads/slides/';
-        foreach ($slides as &$s) {
-            $imageName = trim($s['image'] ?? '');
-            $s['image'] = ($imageName && is_file($realPath . $imageName))
-                ? base_url($publicPath . $imageName)
-                : 'https://placehold.co/1200x600?text=Sem+Imagem';
 
-            $s['cta_url']  = $s['cta_url']  ?: '#';
-            $s['cta_text'] = $s['cta_text'] ?: 'Ver mais';
-            $s['title']    = $s['title']    ?: 'Sem título';
-        }
-        /* ============================
-         * ICONS
-         * ============================ */
-        $icons = $this->moduleIconsModel
+        // módulos da home
+        $modules = $this->modulesModel
             ->where('is_active', 1)
-            ->orderBy('sort_order ASC')
-            ->findAll();
-        /* ============================
-         * BLOCO ÚNICO (website_module_categories)
-         * ============================ */
-        $block = $this->blockModel->first(); // só tens um bloco
-        // category_ids guardados como JSON
-        $ids = json_decode($block['category_ids'], true) ?: [];
-        // buscar as categorias reais desse bloco
-        $categories = $this->categoriesModel
-            ->whereIn('id', $ids)
-            ->findAll();
-        // completar cada categoria
-        foreach ($categories as &$c) {
-            // total de produtos
-            $c['total_products'] = $this->productsModel
-                ->where('category_id', $c['id'])
-                ->countAllResults();
-            // imagem real
-            if (!empty($c['image'])) {
-                $c['image'] = base_url('uploads/categories/' . $c['image']);
-            } else {
-                $c['image'] = 'https://placehold.co/300x300?text=Sem+Imagem';
-            }
-        }
-        /* ============================
- * BANNER PRODUCTS LEFT/RIGHT
- * ============================ */
-        $bannerBlocks = $this->bannerModel
             ->orderBy('sort_order', 'ASC')
             ->findAll();
 
-// Inicializar
-        $leftBlock  = null;
-        $rightBlock = null;
+        foreach ($modules as &$module) {
 
-        foreach ($bannerBlocks as &$b) {
+            switch ($module['type']) {
 
-            // produtos
-            $productIds = json_decode($b['product_ids'], true) ?? [];
-            $b['products'] = $productIds
-                ? $this->productsModel->whereIn('id', $productIds)->findAll()
-                : [];
+                /* -----------------------------------------
+                    SLIDER
+                ------------------------------------------ */
+                case 'slider_01':
+                    $module['data'] = $this->sliderModel
+                        ->where('is_active', 1)
+                        ->orderBy('sort_order', 'ASC')
+                        ->findAll();
+                    break;
 
-            // imagem
-            $b['banner_image'] = !empty($b['banner_image'])
-                ? base_url('uploads/banners/' . $b['banner_image'])
-                : 'https://placehold.co/800x800?text=Sem+Imagem';
+                /* -----------------------------------------
+                    ICONS
+                ------------------------------------------ */
+                case 'box_icons':
+                    $module['data'] = $this->iconsModel
+                        ->where('is_active', 1)
+                        ->orderBy('sort_order', 'ASC')
+                        ->findAll();
+                    break;
 
-            // pins
-            $b['pins'] = json_decode($b['pins'], true) ?: [];
+                /* -----------------------------------------
+                    CATEGORY LOOP
+                ------------------------------------------ */
+                case 'category_loop_01':
 
-            // separa LEFT e RIGHT
-            if ($b['position'] === 'left') {
-                $leftBlock = $b;
-            }
-            if ($b['position'] === 'right') {
-                $rightBlock = $b;
+                    $block = $this->categoryBlockModel->first();
+                    $module['data'] = [];
+
+                    if ($block) {
+                        $ids = json_decode($block['category_ids'], true) ?? [];
+
+                        if (!empty($ids)) {
+                            $cats = $this->categoriesModel
+                                ->whereIn('id', $ids)
+                                ->findAll();
+
+                            foreach ($cats as &$c) {
+                                $c['total_products'] = $this->productsModel
+                                    ->where('category_id', $c['id'])
+                                    ->countAllResults();
+                            }
+
+                            $module['data'] = $cats;
+                        }
+
+                        $module['title'] = $block['title'];
+                        $module['subtitle'] = $block['subtitle'];
+                    }
+                    break;
+
+                /* -----------------------------------------
+                    BANNERS LEFT
+                ------------------------------------------ */
+                case 'banner_product_left':
+
+                    $block = $this->bannerModel
+                        ->where('position', 'left')
+                        ->first();
+
+                    if ($block) {
+
+                        $productIds = json_decode($block['product_ids'], true) ?? [];
+
+                        if (!empty($productIds)) {
+                            $products = $this->productsModel
+                                ->whereIn('id', $productIds)
+                                ->findAll();
+                        } else {
+                            $products = [];
+                        }
+
+                        $module['data'] = [
+                            'products' => $products,
+                            'pins'     => json_decode($block['pins'], true) ?? [],
+                            'banner'   => $block['banner_image'] ?? null,
+                        ];
+
+                        $module['title']    = $block['title'] ?? '';
+                        $module['subtitle'] = $block['subtitle'] ?? '';
+                    } else {
+                        $module['data'] = [
+                            'products' => [],
+                            'pins'     => [],
+                            'banner'   => null
+                        ];
+                    }
+
+                    break;
+
+
+                /* -----------------------------------------
+                    BANNERS RIGHT
+                ------------------------------------------ */
+                case 'banner_product_right':
+
+                    $block = $this->bannerModel
+                        ->where('position', 'right')
+                        ->first();
+
+                    if ($block) {
+
+                        $productIds = json_decode($block['product_ids'], true) ?? [];
+
+                        $products = !empty($productIds)
+                            ? $this->productsModel->whereIn('id', $productIds)->findAll()
+                            : [];
+
+                        $module['data'] = [
+                            'products' => $products,
+                            'pins'     => json_decode($block['pins'], true) ?? [],
+                            'banner'   => $block['banner_image'],
+                        ];
+
+                        $module['title'] = $block['title'];
+                        $module['subtitle'] = $block['subtitle'];
+                    } else {
+                        $module['data'] = [];
+                    }
+
+                    break;
+
+                /* -----------------------------------------
+                    PRODUCT LOOP LINK
+                ------------------------------------------ */
+                case 'product_loop_link':
+                    $module['data'] = $this->productsModel
+                        ->limit(12)
+                        ->findAll();
+                    break;
             }
         }
+
         return view('website/home/index', [
-            'menu_tree'  => $tree,
-            'slides'     => $slides,
-            'icons'      => $icons,
-            'block'      => $block,
-            'categories' => $categories,
-            'leftBlock'     => $leftBlock,
-            'rightBlock'    => $rightBlock,
+            'menu_tree' => $tree,
+            'modules'   => $modules
         ]);
     }
+
 }

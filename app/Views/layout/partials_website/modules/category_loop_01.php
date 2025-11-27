@@ -1,11 +1,11 @@
 <section class="themesFlat">
     <div class="container">
-
         <div class="sect-title text-center wow fadeInUp">
-            <h1 class="title mb-8"><?= esc($block['title']) ?></h1>
-
-            <?php if (!empty($block['subtitle'])): ?>
-                <p class="s-subtitle h6"><?= esc($block['subtitle']) ?></p>
+            <h1 class="title mb-8">
+                <?= esc($settings['title'] ?? '') ?>
+            </h1>
+            <?php if (!empty($settings['subtitle'])): ?>
+                <p class="s-subtitle h6"><?= esc($settings['subtitle']) ?></p>
             <?php endif; ?>
         </div>
 
@@ -25,16 +25,27 @@
 
             <div class="swiper-wrapper">
 
-                <?php foreach ($categories as $cat): ?>
+                <?php foreach ($data as $cat): ?>
                     <div class="swiper-slide">
                         <a href="<?= base_url('shop/category/' . $cat['id']) ?>"
                            class="widget-collection style-circle hover-img">
 
                             <div class="collection_image img-style">
+
+                                <?php
+                                $img = (
+                                        !empty($cat['image']) &&
+                                        is_file(FCPATH . 'uploads/categories/' . basename($cat['image']))
+                                )
+                                        ? $cat['image']
+                                        : 'https://placehold.co/300x300?text=Sem+Imagem';
+                                ?>
+
                                 <img class="lazyload"
-                                     src="<?= $cat['image'] ?>"
-                                     data-src="<?= $cat['image'] ?>"
+                                     src="<?= esc($img) ?>"
+                                     data-src="<?= esc($img) ?>"
                                      alt="<?= esc($cat['name']) ?>">
+
                             </div>
 
                             <div class="collection_content">
@@ -55,3 +66,4 @@
 
     </div>
 </section>
+

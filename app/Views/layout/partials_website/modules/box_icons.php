@@ -7,7 +7,7 @@
 
             <div class="swiper-wrapper">
 
-                <?php foreach ($icons as $i): ?>
+                <?php foreach ($data as $i): ?>
                     <div class="swiper-slide">
                         <div class="box-icon_V01 wow fadeInLeft">
             <span class="icon">
