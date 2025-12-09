@@ -23,14 +23,12 @@
             </div>
         </div>
         <div id="wrapper">
-
             <?= $this->include('layout/partials_website/top_bar') ?>
             <?= $this->include('layout/partials_website/tf_header') ?>
             <?= $this->include('layout/partials_website/tf_header_fixed') ?>
             <?= $this->renderSection('content') ?>
-            <?= $this->include('layout/partials_website/modules/blog') ?>
             <?= $this->include('layout/partials_website/modules/footer') ?>
-    </div>
+        </div>
         <?= $this->include('layout/partials_website/mobile_menu') ?>
         <?= $this->include('layout/partials_website/toolbar_bottom') ?>
         <?= $this->include('layout/partials_website/modal/quick_view') ?>

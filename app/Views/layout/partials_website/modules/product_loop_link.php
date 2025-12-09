@@ -2,7 +2,6 @@
 $categories = $data ?? [];
 $title = $title ?? 'Shop by Departments';
 ?>
-
 <section class="flat-spacing flat-animate-tab pt-0">
     <div class="container">
 
@@ -80,7 +79,6 @@ $title = $title ?? 'Shop by Departments';
                                                         <span class="tooltip">Add to cart</span>
                                                     </a>
                                                 </li>
-
                                                 <li class="wishlist">
                                                     <a href="javascript:void(0);"
                                                        class="hover-tooltip tooltip-left box-icon">
@@ -88,7 +86,6 @@ $title = $title ?? 'Shop by Departments';
                                                         <span class="tooltip">Add to Wishlist</span>
                                                     </a>
                                                 </li>
-
                                                 <li class="compare">
                                                     <a href="#compare" data-bs-toggle="offcanvas"
                                                        class="hover-tooltip tooltip-left box-icon ">
@@ -96,7 +93,6 @@ $title = $title ?? 'Shop by Departments';
                                                         <span class="tooltip">Compare</span>
                                                     </a>
                                                 </li>
-
                                                 <li>
                                                     <a href="#quickView" data-bs-toggle="modal"
                                                        class="hover-tooltip tooltip-left box-icon">
@@ -106,7 +102,6 @@ $title = $title ?? 'Shop by Departments';
                                                 </li>
                                             </ul>
                                         </div>
-
                                         <div class="card-product_info">
                                             <a href="<?= base_url('product/' . $product['id']) ?>"
                                                class="name-product h4 link">
@@ -122,21 +117,14 @@ $title = $title ?? 'Shop by Departments';
                                                 </span>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
-
                             <?php endforeach; ?>
-
                         </div>
-
                         <div class="sw-dot-default tf-sw-pagination"></div>
                     </div>
-
                 </div>
             <?php endforeach; ?>
-
         </div>
-
     </div>
 </section>

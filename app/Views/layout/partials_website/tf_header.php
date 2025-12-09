@@ -24,7 +24,7 @@
                     </form>
                 </div>
                 <div class="col-xl-4 col-md-4 col-6">
-                    <a href="index-2.html" class="logo-site justify-content-center">
+                    <a href=""<?= base_url(); ?>" class="logo-site justify-content-center">
                         <img src="<?= base_url('assets/website/uploads/logo.svg'); ?>" alt="Logo">
                     </a>
                 </div>

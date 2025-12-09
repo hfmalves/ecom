@@ -1,33 +1,44 @@
+<?php
+// Garantir pelo menos 3 slides se não vier nada do controlador
+if (empty($data)) {
+    $data = [];
+
+    for ($i = 1; $i <= 3; $i++) {
+        $data[] = [
+            'image'     => null,
+            'title'     => "Slide Aleatório $i",
+            'price_old' => '',
+            'price_new' => '',
+            'cta_url'   => '#',
+            'cta_text'  => 'Saber mais'
+        ];
+    }
+}
+?>
+
 <div class="tf-slideshow tf-btn-swiper-main">
     <div dir="ltr" class="swiper tf-swiper sw-slide-show slider_effect_fade"
          data-preview="1.33" data-tablet="1.2" data-auto="true"
          data-delay="3000" data-loop="true" data-center="true" data-space="8">
-
         <div class="swiper-wrapper">
-
             <?php foreach ($data as $s): ?>
-
                 <?php
                 $img = (
-                        !empty($s['image']) &&
-                        is_file(FCPATH . 'assets/website/uploads/slides/' . $s['image'])
+                    !empty($s['image']) &&
+                    is_file(FCPATH . 'assets/website/uploads/slides/' . $s['image'])
                 )
-                        ? base_url('assets/website/uploads/slides/' . $s['image'])
-                        : 'https://placehold.co/1920x1080?text=Sem+Imagem';
+                    ? base_url('assets/website/uploads/slides/' . $s['image'])
+                    : 'https://placehold.co/1920x1080?text=Sem+Imagem';
                 ?>
-
                 <div class="swiper-slide">
                     <div class="slider-wrap">
-
                         <div class="sld_image">
                             <img src="<?= esc($img) ?>"
                                  alt="<?= esc($s['title']) ?>"
                                  class="lazyload scale-item scale-item-1">
                         </div>
-
                         <div class="sld_content type-2">
                             <div class="content-sld_wrap">
-
                                 <h2 class="title_sld type-semibold fade-item fade-item-1">
                                     <a href="<?= esc($s['cta_url']) ?>" class="link">
                                         <?= esc($s['title']) ?>
@@ -47,14 +58,11 @@
                                         <i class="icon icon-arrow-right"></i>
                                     </a>
                                 </div>
-
                             </div>
                         </div>
-
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
 </div>
-

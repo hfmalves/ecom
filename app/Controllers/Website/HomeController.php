@@ -12,6 +12,7 @@ use App\Models\Website\ModuleBannerProductsPositionsModel;
 use App\Models\Website\ModuleProductLoopLinkModel;
 use App\Models\Website\ModuleProductLoopCategoryModel;
 use App\Models\Website\ModuleProductLoopCategoryProductsModel;
+use App\Models\Website\ModuleTestimonialModel;
 
 use App\Models\Admin\Catalog\CategoriesModel;
 use App\Models\Admin\Catalog\ProductsModel;
@@ -45,30 +46,26 @@ class HomeController extends BaseController
         $this->moduleLoopModel       = new ModuleProductLoopLinkModel();
         $this->moduleLoopCatModel    = new ModuleProductLoopCategoryModel();
         $this->moduleLoopProdModel   = new ModuleProductLoopCategoryProductsModel();
+        $this->moduleTestimonialModel  = new ModuleTestimonialModel();
+
     }
     public function index()
     {
-        // menu (não mexo)
         $items = $this->menuModel
             ->where('is_active', 1)
             ->orderBy('parent_id ASC, sort_order ASC')
             ->findAll();
-
         $tree = [];
         foreach ($items as $item) {
             $tree[$item['parent_id']][] = $item;
         }
-
         // módulos da home
         $modules = $this->modulesModel
             ->where('is_active', 1)
             ->orderBy('sort_order', 'ASC')
             ->findAll();
-
         foreach ($modules as &$module) {
-
             switch ($module['type']) {
-
                 /* -----------------------------------------
                     SLIDER
                 ------------------------------------------ */
@@ -78,7 +75,6 @@ class HomeController extends BaseController
                         ->orderBy('sort_order', 'ASC')
                         ->findAll();
                     break;
-
                 /* -----------------------------------------
                     ICONS
                 ------------------------------------------ */
@@ -88,50 +84,38 @@ class HomeController extends BaseController
                         ->orderBy('sort_order', 'ASC')
                         ->findAll();
                     break;
-
                 /* -----------------------------------------
                     CATEGORY LOOP
                 ------------------------------------------ */
                 case 'category_loop_01':
-
                     $block = $this->categoryBlockModel->first();
                     $module['data'] = [];
-
                     if ($block) {
                         $ids = json_decode($block['category_ids'], true) ?? [];
-
                         if (!empty($ids)) {
                             $cats = $this->categoriesModel
                                 ->whereIn('id', $ids)
                                 ->findAll();
-
                             foreach ($cats as &$c) {
                                 $c['total_products'] = $this->productsModel
                                     ->where('category_id', $c['id'])
                                     ->countAllResults();
                             }
-
                             $module['data'] = $cats;
                         }
-
                         $module['title'] = $block['title'];
                         $module['subtitle'] = $block['subtitle'];
                     }
                     break;
-
                 /* -----------------------------------------
                     BANNERS LEFT
                 ------------------------------------------ */
                 case 'banner_product_left':
-
                     $block = $this->bannerModel
                         ->where('position', 'left')
                         ->first();
-
                     if ($block) {
-
                         $productIds = json_decode($block['product_ids'], true) ?? [];
-
                         if (!empty($productIds)) {
                             $products = $this->productsModel
                                 ->whereIn('id', $productIds)
@@ -139,13 +123,11 @@ class HomeController extends BaseController
                         } else {
                             $products = [];
                         }
-
                         $module['data'] = [
                             'products' => $products,
                             'pins'     => json_decode($block['pins'], true) ?? [],
                             'banner'   => $block['banner_image'] ?? null,
                         ];
-
                         $module['title']    = $block['title'] ?? '';
                         $module['subtitle'] = $block['subtitle'] ?? '';
                     } else {
@@ -155,90 +137,93 @@ class HomeController extends BaseController
                             'banner'   => null
                         ];
                     }
-
                     break;
-
-
                 /* -----------------------------------------
                     BANNERS RIGHT
                 ------------------------------------------ */
                 case 'banner_product_right':
-
                     $block = $this->bannerModel
                         ->where('position', 'right')
                         ->first();
-
                     if ($block) {
-
                         $productIds = json_decode($block['product_ids'], true) ?? [];
-
                         $products = !empty($productIds)
                             ? $this->productsModel->whereIn('id', $productIds)->findAll()
                             : [];
-
                         $module['data'] = [
                             'products' => $products,
                             'pins'     => json_decode($block['pins'], true) ?? [],
                             'banner'   => $block['banner_image'],
                         ];
-
                         $module['title'] = $block['title'];
                         $module['subtitle'] = $block['subtitle'];
                     } else {
                         $module['data'] = [];
                     }
-
                     break;
-
                 /* -----------------------------------------
                     PRODUCT LOOP LINK
                 ------------------------------------------ */
                 case 'product_loop_link':
-
-                    // Buscar o módulo (deverá haver só 1)
                     $block = $this->moduleLoopModel
                         ->where('is_active', 1)
                         ->first();
-
                     if (!$block) {
                         $module['data'] = [];
                         break;
                     }
-
-                    // Buscar as categorias do módulo
                     $categories = $this->moduleLoopCatModel
-                        ->where('module_id', $block['id'])
                         ->orderBy('sort_order', 'ASC')
                         ->findAll();
-
                     foreach ($categories as &$cat) {
-
-                        // Buscar produtos dessa categoria interna
                         $productLinks = $this->moduleLoopProdModel
                             ->where('module_category_id', $cat['id'])
                             ->orderBy('sort_order', 'ASC')
                             ->findAll();
-
-                        // Extrair IDs de produto
                         $productIds = array_column($productLinks, 'product_id');
-
-                        // Buscar produtos reais
                         $cat['products'] = !empty($productIds)
-                            ? $this->productsModel
-                                ->whereIn('id', $productIds)
-                                ->findAll()
+                            ? $this->productsModel->whereIn('id', $productIds)->findAll()
                             : [];
                     }
-
                     $module['title']    = $block['title'];
                     $module['subtitle'] = $block['subtitle'];
                     $module['data']     = $categories;
+                    break;
+                /* -----------------------------------------
+                            TESTIMONIAL
+                ------------------------------------------ */
+                case 'testimonial':
+
+                    // Buscar todos os testimonhos ativos e ordenados
+                    $testimonials = $this->moduleTestimonialModel
+                        ->where('is_active', 1)
+                        ->orderBy('sort_order', 'ASC')
+                        ->findAll();
+
+                    if (empty($testimonials)) {
+                        $module['data'] = [];
+                        break;
+                    }
+
+                    // Buscar produtos associados
+                    foreach ($testimonials as &$item) {
+                        $item['product'] = null;
+
+                        if (!empty($item['product_id'])) {
+                            $item['product'] = $this->productsModel
+                                ->where('id', $item['product_id'])
+                                ->first();
+                        }
+                    }
+
+                    $module['title']    = 'Customer Reviews';
+                    $module['subtitle'] = 'Up to 50% off Lorem ipsum dolor sit amet, consectetur adipiscing elit';
+                    $module['data']     = $testimonials;
 
                     break;
 
             }
         }
-
         return view('website/home/index', [
             'menu_tree' => $tree,
             'modules'   => $modules
