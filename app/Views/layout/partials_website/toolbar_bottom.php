@@ -1,6 +1,6 @@
 <div class="tf-toolbar-bottom">
     <div class="toolbar-item">
-        <a href="shop-default.html">
+        <a href="<?= base_url(); ?>">
                             <span class="toolbar-icon">
                                 <i class="icon icon-storefront"></i>
                             </span>
@@ -16,7 +16,7 @@
         </a>
     </div>
     <div class="toolbar-item">
-        <a href="account-page.html">
+        <a href="<?= base_url('account'); ?>">
                             <span class="toolbar-icon">
                                 <i class="icon icon-user"></i>
                             </span>
@@ -24,7 +24,7 @@
         </a>
     </div>
     <div class="toolbar-item">
-        <a href="wishlist.html">
+        <a href="<?= base_url('account/wishlist'); ?>">
                             <span class="toolbar-icon">
                                 <i class="icon icon-heart"></i>
                                 <span class="toolbar-count">7</span>
@@ -33,7 +33,7 @@
         </a>
     </div>
     <div class="toolbar-item">
-        <a href="view-cart.html">
+        <a href="<?= base_url('cart'); ?>">
                             <span class="toolbar-icon">
                                 <i class="icon icon-shopping-cart-simple"></i>
                                 <span class="toolbar-count">24</span>
