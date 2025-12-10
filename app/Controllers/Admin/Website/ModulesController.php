@@ -9,6 +9,6 @@ class ModulesController extends BaseController
 {
     public function index()
     {
-        return view('admin/website/menu/index');
+        return view('admin/website/modules/index');
     }
 }
