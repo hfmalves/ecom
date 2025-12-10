@@ -186,6 +186,12 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('menu', ['filter' => 'noauth'], function ($routes) {
             $routes->get('/', 'MenuController::index');
+            $routes->get('edit/(:num)', 'MenuController::edit/$1');
+            $routes->post('store', 'MenuController::store');
+            $routes->post('update', 'MenuController::update');
+            $routes->post('delete/(:num)', 'MenuController::delete/$1');
+            $routes->post('enable', 'MenuController::enable');
+            $routes->post('reorder', 'MenuController::reorder');
         });
         $routes->group('modules', ['filter' => 'noauth'], function ($routes) {
             $routes->get('/', 'ModulesController::index');

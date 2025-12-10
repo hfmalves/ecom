@@ -12,7 +12,19 @@ class MenuModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields = [
+        'parent_id',
+        'title',
+        'url',
+        'type',
+        'image',
+        'sort_order',
+        'is_active',
+        'block_type',
+        'block_data',
+        'created_at',
+        'updated_at'
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -28,8 +40,20 @@ class MenuModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
+
+    // Validation
+    protected $validationRules = [
+        'title' => 'required|min_length[2]|max_length[200]',
+        'url'   => 'permit_empty|max_length[255]',
+        'type'  => 'required|in_list[0,1]',
+        'block_type' => 'permit_empty|in_list[0,2,3]',
+    ];
+
+    protected $validationMessages = [
+        'title' => [
+            'required' => 'O título é obrigatório.'
+        ]
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

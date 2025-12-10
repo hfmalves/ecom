@@ -3,7 +3,6 @@
 namespace App\Controllers\Admin\Website;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
 
 class FaqController extends BaseController
 {
