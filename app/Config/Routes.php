@@ -180,6 +180,26 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('deleteGroup', 'CartRulesController::deleteGroup');
         });
     });
+    $routes->group('website', ['namespace' => 'App\Controllers\Admin\Website'], function ($routes) {
+        $routes->group('design', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'DesignController::index');
+        });
+        $routes->group('menu', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'MenuController::index');
+        });
+        $routes->group('modules', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'ModulesController::index');
+        });
+        $routes->group('blog', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'BlogController::index');
+        });
+        $routes->group('faq', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'FaqController::index');
+        });
+        $routes->group('pages', ['filter' => 'noauth'], function ($routes) {
+            $routes->get('/', 'PagesController::index');
+        });
+    });
     $routes->group('reports', function ($routes) {
         $routes->group('sales', ['namespace' => 'App\Controllers\Admin\Reports\Sales'], function ($routes) {
             $routes->get('/', 'SalesController::index', ['filter' => 'noauth']);

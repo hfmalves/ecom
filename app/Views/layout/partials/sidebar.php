@@ -65,6 +65,22 @@
                         <li><a href="<?= base_url('admin/marketing/cart-rules') ?>">Regras de Carrinho</a></li>
                     </ul>
                 </li>
+                <!-- Website -->
+                <li class="menu-title">Loja Online</li>
+                <li>
+                    <a href="javascript:void(0);" class="has-arrow waves-effect">
+                        <i class="bx bx bx-store"></i>
+                        <span>Loja</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li><a href="<?= base_url('admin/website/design') ?>">Página Inicial</a></li>
+                        <li><a href="<?= base_url('admin/website/menu') ?>">Menus de Acesso</a></li>
+                        <li><a href="<?= base_url('admin/website/modules') ?>">Módulos</a></li>
+                        <li><a href="<?= base_url('admin/website/blog') ?>">Blog & Artigos</a></li>
+                        <li><a href="<?= base_url('admin/website/faq') ?>">Faq's</a></li>
+                        <li><a href="<?= base_url('admin/website/pages') ?>">Páginas</a></li>
+                    </ul>
+                </li>
                 <!-- Relatórios -->
                 <li class="menu-title">Relatórios</li>
                 <li>
@@ -87,10 +103,8 @@
                     </ul>
                 </li>
 
-
                 <!-- Configurações -->
                 <li class="menu-title">Configurações</li>
-
                 <li>
                     <a href="javascript:void(0);" class="has-arrow waves-effect">
                         <i class="bx bx-cog"></i>
