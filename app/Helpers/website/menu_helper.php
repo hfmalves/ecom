@@ -71,7 +71,8 @@ function buildListMenu(array $tree, int $parentId)
  */
 function buildMegaMenu(array $tree, int $parentId)
 {
-    $placeholder = base_url('assets/img/placeholder.png'); // <-- ADICIONADO
+    // Placeholder universal
+    $placeholder = "https://placehold.co/122x122";
 
     $html = <<<HTML
         <div class="sub-menu mega-menu">
@@ -86,41 +87,55 @@ function buildMegaMenu(array $tree, int $parentId)
 
         switch ($child['block_type']) {
 
-            // -----------------------------------
-            // PRODUTOS RECENTES
-            // -----------------------------------
+            /* =======================================================
+             *  PRODUTOS RECENTES (BLOCO DE PRODUTOS)
+             * ======================================================= */
             case 2:
                 $items = json_decode($child['block_data'], true);
-                $col  .= "<div class=\"mega-products\">";
+
+                // Wrapper correto da coluna
+                $col .= "<ul class=\"list-ver\">";
 
                 foreach ($items as $prod) {
 
-                    $imgPath = FCPATH . ltrim($prod['image'], '/');
-                    $img = file_exists($imgPath) ? $prod['image'] : $placeholder;
+                    // Imagem fallback
+                    $imgRelative = ltrim($prod['image'], '/');
+                    $imgPath     = FCPATH . $imgRelative;
+                    $img         = file_exists($imgPath) ? base_url($imgRelative) : $placeholder;
 
                     $col .= <<<HTML
-                        <div class="mega-product">
-                            <img src="{$img}" alt="">
-                            <div class="cat">{$prod['category']}</div>
-                            <div class="name">{$prod['name']}</div>
-                            <div class="price">{$prod['price']}</div>
-                        </div>
-                    HTML;
+            <li class="prd-recent hover-img">
+              
+
+                <div class="content">
+                    <span class="badge-tag">{$prod['category']}</span>
+
+                    <a href="{$prod['url']}" class="name-prd h6 fw-medium link">
+                        {$prod['name']}
+                    </a>
+
+                    <span class="price-wrap h6 fw-semibold text-black">
+                        {$prod['price']}
+                    </span>
+                </div>
+            </li>
+
+            <li class="br-line"></li>
+        HTML;
                 }
 
-                $col .= "</div>";
+                $col .= "</ul>";
                 break;
 
-            // -----------------------------------
-            // DESTAQUES
-            // -----------------------------------
+
+
             case 3:
                 $items = json_decode($child['block_data'], true);
                 $col  .= "<div class=\"mega-spot\">";
 
                 foreach ($items as $spot) {
 
-                    $img = !empty($spot['image']) ? $spot['image'] : $placeholder; // <-- FALLBACK
+                    $img = !empty($spot['image']) ? $spot['image'] : $placeholder;
 
                     $col .= <<<HTML
                         <div class="spot-item">
@@ -134,11 +149,12 @@ function buildMegaMenu(array $tree, int $parentId)
                 $col .= "</div>";
                 break;
 
-            // -----------------------------------
-            // SUBLISTA NORMAL
-            // -----------------------------------
+            /* =======================================================
+             *  LISTA NORMAL (LINKS DE SUBMENUS)
+             * ======================================================= */
             default:
                 if (isset($tree[$child['id']])) {
+
                     $col .= "<ul class=\"sub-menu_list\">";
 
                     foreach ($tree[$child['id']] as $subItem) {
@@ -150,11 +166,10 @@ function buildMegaMenu(array $tree, int $parentId)
                 }
         }
 
-        $col .= "</div></div>";
+        $col .= "</div></div>"; // fecha coluna e bloco
         $html .= $col;
     }
 
-    $html .= "</div></div></div>";
+    $html .= "</div></div></div>"; // fecha mega wrapper
     return $html;
 }
-
