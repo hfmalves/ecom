@@ -190,6 +190,7 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('store', 'MenuController::store');
             $routes->post('update', 'MenuController::update');
             $routes->post('delete/(:num)', 'MenuController::delete/$1');
+            $routes->post('disable', 'MenuController::disable');
             $routes->post('enable', 'MenuController::enable');
             $routes->post('reorder', 'MenuController::reorder');
         });
