@@ -5,7 +5,7 @@
     <meta name="author" content="flexkit">
     <link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.gstatic.com/">
-    <?= $this->include('partials/shop/head-css') ?>
+    <?= $this->include('layout/partials_website/head-css') ?>
     <!-- Document Title -->
     <title>Norkeme - Produtos de higiene</title>
 </head>
@@ -163,23 +163,23 @@
     </symbol>
 </svg>
 <!-- Mobile Header -->
-<?= $this->include('partials/shop/header_mobile.php') ?>
+<?= $this->include('layout/partials_website//header_mobile.php') ?>
 <!-- /.header-mobile -->
 <!-- Header Type 6 -->
-<?= $this->include('partials/shop/header.php') ?>
+<?= $this->include('layout/partials_website//header.php') ?>
 <main>
     <?= $this->renderSection('content') ?>
 </main>
 <!-- Footer Type 2 -->
-<?= $this->include('partials/shop/footer.php') ?>
+<?= $this->include('layout/partials_website/footer.php') ?>
 <!-- Mobile Fixed Footer -->
-<?= $this->include('partials/shop/footer_mobile.php') ?>
+<?= $this->include('layout/partials_website/footer_mobile.php') ?>
 <!-- /.footer-mobile container position-fixed d-md-none bottom-0 -->
 <!-- Cart Drawer -->
-<?= $this->include('partials/shop/cart_drawer.php') ?>
+<?= $this->include('layout/partials_website/cart_drawer.php') ?>
 <!-- /Cart Drawer -->
 <!-- Newsletter Popup -->
-<?= $this->include('partials/shop/newsletter_popup') ?>
+<?= $this->include('layout/partials_website/newsletter_popup') ?>
 <!-- /.newsletter-popup position-fixed -->
 <!-- Go To Top -->
 <div id="scrollTop" class="visually-hidden end-0"></div>
@@ -200,7 +200,7 @@
         </div>
     </div>
 </div>
-<?= $this->include('partials/shop/vendor-scripts') ?>
+<?= $this->include('layout/partials_website/vendor-scripts') ?>
 <?= $this->renderSection('custom-js') ?>
 </body>
 </html>

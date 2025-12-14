@@ -1,4 +1,37 @@
-<?php $slides = $data['slides'] ?? []; ?>
+<?php
+$slides = $data['slides'] ?? [];
+
+// fallback: 3 placeholders
+if (empty($slides)) {
+    $slides = [
+        [
+            'background_image' => 'https://via.placeholder.com/1863x700?text=Slide+1',
+            'title' => 'Slide de Destaque 1',
+            'description' => 'Descrição exemplo do slide.',
+            'button_text' => 'Ver mais',
+            'type_link' => '',
+            'button_link' => '#',
+        ],
+        [
+            'background_image' => 'https://via.placeholder.com/1863x700?text=Slide+2',
+            'title' => 'Slide de Destaque 2',
+            'description' => 'Descrição exemplo do slide.',
+            'button_text' => 'Descobrir',
+            'type_link' => '',
+            'button_link' => '#',
+        ],
+        [
+            'background_image' => 'https://via.placeholder.com/1863x700?text=Slide+3',
+            'title' => 'Slide de Destaque 3',
+            'description' => 'Descrição exemplo do slide.',
+            'button_text' => 'Comprar agora',
+            'type_link' => '',
+            'button_link' => '#',
+        ],
+    ];
+}
+?>
+
 <?php if (!empty($slides)): ?>
 <section class="swiper-container js-swiper-slider slideshow full-width_padding-20 slideshow-md"
          data-settings='{
