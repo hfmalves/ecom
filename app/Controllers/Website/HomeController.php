@@ -34,20 +34,16 @@ class HomeController extends BaseController
     {
         $this->menuModel         = new MenuModel();
         $this->modulesModel      = new ModuleHomeModel();
-
         $this->sliderModel       = new ModuleSliderModel();
         $this->iconsModel        = new ModuleIconsModel();
         $this->categoryBlockModel = new ModuleCategoryModel();
         $this->bannerModel       = new ModuleBannerProductsPositionsModel();
-
         $this->categoriesModel   = new CategoriesModel();
         $this->productsModel     = new ProductsModel();
-
         $this->moduleLoopModel       = new ModuleProductLoopLinkModel();
         $this->moduleLoopCatModel    = new ModuleProductLoopCategoryModel();
         $this->moduleLoopProdModel   = new ModuleProductLoopCategoryProductsModel();
         $this->moduleTestimonialModel  = new ModuleTestimonialModel();
-
     }
     public function index()
     {
