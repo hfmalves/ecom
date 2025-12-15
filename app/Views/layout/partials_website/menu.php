@@ -1,1 +1,3 @@
-<li class="navigation__item">
+<?php
+helper('website/menu');
+echo website_menu($menu);

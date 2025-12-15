@@ -1,175 +1,84 @@
 <?php
 
-function renderMenuTF(array $tree, $parentId = null)
+function menu_tree(array $items): array
 {
-    if (!isset($tree[$parentId])) {
-        return;
+    $indexed = [];
+    $tree = [];
+
+    foreach ($items as $item) {
+        $item['children'] = [];
+        $indexed[$item['id']] = $item;
     }
-    echo buildMenuHTML($tree, $parentId);
-}
 
-/**
- * Constrói o HTML do menu (normal, lista ou mega)
- */
-function buildMenuHTML(array $tree, $parentId)
-{
-    $html = "<ul class=\"box-nav-menu\">";
-
-    foreach ($tree[$parentId] as $item) {
-        $hasChildren = isset($tree[$item['id']]);
-        $type        = (int)$item['type']; // 0 = normal, 1 = mega, 2 = lista
-        $liClass = "menu-item";
-        if ($item['type'] == 2) {
-            $liClass .= " position-relative";
+    foreach ($indexed as &$item) {
+        if ($item['parent_id'] !== null && isset($indexed[$item['parent_id']])) {
+            $indexed[$item['parent_id']]['children'][] = &$item;
+        } else {
+            $tree[] = &$item;
         }
-        $html .= "<li class=\"{$liClass}\">";
-        $url  = $item['url'] ?: 'javascript:void(0)';
-        $icon = $hasChildren ? "<i class=\"icon icon-caret-down\"></i>" : "";
-        $html .= <<<HTML
-            <a href="{$url}" class="item-link">
-                {$item['title']} {$icon}
-            </a>
-        HTML;
-        if ($hasChildren) {
-            if ($type === 1) {
-                $html .= buildMegaMenu($tree, $item['id']);
-            }
-            elseif ($type === 2) {
-                $html .= "<div class=\"sub-menu\">";
-                $html .= buildListMenu($tree, $item['id']);
-                $html .= "</div>";
-            }
-            else {
-                $html .= "<div class=\"sub-menu\">";
-                $html .= buildMenuHTML($tree, $item['id']);
-                $html .= "</div>";
-            }
-        }
-        $html .= "</li>";
-    }
-    $html .= "</ul>";
-    return $html;
-}
-/**
- * MENU LISTA — igual ao BLOG
- */
-function buildListMenu(array $tree, int $parentId)
-{
-    $html = "<ul class=\"sub-menu_list\">";
-
-    foreach ($tree[$parentId] as $item) {
-        $url = $item['url'] ?: '#';
-        $html .= "<li><a href=\"{$url}\" class=\"sub-menu_link\">{$item['title']}</a></li>";
     }
 
-    $html .= "</ul>";
-    return $html;
+    return $tree;
 }
 
-/**
- * MEGA MENU PROFISSIONAL
- */
-function buildMegaMenu(array $tree, int $parentId)
+function website_menu(array $menu): string
 {
-    // Placeholder universal
-    $placeholder = "https://placehold.co/122x122";
+    ob_start(); ?>
+    <nav class="navigation mx-auto mx-xxl-0">
+        <ul class="navigation__list list-unstyled d-flex">
 
-    $html = <<<HTML
-        <div class="sub-menu mega-menu">
-            <div class="container">
-                <div class="row">
-    HTML;
-
-    foreach ($tree[$parentId] as $child) {
-
-        $col = "<div class=\"col-2\"><div class=\"mega-menu-item\">";
-        $col .= "<h4 class=\"menu-heading\">{$child['title']}</h4>";
-
-        switch ($child['block_type']) {
-
-            /* =======================================================
-             *  PRODUTOS RECENTES (BLOCO DE PRODUTOS)
-             * ======================================================= */
-            case 2:
-                $items = json_decode($child['block_data'], true);
-
-                // Wrapper correto da coluna
-                $col .= "<ul class=\"list-ver\">";
-
-                foreach ($items as $prod) {
-
-                    // Imagem fallback
-                    $imgRelative = ltrim($prod['image'], '/');
-                    $imgPath     = FCPATH . $imgRelative;
-                    $img         = file_exists($imgPath) ? base_url($imgRelative) : $placeholder;
-
-                    $col .= <<<HTML
-            <li class="prd-recent hover-img">
-              
-
-                <div class="content">
-                    <span class="badge-tag">{$prod['category']}</span>
-
-                    <a href="{$prod['url']}" class="name-prd h6 fw-medium link">
-                        {$prod['name']}
+            <?php foreach ($menu as $item): ?>
+                <li class="navigation__item">
+                    <a href="<?= $item['url'] ?: '#' ?>" class="navigation__link">
+                        <?= esc($item['title']) ?>
                     </a>
 
-                    <span class="price-wrap h6 fw-semibold text-black">
-                        {$prod['price']}
-                    </span>
-                </div>
-            </li>
+                    <?php if (empty($item['children'])) continue; ?>
 
-            <li class="br-line"></li>
-        HTML;
-                }
+                    <?php if ((int)$item['type'] === 1): ?>
+                        <!-- MEGA MENU -->
+                        <div class="mega-menu">
+                            <div class="container d-flex">
+                                <?php foreach ($item['children'] as $col): ?>
+                                    <div class="col pe-4">
+                                        <a href="<?= $col['url'] ?: '#' ?>" class="sub-menu__title">
+                                            <?= esc($col['title']) ?>
+                                        </a>
 
-                $col .= "</ul>";
-                break;
-
-
-
-            case 3:
-                $items = json_decode($child['block_data'], true);
-                $col  .= "<div class=\"mega-spot\">";
-
-                foreach ($items as $spot) {
-
-                    $img = !empty($spot['image']) ? $spot['image'] : $placeholder;
-
-                    $col .= <<<HTML
-                        <div class="spot-item">
-                            <img src="{$img}" alt="">
-                            <div class="label">{$spot['label']}</div>
-                            <a class="cta" href="{$spot['url']}">{$spot['cta']}</a>
+                                        <?php if (!empty($col['children'])): ?>
+                                            <ul class="sub-menu__list list-unstyled">
+                                                <?php foreach ($col['children'] as $child): ?>
+                                                    <li class="sub-menu__item">
+                                                        <a href="<?= $child['url'] ?: '#' ?>" class="menu-link menu-link_us-s">
+                                                            <?= esc($child['title']) ?>
+                                                        </a>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                    HTML;
-                }
 
-                $col .= "</div>";
-                break;
+                    <?php elseif ((int)$item['type'] === 2): ?>
+                        <!-- MENU LISTA NORMAL -->
+                        <ul class="default-menu list-unstyled">
+                            <?php foreach ($item['children'] as $child): ?>
+                                <li class="sub-menu__item">
+                                    <a href="<?= $child['url'] ?: '#' ?>" class="menu-link menu-link_us-s">
+                                        <?= esc($child['title']) ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
 
-            /* =======================================================
-             *  LISTA NORMAL (LINKS DE SUBMENUS)
-             * ======================================================= */
-            default:
-                if (isset($tree[$child['id']])) {
+                </li>
+            <?php endforeach; ?>
 
-                    $col .= "<ul class=\"sub-menu_list\">";
-
-                    foreach ($tree[$child['id']] as $subItem) {
-                        $surl = $subItem['url'] ?: '#';
-                        $col .= "<li><a href=\"{$surl}\" class=\"sub-menu_link\">{$subItem['title']}</a></li>";
-                    }
-
-                    $col .= "</ul>";
-                }
-        }
-
-        $col .= "</div></div>"; // fecha coluna e bloco
-        $html .= $col;
-    }
-
-    $html .= "</div></div></div>"; // fecha mega wrapper
-    return $html;
+        </ul>
+    </nav>
+    <?php
+    return ob_get_clean();
 }

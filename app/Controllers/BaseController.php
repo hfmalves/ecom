@@ -57,5 +57,11 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
 
        $this->session = service('session');
+
+        $menuModel = new \App\Models\Website\MenuModel();
+        $menu = $menuModel->getMenuTree();
+
+        service('renderer')->setVar('menu', $menu);
+
     }
 }

@@ -67,4 +67,15 @@ class MenuModel extends Model
     protected $afterFind      = [];
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
+    public function getMenuTree(): array
+    {
+        helper('website/menu');
+
+        $rows = $this->where('is_active', 1)
+            ->orderBy('parent_id', 'ASC')
+            ->orderBy('sort_order', 'ASC')
+            ->findAll();
+
+        return \menu_tree($rows);
+    }
 }
