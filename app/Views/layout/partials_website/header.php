@@ -1,4 +1,3 @@
-<!-- Header Type 5 -->
 <header id="header" class="header header_sticky header-fullwidth">
     <div class="header-desk header-desk_type_5">
         <div class="logo">
@@ -6,25 +5,17 @@
                 <img src="<?= base_url('assets/website/images/logo.png'); ?>" alt="Uomo" class="logo__image d-block">
             </a>
         </div>
-        <form action="https://uomo-html.flexkitux.com/Demo9/" method="GET" class="header-search search-field d-none d-xxl-flex">
+        <form action="<?= base_url('search'); ?>" method="GET"
+              class="header-search search-field d-none d-xxl-flex"
+              x-data="searchBox">
             <button class="btn header-search__btn" type="submit">
-                <svg class="d-block" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#icon_search" /></svg>
+                <svg width="20" height="20"><use href="#icon_search"></use></svg>
             </button>
-            <input class="header-search__input w-100" type="text" name="search-keyword" placeholder="Pesquisar Artigos...">
+            <input class="header-search__input w-100"
+                   type="text"
+                   name="search-keyword"
+                   placeholder="Search products...">
             <div class="hover-container position-relative">
-                <div class="js-hover__open">
-                    <input class="header-search__category search-field__actor border-0 bg-white w-100" type="text" name="search-category" placeholder="Todos" readonly>
-                </div>
-                <div class="header-search__category-list js-hidden-content mt-2">
-                    <?php foreach (categorize($items) as $category => $rows): ?>
-                        <ul class="search-suggestion list-unstyled">
-                            <li class="search-suggestion__item js-search-select">
-                                <?= esc($category) ?>
-                            </li>
-                        </ul>
-                    <?php endforeach; ?>
-
-                </div>
             </div>
         </form>
         <?= view('layout/partials_website/menu') ?>
@@ -46,7 +37,6 @@
                     <rect width="25" height="2"/><rect y="8" width="20" height="2"/><rect y="16" width="25" height="2"/>
                 </svg>
             </a>
-        </div><!-- /.header__tools -->
-    </div><!-- /.header-desk header-desk_type_1 -->
+        </div>
+    </div>
 </header>
-<!-- End Header Type 5 -->
