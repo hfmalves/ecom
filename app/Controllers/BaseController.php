@@ -37,7 +37,8 @@ abstract class BaseController extends Controller
      */
     protected $helpers = [
         'email',
-        'company'
+        'company',
+        'category'
     ];
 
     /**
@@ -53,14 +54,12 @@ abstract class BaseController extends Controller
     {
         // Do Not Edit This Line
         parent::initController($request, $response, $logger);
-
-        // Preload any models, libraries, etc, here.
-
-       $this->session = service('session');
-
+        $this->session = service('session');
         $menuModel = new \App\Models\Website\MenuModel();
         $menu = $menuModel->getMenuTree();
-
+        $categoryModel = new \App\Models\Admin\Catalog\CategoriesModel();
+        $categories = $categoryModel->findAll();
+        service('renderer')->setVar('items', $categories);
         service('renderer')->setVar('menu', $menu);
 
     }

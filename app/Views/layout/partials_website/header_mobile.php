@@ -8,7 +8,7 @@
 
         <div class="logo">
             <a href="index.html">
-                <img src="../images/logo.png" alt="Uomo" class="logo__image d-block">
+                <img src="<?= base_url('assets/website/images/logo.png'); ?>" alt="Uomo" class="logo__image d-block">
             </a>
         </div><!-- /.logo -->
 

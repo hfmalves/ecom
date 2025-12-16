@@ -1,5 +1,4 @@
 <?php
-
 function menu_tree(array $items): array
 {
     $indexed = [];
@@ -20,7 +19,6 @@ function menu_tree(array $items): array
 
     return $tree;
 }
-
 function website_menu(array $menu): string
 {
     ob_start(); ?>
