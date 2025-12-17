@@ -25,6 +25,14 @@ use App\Models\Website\BlogPostModel;
 use App\Models\Website\BlockHomeDealsDayModel;
 use App\Models\Website\BlockHomeDealsDayItemModel;
 
+use App\Models\Website\BlockServicePromotionModel;
+use App\Models\Website\BlockServicePromotionItemModel;
+
+use App\Models\Website\FaqModel;
+use App\Models\Website\FaqItemModel;
+
+
+
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsImagesModel;
@@ -69,6 +77,12 @@ class HomeController extends BaseController
                     break;
                 case 'blog_grid':
                     $block = $this->resolveBlogGrid($block);
+                    break;
+                case 'service_promotion':
+                    $block = $this->resolveServicePromotion($block);
+                    break;
+                case 'faq':
+                    $block = $this->resolveFaq($block);
                     break;
             }
         }
@@ -239,6 +253,54 @@ class HomeController extends BaseController
 
         $block['blockConfig'] = $config;
         $block['items']      = $items;
+
+        return $block;
+    }
+    private function resolveServicePromotion(array $block): array
+    {
+        $configModel = new BlockServicePromotionModel();
+        $itemModel   = new BlockServicePromotionItemModel();
+
+        $config = $configModel
+            ->where('block_id', $block['id'])
+            ->first();
+
+        $items = $itemModel
+            ->where('block_id', $block['id'])
+            ->orderBy('position', 'ASC')
+            ->findAll();
+
+        $block['blockConfig'] = $config;
+        $block['items']       = $items;
+
+        return $block;
+    }
+
+    private function resolveFaq(array $block): array
+    {
+        $faqModel     = new FaqModel();
+        $faqItemModel = new FaqItemModel();
+
+        $faq = $faqModel
+            ->where('context_type', 'home')
+            ->where('context_id', $block['home_id'])
+            ->where('is_active', 1)
+            ->first();
+
+        if (!$faq) {
+            $block['faq']   = null;
+            $block['items'] = [];
+            return $block;
+        }
+
+        $items = $faqItemModel
+            ->where('faq_id', $faq['id'])
+            ->where('is_active', 1)
+            ->orderBy('position', 'ASC')
+            ->findAll();
+
+        $block['faq']   = $faq;
+        $block['items'] = $items;
 
         return $block;
     }
