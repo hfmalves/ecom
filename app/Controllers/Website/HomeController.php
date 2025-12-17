@@ -14,6 +14,14 @@ use App\Models\Website\BlockGridBannerItemModel;
 use App\Models\Website\BlockProductsGridModel;
 use App\Models\Website\BlockProductsGridItemModel;
 
+use App\Models\Website\BlockBlogGridModel;
+use App\Models\Website\BlockBlogGridItemModel;
+
+use App\Models\Website\BlogCategoryModel;
+use App\Models\Website\BlogCommentModel;
+use App\Models\Website\BlogPostCategoryModel;
+use App\Models\Website\BlogPostModel;
+
 use App\Models\Website\BlockHomeDealsDayModel;
 use App\Models\Website\BlockHomeDealsDayItemModel;
 
@@ -45,26 +53,22 @@ class HomeController extends BaseController
             ->where('is_active', 1)
             ->orderBy('position', 'ASC')
             ->findAll();
-        /**
-         * RESOLVER BLOCOS (UM A UM)
-         */
         foreach ($blocks as &$block) {
-
             switch ($block['block_type']) {
-
                 case 'hero':
                     $block = $this->resolveHero($block);
                     break;
-
                 case 'grid_banner':
                     $block = $this->resolveGridBanner($block);
                     break;
-
                 case 'products_grid':
                     $block = $this->resolveProductsGrid($block);
                     break;
                 case 'home_deals_day':
                     $block = $this->resolveHomeDealsDay($block);
+                    break;
+                case 'blog_grid':
+                    $block = $this->resolveBlogGrid($block);
                     break;
             }
         }
@@ -168,54 +172,77 @@ class HomeController extends BaseController
     }
     private function resolveHomeDealsDay(array $block): array
     {
-        $configModel  = new BlockHomeDealsDayModel();
-        $itemModel    = new BlockHomeDealsDayItemModel();
+        $configModel=new BlockHomeDealsDayModel();
+        $itemModel=new BlockHomeDealsDayItemModel();
+        $productModel=new ProductsModel();
+        $variantModel=new ProductsVariantsModel();
+        $imageModel=new ProductsImagesModel();
+        $config=$configModel->where('block_id',$block['id'])->first();
+        $items=$itemModel->where('block_id',$block['id'])->where('is_active',1)->orderBy('position','ASC')->findAll();
+        $products=[];
+        foreach($items as $item){
+            $product=null;
+            $variant=null;
+            if(!empty($item['product_id'])){
+                $product=$productModel->find($item['product_id']);
+            }
+            if(!$product&&!empty($item['product_variant_id'])){
+                $variant=$variantModel->find($item['product_variant_id']);
+                if($variant){
+                    $product=$productModel->find($variant['product_id']);
+                }
+            }
+            if(!$product){
+                continue;
+            }
+            if($variant){
+                $product['variation']=$variant;
+            }
+            if(!empty($variant['image'])){
+                $product['images']=[['path'=>$variant['image']]];
+            }else{
+                $product['images']=$imageModel->where('owner_id',$product['id'])->orderBy('position','ASC')->findAll();
+            }
+            $product['in_wishlist']=false;
+            $products[]=$product;
+        }
+        $block['blockConfig']=$config;
+        $block['products']=$products;
+        return $block;
+    }
+    private function resolveBlogGrid(array $block): array
+    {
+        $gridModel = new BlockBlogGridModel();
+        $itemModel = new BlockBlogGridItemModel();
+        $postModel = new BlogPostModel();
 
-        $productModel = new ProductsModel();
-        $variantModel = new ProductsVariantsModel();
-        $imageModel   = new ProductsImagesModel();
-
-        // config do bloco
-        $config = $configModel
+        $config = $gridModel
             ->where('block_id', $block['id'])
             ->first();
 
-        // items definidos no bloco
         $items = $itemModel
             ->where('block_id', $block['id'])
+            ->where('is_active', 1)
             ->orderBy('position', 'ASC')
+            ->limit((int)($config['items_limit'] ?? 3))
             ->findAll();
 
-        $products = [];
-
-        foreach ($items as $item) {
-
-            $product = $productModel->find($item['product_id']);
-            if (!$product) {
-                continue;
+        foreach ($items as &$item) {
+            if (!empty($item['post_id'])) {
+                $post = $postModel->find($item['post_id']);
+                if ($post && !empty($post['featured_image'])) {
+                    $item['image'] = $post['featured_image'];
+                }
             }
-
-            // variante (opcional)
-            if (!empty($item['product_variant_id'])) {
-                $product['variation'] = $variantModel->find($item['product_variant_id']);
-            }
-
-            // imagens
-            $product['images'] = $imageModel
-                ->where('owner_id', $product['id'])
-                ->orderBy('position', 'ASC')
-                ->findAll();
-
-            // estado resolvido AQUI (MVP)
-            $product['in_wishlist'] = false;
-
-            $products[] = $product;
         }
+        unset($item);
 
         $block['blockConfig'] = $config;
-        $block['products']    = $products;
+        $block['items']      = $items;
 
         return $block;
     }
+
+
 
 }

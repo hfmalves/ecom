@@ -3,6 +3,7 @@ $slides = $block['data']['slides'] ?? [];
 if (!$slides) return;
 ?>
 
+<?php if (!empty($slides)): ?>
 <section class="swiper-container js-swiper-slider slideshow full-width_padding-20 slideshow-md"
          data-settings='{
         "autoplay": {
@@ -53,3 +54,4 @@ if (!$slides) return;
     </div>
     <div class="slideshow-pagination position-left-center"></div>
 </section>
+    <?php endif; ?>
