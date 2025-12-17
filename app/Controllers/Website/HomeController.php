@@ -14,6 +14,9 @@ use App\Models\Website\BlockGridBannerItemModel;
 use App\Models\Website\BlockProductsGridModel;
 use App\Models\Website\BlockProductsGridItemModel;
 
+use App\Models\Website\BlockHomeDealsDayModel;
+use App\Models\Website\BlockHomeDealsDayItemModel;
+
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsImagesModel;
@@ -59,6 +62,9 @@ class HomeController extends BaseController
 
                 case 'products_grid':
                     $block = $this->resolveProductsGrid($block);
+                    break;
+                case 'home_deals_day':
+                    $block = $this->resolveHomeDealsDay($block);
                     break;
             }
         }
@@ -159,6 +165,57 @@ class HomeController extends BaseController
             ->findAll();
 
         return $product;
+    }
+    private function resolveHomeDealsDay(array $block): array
+    {
+        $configModel  = new BlockHomeDealsDayModel();
+        $itemModel    = new BlockHomeDealsDayItemModel();
+
+        $productModel = new ProductsModel();
+        $variantModel = new ProductsVariantsModel();
+        $imageModel   = new ProductsImagesModel();
+
+        // config do bloco
+        $config = $configModel
+            ->where('block_id', $block['id'])
+            ->first();
+
+        // items definidos no bloco
+        $items = $itemModel
+            ->where('block_id', $block['id'])
+            ->orderBy('position', 'ASC')
+            ->findAll();
+
+        $products = [];
+
+        foreach ($items as $item) {
+
+            $product = $productModel->find($item['product_id']);
+            if (!$product) {
+                continue;
+            }
+
+            // variante (opcional)
+            if (!empty($item['product_variant_id'])) {
+                $product['variation'] = $variantModel->find($item['product_variant_id']);
+            }
+
+            // imagens
+            $product['images'] = $imageModel
+                ->where('owner_id', $product['id'])
+                ->orderBy('position', 'ASC')
+                ->findAll();
+
+            // estado resolvido AQUI (MVP)
+            $product['in_wishlist'] = false;
+
+            $products[] = $product;
+        }
+
+        $block['blockConfig'] = $config;
+        $block['products']    = $products;
+
+        return $block;
     }
 
 }
