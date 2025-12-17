@@ -1,4 +1,5 @@
 <div class="mb-2 mb-xl-5 pt-1 pb-2"></div>
+<!-- asd -->
 <?php $products = $products_home_deals_day ?? []; ?>
 <section class="products-carousel container">
     <h2 class="section-title fw-normal text-center mb-3 pb-xl-3 mb-xl-3"><?= $data['title'] ?></h2>

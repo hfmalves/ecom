@@ -2,21 +2,20 @@
 <footer id="footer" class="footer footer_type_2 bordered">
     <div class="footer-top container">
         <div class="block-newsletter">
-            <h3 class="block__title">DON'T MISS THE CHANGE TO GET 40% OFF</h3>
-            <p>Get the latest products and news update daily in fastest.</p>
-            <form action="https://uomo-html.flexkitux.com/Demo9/index.html" class="block-newsletter__form">
-                <input class="form-control" type="email" name="email" placeholder="Your email address">
-                <button class="btn btn-secondary fw-medium" type="submit">JOIN</button>
+            <h3 class="block__title">ASSINE NOSSA NEWSLETTER E APROVEITE</h3>
+            <p>Receba as últimas novidades, produtos exclusivos e atualizações diárias de forma direta!</p>
+            <form action="<?= base_url(); ?>" class="block-newsletter__form">
+                <input class="form-control" type="email" name="email" placeholder="Endereço de email">
+                <button class="btn btn-secondary fw-medium" type="submit">Subsesrever</button>
             </form>
         </div>
-    </div><!-- /.footer-top container -->
-
+    </div>
     <div class="footer-middle container">
         <div class="row row-cols-lg-5 row-cols-2">
             <div class="footer-column footer-store-info col-12 mb-4 mb-lg-0">
                 <div class="logo">
-                    <a href="index.html">
-                        <img src="../images/logo-dark-blue.png" alt="Uomo" class="logo__image d-block">
+                    <a href="<?= base_url(); ?>">
+                        <img src="<?= base_url('assets/website/images/logo.png'); ?>" alt="Uomo" class="logo__image d-block">
                     </a>
                 </div><!-- /.logo -->
                 <p class="footer-address">1418 River Drive, Suite 35 Cottonhall, CA 9622 United States</p>

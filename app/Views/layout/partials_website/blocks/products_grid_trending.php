@@ -1,4 +1,5 @@
 <div class="mb-2 mb-xl-5 pt-1 pb-2"></div>
+<!-- asd -->
 <?php $products = $products_grid_trending ?? []; ?>
 <section class="products-grid container">
     <h2 class="section-title text-uppercase text-center mb-1 mb-md-3 pb-xl-2 mb-xl-4">

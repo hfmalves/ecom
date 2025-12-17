@@ -5,24 +5,21 @@
             <svg class="nav-icon" width="25" height="18" viewBox="0 0 25 18" xmlns="http://www.w3.org/2000/svg"><use href="#icon_nav" /></svg>
             <span class="btn-close-lg position-absolute top-0 start-0 w-100"></span>
         </a>
-
         <div class="logo">
-            <a href="index.html">
+            <a href="<?= base_url(); ?>">
                 <img src="<?= base_url('assets/website/images/logo.png'); ?>" alt="Uomo" class="logo__image d-block">
             </a>
-        </div><!-- /.logo -->
-
+        </div>
         <a href="#" class="header-tools__item header-tools__cart js-open-aside" data-aside="cartDrawer">
             <svg class="d-block" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#icon_cart" /></svg>
             <span class="cart-amount d-block position-absolute js-cart-items-count">3</span>
         </a>
-    </div><!-- /.container -->
-
+    </div>
     <nav class="header-mobile__navigation navigation d-flex flex-column w-100 position-absolute top-100 bg-body overflow-auto">
         <div class="container">
-            <form action="https://uomo-html.flexkitux.com/Demo9/search.html" method="GET" class="search-field position-relative mt-4 mb-3">
+            <form action="<?= base_url('search'); ?>" method="GET" class="search-field position-relative mt-4 mb-3">
                 <div class="position-relative">
-                    <input class="search-field__input w-100 border rounded-1" type="text" name="search-keyword" placeholder="Search products">
+                    <input class="search-field__input w-100 border rounded-1" type="text" name="search-keyword" placeholder="Pesquisar">
                     <button class="btn-icon search-popup__submit pb-0 me-2" type="submit">
                         <svg class="d-block" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#icon_search" /></svg>
                     </button>

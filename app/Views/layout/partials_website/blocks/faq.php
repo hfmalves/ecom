@@ -1,4 +1,5 @@
 <section class="container py-5  mw-930 lh-30">
+    <!-- model criados ->
     <h2 class="section-title text-uppercase fw-bold mb-5"><?= esc($data['section_title']) ?></h2>
     <?php foreach ($data['categories'] as $catIndex => $category): ?>
         <h4 class="mb-3"><?= esc($category['category']) ?></h4>

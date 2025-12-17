@@ -1,6 +1,5 @@
 <section class="blog-carousel container">
     <h2 class="section-title fw-normal text-center mb-3 pb-xl-3 mb-xl-3">Our Blog</h2>
-
     <div class="position-relative">
         <div class="swiper-container js-swiper-slider"
              data-settings='{
@@ -79,8 +78,6 @@
                 </div>
             </div><!-- /.swiper-wrapper -->
         </div><!-- /.swiper-container js-swiper-slider -->
-
         <div class="blog-pagination type2 mt-4 d-flex align-items-center justify-content-center"></div>
-        <!-- /.products-pagination -->
-    </div><!-- /.position-relative -->
+    </div>
 </section>

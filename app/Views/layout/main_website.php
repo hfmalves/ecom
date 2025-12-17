@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com/">
     <?= $this->include('layout/partials_website/head-css') ?>
     <!-- Document Title -->
-    <title>Norkeme - Produtos de higiene</title>
+    <title>sandbox</title>
 </head>
 <body>
 <svg class="d-none">
