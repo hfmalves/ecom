@@ -5,7 +5,7 @@ if (empty($items)) {
     return;
 }
 ?>
-
+<div class="mb-2 mb-xl-5 pt-1 pb-2"></div>
 <section class="grid-banner container mb-3 mt-3" id="section-grid-banner">
     <div class="row">
 

@@ -1,8 +1,8 @@
 <div class="mb-2 mb-xl-5 pt-1 pb-2"></div>
-
 <?php
-$products = $products ?? [];
-$title    = $blockConfig['title'] ?? '';
+$products    = $block['products']    ?? [];
+$blockConfig = $block['blockConfig'] ?? [];
+$title       = $blockConfig['title'] ?? '';
 ?>
 
 <section class="products-grid container">
@@ -24,27 +24,30 @@ $title    = $blockConfig['title'] ?? '';
 
                         <div class="pc__img-wrapper">
                             <a href="<?= base_url('product/' . $product['slug']) ?>">
+
                                 <?php if (!empty($product['images'])): ?>
                                     <?php foreach ($product['images'] as $img): ?>
                                         <img
                                                 loading="lazy"
-                                                src="<?= base_url('uploads/product_images/' . $img['image_path']) ?>"
+                                                src="<?= base_url('uploads/product_images/' . esc($img['path'])) ?>"
                                                 alt="<?= esc($product['name']) ?>"
                                                 width="330"
                                                 height="400"
                                                 class="pc__img mb-2"
+                                                onerror="this.onerror=null;this.src='https://placehold.co/330x400';"
                                         />
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <img
                                             loading="lazy"
-                                            src="<?= base_url('uploads/no-picture-available.jpg') ?>"
+                                            src="https://placehold.co/330x400"
                                             alt="Imagem não disponível"
                                             width="330"
                                             height="400"
                                             class="pc__img mb-2"
                                     />
                                 <?php endif; ?>
+
                             </a>
 
                             <form method="post" class="addtocart-form">
@@ -74,7 +77,9 @@ $title    = $blockConfig['title'] ?? '';
                         </div>
 
                         <div class="pc__info position-relative">
-                            <p class="pc__category"><?= esc($product['category']['name'] ?? '') ?></p>
+                            <p class="pc__category">
+                                <?= esc($product['category']['name'] ?? '') ?>
+                            </p>
 
                             <h6 class="pc__title">
                                 <a href="<?= base_url('product/' . $product['slug']) ?>">
@@ -83,33 +88,22 @@ $title    = $blockConfig['title'] ?? '';
                             </h6>
 
                             <div class="product-card__price d-flex">
-                                <?php if (!empty($product['price_discount'])): ?>
-                                    <span class="money price price-old"><?= esc($product['price']) ?> €</span>
-                                    <span class="money price price-sale"><?= esc($product['price_discount']) ?> €</span>
+                                <?php if (!empty($product['special_price'])): ?>
+                                    <span class="money price price-old"><?= esc($product['base_price_tax']) ?> €</span>
+                                    <span class="money price price-sale"><?= esc($product['special_price']) ?> €</span>
                                 <?php else: ?>
-                                    <span class="money price"><?= esc($product['price']) ?> €</span>
+                                    <span class="money price"><?= esc($product['base_price_tax']) ?> €</span>
                                 <?php endif; ?>
                             </div>
 
-                            <?php if (isInWishlist($product['id'], $variationId)): ?>
-                                <button
-                                        type="button"
-                                        class="btn btn-round-sm btn-hover-red d-block border-0 js-remove-wishlist"
-                                        data-product-id="<?= $product['id'] ?>"
-                                        data-variation-id="<?= esc($variationId) ?>"
-                                >
-                                    <svg width="14" height="14"><use href="#icon_close"></use></svg>
-                                </button>
-                            <?php else: ?>
-                                <button
-                                        type="button"
-                                        class="btn btn-round-sm btn-hover-red d-block border-0 js-add-wishlist"
-                                        data-product-id="<?= $product['id'] ?>"
-                                        data-variation-id="<?= esc($variationId) ?>"
-                                >
-                                    <svg width="14" height="14"><use href="#icon_heart"></use></svg>
-                                </button>
-                            <?php endif; ?>
+                            <button
+                                    type="button"
+                                    class="btn btn-round-sm btn-hover-red d-block border-0 js-add-wishlist"
+                                    data-product-id="<?= $product['id'] ?>"
+                                    data-variation-id="<?= esc($variationId) ?>"
+                            >
+                                <svg width="14" height="14"><use href="#icon_heart"></use></svg>
+                            </button>
                         </div>
 
                     </div>
@@ -120,5 +114,4 @@ $title    = $blockConfig['title'] ?? '';
     <?php else: ?>
         <p class="text-muted text-center">Nenhum produto disponível neste momento.</p>
     <?php endif; ?>
-
 </section>
