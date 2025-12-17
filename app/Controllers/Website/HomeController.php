@@ -31,6 +31,9 @@ use App\Models\Website\BlockServicePromotionItemModel;
 use App\Models\Website\FaqModel;
 use App\Models\Website\FaqItemModel;
 
+use App\Models\Website\BlockTopCategoryFilterModel;
+use App\Models\Website\BlockTopCategoryFilterTabItemModel;
+use App\Models\Website\BlockTopCategoryFilterTabModel;
 
 
 use App\Models\Admin\Catalog\ProductsModel;
@@ -83,6 +86,9 @@ class HomeController extends BaseController
                     break;
                 case 'faq':
                     $block = $this->resolveFaq($block);
+                    break;
+                case 'top_category_filter':
+                    $block = $this->resolveTopCategoryFilter($block);
                     break;
             }
         }
@@ -304,6 +310,88 @@ class HomeController extends BaseController
 
         return $block;
     }
+    private function resolveTopCategoryFilter(array $block): array
+    {
+        $configModel  = new BlockTopCategoryFilterModel();
+        $tabModel     = new BlockTopCategoryFilterTabModel();
+        $itemModel    = new BlockTopCategoryFilterTabItemModel();
+        $productModel = new ProductsModel();
+        $variantModel = new ProductsVariantsModel();
+        $imageModel   = new ProductsImagesModel();
+
+        // 1. CONFIG
+        $block['blockConfig'] = $configModel
+            ->where('block_id', $block['id'])
+            ->first();
+
+        // 2. TABS
+        $tabs = $tabModel
+            ->where('block_id', $block['id'])
+            ->where('is_active', 1)
+            ->orderBy('position', 'ASC')
+            ->findAll();
+
+        foreach ($tabs as &$tab) {
+
+            // 3. ITEMS DA TAB (items_limit VEM DA TAB)
+            $items = $itemModel
+                ->where('tab_id', $tab['id'])
+                ->where('is_active', 1)
+                ->orderBy('position', 'ASC')
+                ->limit((int) $tab['items_limit'])
+                ->findAll();
+
+            foreach ($items as &$item) {
+
+                $product = null;
+                $variant = null;
+
+                if (!empty($item['product_variant_id'])) {
+
+                    $variant = $variantModel->find($item['product_variant_id']);
+
+                    if ($variant) {
+                        $product = $productModel->find($variant['product_id']);
+                    }
+
+                } elseif (!empty($item['product_id'])) {
+
+                    $product = $productModel->find($item['product_id']);
+                }
+
+                if (!$product) {
+                    continue;
+                }
+
+                // IMAGEM
+                if ($variant && !empty($variant['image'])) {
+
+                    $product['images'] = [
+                        ['path' => $variant['image']]
+                    ];
+
+                } else {
+
+                    $product['images'] = $imageModel
+                        ->where('owner_id', $product['id'])
+                        ->orderBy('position', 'ASC')
+                        ->findAll();
+                }
+
+                $item['product']  = $product;
+                $item['variant']  = $variant;
+            }
+
+
+            $tab['items'] = array_values(array_filter($items));
+        }
+
+        $block['tabs'] = $tabs;
+        return $block;
+    }
+
+
+
 
 
 
