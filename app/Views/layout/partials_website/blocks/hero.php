@@ -1,38 +1,8 @@
 <?php
-$slides = $data['slides'] ?? [];
-
-// fallback: 3 placeholders
-if (empty($slides)) {
-    $slides = [
-        [
-            'background_image' => 'https://via.placeholder.com/1863x700?text=Slide+1',
-            'title' => 'Slide de Destaque 1',
-            'description' => 'Descrição exemplo do slide.',
-            'button_text' => 'Ver mais',
-            'type_link' => '',
-            'button_link' => '#',
-        ],
-        [
-            'background_image' => 'https://via.placeholder.com/1863x700?text=Slide+2',
-            'title' => 'Slide de Destaque 2',
-            'description' => 'Descrição exemplo do slide.',
-            'button_text' => 'Descobrir',
-            'type_link' => '',
-            'button_link' => '#',
-        ],
-        [
-            'background_image' => 'https://via.placeholder.com/1863x700?text=Slide+3',
-            'title' => 'Slide de Destaque 3',
-            'description' => 'Descrição exemplo do slide.',
-            'button_text' => 'Comprar agora',
-            'type_link' => '',
-            'button_link' => '#',
-        ],
-    ];
-}
+$slides = $block['data']['slides'] ?? [];
+if (!$slides) return;
 ?>
 
-<?php if (!empty($slides)): ?>
 <section class="swiper-container js-swiper-slider slideshow full-width_padding-20 slideshow-md"
          data-settings='{
         "autoplay": {
@@ -48,29 +18,38 @@ if (empty($slides)) {
         }
       }'>
     <div class="swiper-wrapper">
-    <?php if (!empty($slides)): ?>
         <?php foreach ($slides as $slide): ?>
-        <div class="swiper-slide">
-            <div class="overflow-hidden position-relative h-100">
-                <div class="slideshow-bg">
-                    <img loading="lazy" src="<?= base_url('public/uploads/sliders/large/' . esc($slide['background_image'])) ?>" width="1863" height="700" alt="" class="slideshow-bg__img object-fit-cover object-position-right">
-                </div>
-                <div class="slideshow-text container position-absolute start-50 top-50 translate-middle">
-                    <h6 class="text_dash text-uppercase fs-base fw-medium animate animate_fade animate_btt animate_delay-3">TRENDING 2023</h6>
-                    <h2 class="text-uppercase h1 fw-normal mb-0 animate animate_fade animate_btt animate_delay-5"><?= $slide['title'] ?></h2>
-                    <p class="animate animate_fade animate_btt animate_delay-6"><?= $slide['description'] ?></p>
-                    <a href="<?= base_url( esc($slide['type_link'] . '/' . $slide['button_link'])) ?>" class="btn-link btn-link_sm default-underline text-uppercase fw-medium animate animate_fade animate_btt animate_delay-7">
-                        <?= esc($slide['button_text']) ?>
-                    </a>
+            <div class="swiper-slide">
+                <div class="overflow-hidden position-relative h-100">
+                    <div class="slideshow-bg">
+                        <img
+                                src="<?= base_url('uploads/hero/' . esc($slide['background_image'])) ?>"
+                                onerror="this.onerror=null;this.src='https://placehold.co/1863x700?text=<?= rawurlencode($slide['title'] ?? 'Hero') ?>';"
+                                alt="<?= esc($slide['title']) ?>"
+                                class="slideshow-bg__img object-fit-cover object-position-right"
+                        />
+                    </div>
+                    <div class="slideshow-text container position-absolute start-50 top-50 translate-middle">
+                        <h2 class="text-uppercase h1 fw-normal mb-0 animate animate_fade animate_btt animate_delay-5">
+                            <?= esc($slide['title']) ?>
+                        </h2>
+                        <?php if (!empty($slide['description'])): ?>
+                            <p class="animate animate_fade animate_btt animate_delay-6">
+                                <?= esc($slide['description']) ?>
+                            </p>
+                        <?php endif; ?>
+                        <?php if (!empty($slide['button_text']) && !empty($slide['button_link'])): ?>
+                            <a
+                                    href="<?= esc($slide['button_link']) ?>"
+                                    class="btn-link btn-link_sm default-underline text-uppercase fw-medium animate animate_fade animate_btt animate_delay-7"
+                            >
+                                <?= esc($slide['button_text']) ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php endforeach; ?>
-    <?php endif; ?>
-    </div><!-- /.slideshow-wrapper js-swiper-slider -->
-
+    </div>
     <div class="slideshow-pagination position-left-center"></div>
-    <!-- /.products-pagination -->
-</section><!-- /.slideshow -->
-<?php else: ?>
-<?php endif; ?>
+</section>

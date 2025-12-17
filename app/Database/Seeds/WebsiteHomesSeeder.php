@@ -123,15 +123,55 @@ class WebsiteHomesSeeder extends Seeder
                  * HERO
                  */
                 if ($blockType === 'hero') {
+
+                    // HERO BASE (SO BLOCK_ID)
                     $db->table('website_block_hero')->insert([
-                        'block_id'         => $blockId,
-                        'title'            => strtoupper($homeCode) . ' HERO',
-                        'subtitle'         => 'Texto curto para MVP',
-                        'background_image' => 'hero.jpg',
-                        'cta_text'         => 'Ver mais',
-                        'cta_link'         => '/shop',
+                        'block_id' => $blockId,
                     ]);
+
+                    // SLIDES
+                    $slides = [
+                        [
+                            'background_image' => 'hero_1.jpg',
+                            'title'            => strtoupper($homeCode) . ' SLIDE 1',
+                            'description'      => 'Descrição slide 1',
+                            'button_text'      => 'Ver mais',
+                            'button_link'      => '/shop',
+                            'position'         => 1,
+                        ],
+                        [
+                            'background_image' => 'hero_2.jpg',
+                            'title'            => strtoupper($homeCode) . ' SLIDE 2',
+                            'description'      => 'Descrição slide 2',
+                            'button_text'      => 'Comprar',
+                            'button_link'      => '/sale',
+                            'position'         => 2,
+                        ],
+                        [
+                            'background_image' => 'hero_3.jpg',
+                            'title'            => strtoupper($homeCode) . ' SLIDE 3',
+                            'description'      => 'Descrição slide 3',
+                            'button_text'      => 'Descobrir',
+                            'button_link'      => '/new',
+                            'position'         => 3,
+                        ],
+                    ];
+
+                    foreach ($slides as $s) {
+                        $db->table('website_block_hero_slides')->insert([
+                            'block_id'         => $blockId,
+                            'background_image' => $s['background_image'],
+                            'title'            => $s['title'],
+                            'description'      => $s['description'],
+                            'button_text'      => $s['button_text'],
+                            'button_link'      => $s['button_link'],
+                            'position'         => $s['position'],
+                            'created_at'       => $now,
+                            'updated_at'       => $now,
+                        ]);
+                    }
                 }
+
 
                 /**
                  * GRID BANNER + ITEMS (3 items)
