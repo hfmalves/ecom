@@ -54,7 +54,7 @@ class HomeController extends BaseController
     public function index()
     {
         $home = $this->homeModel
-            ->where('home_code', 'default')
+            ->where('is_active', '1')
             ->first();
         if (!$home) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Home não encontrada');
