@@ -8,7 +8,8 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
-
+use App\Models\Website\HomeModel;
+use App\Models\Website\BlockHomeNewsletterModel;
 /**
  * Class BaseController
  *
@@ -50,17 +51,44 @@ abstract class BaseController extends Controller
     /**
      * @return void
      */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
-        // Do Not Edit This Line
+    public function initController(
+        RequestInterface $request,
+        ResponseInterface $response,
+        LoggerInterface $logger
+    ) {
         parent::initController($request, $response, $logger);
+
         $this->session = service('session');
+
+        // MENU
         $menuModel = new \App\Models\Website\MenuModel();
         $menu = $menuModel->getMenuTree();
+
+        // CATEGORIES
         $categoryModel = new \App\Models\Admin\Catalog\CategoriesModel();
         $categories = $categoryModel->findAll();
+
+        // NEWSLETTER (GLOBAL)
+        $homeModel = new HomeModel();
+        $newsletterModel = new BlockHomeNewsletterModel();
+
+        $home = $homeModel
+            ->where('is_active', 1)
+            ->first();
+
+        $newsletter = null;
+
+        if ($home) {
+            $newsletter = $newsletterModel
+                ->where('home_id', $home['id'])
+                ->where('is_active', 1)
+                ->first();
+        }
+
+        // 🔥 VARIÁVEIS GLOBAIS DO LAYOUT
         service('renderer')->setVar('items', $categories);
         service('renderer')->setVar('menu', $menu);
-
+        service('renderer')->setVar('newsletter', $newsletter);
     }
+
 }

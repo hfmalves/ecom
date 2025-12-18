@@ -33,8 +33,8 @@ use App\Models\Admin\Catalog\ProductsImagesModel;
 
 class HomeController extends BaseController
 {
-    protected HomeModel $homeModel;
-    protected HomeBlockModel $homeBlockModel;
+    protected $homeModel;
+    protected $homeBlockModel;
     public function __construct()
     {
         $this->homeModel      = new HomeModel();
@@ -82,6 +82,7 @@ class HomeController extends BaseController
             }
         }
         unset($block);
+
         return view('website/home/index', [
             'home'   => $home,
             'blocks' => $blocks,
