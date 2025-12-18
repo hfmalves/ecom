@@ -7,6 +7,8 @@ use App\Models\Admin\Catalog\ProductsCategoriesModel;
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsVariantsAttributesModel;
+use App\Models\Admin\Catalog\ProductsPackItemModel;
+use App\Models\Admin\Catalog\ProductsVirtualModel;
 use App\Models\Admin\Catalog\ProductsImagesModel;
 use App\Models\Admin\Catalog\SuppliersModel;
 use App\Models\Admin\Catalog\ProductsAttributesModel;
@@ -17,6 +19,8 @@ class ProductController extends BaseController
     protected $ProductsModel;
     protected $ProductsVariantsModel;
     protected $ProductsVariantsAttributesModel;
+    protected $ProductsPackItemModel;
+    protected $ProductsVirtualModel;
     protected $ProductsImagesModel;
     protected $ProductsCategoriesModel;
     protected $ProductsAttributesModel;
@@ -28,13 +32,14 @@ class ProductController extends BaseController
         $this->ProductsModel = new ProductsModel();
         $this->ProductsVariantsModel = new ProductsVariantsModel();
         $this->ProductsVariantsAttributesModel = new ProductsVariantsAttributesModel();
+        $this->ProductsPackItemModel = new ProductsPackItemModel();
+        $this->ProductsVirtualModel = new ProductsVirtualModel();
         $this->ProductsImagesModel = new ProductsImagesModel();
         $this->ProductsCategoriesModel = new ProductsCategoriesModel();
         $this->ProductsAttributesModel = new ProductsAttributesModel();
         $this->ProductsAttributesValuesModel = new ProductsAttributesValuesModel();
         $this->SuppliersModel = new SuppliersModel();
     }
-
     public function index(string $slug)
     {
         $product = $this->ProductsModel
@@ -85,13 +90,29 @@ class ProductController extends BaseController
                 ->findAll();
         }
         unset($rp);
+        $packItems = [];
+        $virtual   = null;
+        if ($product['type'] === 'pack') {
+            $packItems = $this->ProductsPackItemModel
+                ->where('product_id', $product['id'])
+                ->where('deleted_at', null)
+                ->findAll();
+        }
+        if ($product['type'] === 'virtual') {
+            $virtual = $this->ProductsVirtualModel
+                ->where('product_id', $product['id'])
+                ->where('deleted_at', null)
+                ->first();
+        }
         return view('website/product/index', [
-            'product'        => $product,
-            'images'         => $images,
-            'variants'       => $variants,
-            'attributes'     => $attributes,
-            'attributesMeta' => $attributesMeta,
-            'relatedProducts' => $relatedProducts,
+            'product'          => $product,
+            'images'           => $images,
+            'variants'         => $variants,
+            'attributes'       => $attributes,
+            'attributesMeta'   => $attributesMeta,
+            'relatedProducts'  => $relatedProducts,
+            'packItems'        => $packItems,
+            'virtual'          => $virtual,
         ]);
     }
 
