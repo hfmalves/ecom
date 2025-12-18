@@ -335,4 +335,22 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
     $routes->get('/', 'HomeController::index');
     $routes->get('product/(:any)', 'ProductController::index/$1');
+    $routes->group('user', function ($routes) {
+        $routes->group('auth', function ($routes) {
+            $routes->get('login', 'UserController::login');
+            $routes->get('register', 'UserController::register');
+            $routes->get('recovery', 'UserController::recovery');
+        });
+        $routes->group('account', function ($routes) {
+            $routes->get('', 'UserController::dashboard');
+            $routes->get('dashboard', 'UserController::dashboard');
+            $routes->get('edit', 'UserController::edit');
+            $routes->get('address', 'UserController::edit');
+            $routes->group('orders', function ($routes) {
+                $routes->get('', 'UserController::dashboard');
+            });
+            $routes->get('orders', 'UserController::orders');
+            $routes->get('wishlist', 'UserController::dashboard');
+        });
+    });
 });
