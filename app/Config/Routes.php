@@ -334,23 +334,29 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 
 $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
     $routes->get('/', 'HomeController::index');
+    // PRODUCT
     $routes->get('product/(:any)', 'ProductController::index/$1');
+    // USER
     $routes->group('user', function ($routes) {
-        $routes->group('auth', function ($routes) {
-            $routes->get('login', 'UserController::login');
-            $routes->get('register', 'UserController::register');
-            $routes->get('recovery', 'UserController::recovery');
+        // AUTH
+        $routes->group('auth', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
+            $routes->get('login', 'AuthController::login');
+            $routes->get('register', 'AuthController::register');
+            $routes->get('recovery', 'AuthController::recovery');
+            $routes->get('logout', 'AuthController::logout');
         });
-        $routes->group('account', function ($routes) {
-            $routes->get('', 'UserController::dashboard');
-            $routes->get('dashboard', 'UserController::dashboard');
-            $routes->get('edit', 'UserController::edit');
-            $routes->get('address', 'UserController::edit');
+        // ACCOUNT
+        $routes->group('account', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
+            $routes->get('', 'AccountController::dashboard');
+            $routes->get('dashboard', 'AccountController::dashboard');
+            $routes->get('edit', 'AccountController::edit');
+            $routes->get('address', 'AccountController::address');
+            $routes->get('wishlist', 'AccountController::wishlist');
+            // ORDERS
             $routes->group('orders', function ($routes) {
-                $routes->get('', 'UserController::dashboard');
+                $routes->get('', 'OrdersController::index');
+                $routes->get('(:num)', 'OrdersController::show/$1');
             });
-            $routes->get('orders', 'UserController::orders');
-            $routes->get('wishlist', 'UserController::dashboard');
         });
     });
 });
