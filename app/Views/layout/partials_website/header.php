@@ -6,8 +6,7 @@
             </a>
         </div>
         <form action="<?= base_url('search'); ?>" method="GET"
-              class="header-search search-field d-none d-xxl-flex"
-              x-data="searchBox">
+              class="header-search search-field d-none d-xxl-flex">
             <button class="btn header-search__btn" type="submit">
                 <svg width="20" height="20"><use href="#icon_search"></use></svg>
             </button>

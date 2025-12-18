@@ -162,30 +162,17 @@
         <path d="M5.57201 7.11914C5.8052 7.35233 6.1948 7.35233 6.42858 7.11914L11.8229 1.73867C12.059 1.50249 12.059 1.11947 11.8229 0.88389C11.5867 0.647712 11.2031 0.647712 10.9669 0.88389L6.00002 5.83696L1.03375 0.883291C0.796978 0.647112 0.413959 0.647112 0.177183 0.883291C-0.0589957 1.11947 -0.0589957 1.50249 0.177183 1.73807L5.57201 7.11914Z" fill="currentColor"/>
     </symbol>
 </svg>
-<!-- Mobile Header -->
 <?= $this->include('layout/partials_website//header_mobile.php') ?>
-<!-- /.header-mobile -->
-<!-- Header Type 6 -->
 <?= $this->include('layout/partials_website//header.php') ?>
 <main>
     <?= $this->renderSection('content') ?>
 </main>
-<!-- Footer Type 2 -->
 <?= $this->include('layout/partials_website/footer.php') ?>
-<!-- Mobile Fixed Footer -->
 <?= $this->include('layout/partials_website/footer_mobile.php') ?>
-<!-- /.footer-mobile container position-fixed d-md-none bottom-0 -->
-<!-- Cart Drawer -->
 <?= $this->include('layout/partials_website/cart_drawer.php') ?>
-<!-- /Cart Drawer -->
-<!-- Newsletter Popup -->
 <?= $this->include('layout/partials_website/newsletter_popup') ?>
-<!-- /.newsletter-popup position-fixed -->
-<!-- Go To Top -->
 <div id="scrollTop" class="visually-hidden end-0"></div>
-<!-- Page Overlay -->
-<div class="page-overlay"></div><!-- /.page-overlay -->
-<!-- Modal Genérico -->
+<div class="page-overlay"></div>
 <div class="modal fade" id="genericModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

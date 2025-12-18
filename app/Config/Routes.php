@@ -334,5 +334,5 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 
 $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
     $routes->get('/', 'HomeController::index');
-    $routes->get('produtos', 'ShopController::index');
+    $routes->get('product/(:any)', 'ProductController::index/$1');
 });

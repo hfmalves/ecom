@@ -4,7 +4,7 @@ namespace App\Controllers\Admin\Catalog;
 
 use App\Controllers\BaseController;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
-use App\Models\Admin\Catalog\ProductsVariantsAttributes;
+use App\Models\Admin\Catalog\ProductsVariantsAttributesModel;
 
 use App\Models\Admin\Catalog\ProductsAttributesModel;
 use App\Models\Admin\Catalog\ProductsAttributesValuesModel;
@@ -18,7 +18,7 @@ class ProductVariantsController extends BaseController
     public function __construct()
     {
         $this->productsVariants = new ProductsVariantsModel();
-        $this->productsVariantsAttributes = new ProductsVariantsAttributes();
+        $this->productsVariantsAttributes = new ProductsVariantsAttributesModel();
         $this->productsAttributes = new ProductsAttributesModel();
         $this->productsAttributesValues = new ProductsAttributesValuesModel();
     }

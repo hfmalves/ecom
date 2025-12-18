@@ -9,7 +9,7 @@ use App\Models\Admin\Catalog\ProductsImagesModel;
 use App\Models\Admin\Catalog\SuppliersModel;
 use App\Models\Admin\Catalog\CategoriesModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
-use App\Models\Admin\Catalog\ProductsVariantsAttributes;
+use App\Models\Admin\Catalog\ProductsVariantsAttributesModel;
 use App\Models\Admin\Catalog\ProductsAttributesModel;
 use App\Models\Admin\Catalog\ProductsAttributesValuesModel;
 use App\Models\Admin\Catalog\ProductsVirtualModel;
@@ -41,7 +41,7 @@ class ProductsController extends BaseController
         $this->categories = new CategoriesModel();
 
         $this->productsVariants = new ProductsVariantsModel();
-        $this->productsVariantsAttributes = new ProductsVariantsAttributes();
+        $this->productsVariantsAttributes = new ProductsVariantsAttributesModel();
         $this->productsAttributesModel = new ProductsAttributesModel();
         $this->productsAttributesValues = new ProductsAttributesValuesModel();
         $this->productsVirtualModel = new ProductsVirtualModel();

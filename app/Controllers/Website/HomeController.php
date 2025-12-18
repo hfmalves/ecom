@@ -10,32 +10,23 @@ use App\Models\Website\BlockHeroModel;
 use App\Models\Website\BlockHeroSlideModel;
 use App\Models\Website\BlockGridBannerModel;
 use App\Models\Website\BlockGridBannerItemModel;
-
 use App\Models\Website\BlockProductsGridModel;
 use App\Models\Website\BlockProductsGridItemModel;
-
 use App\Models\Website\BlockBlogGridModel;
 use App\Models\Website\BlockBlogGridItemModel;
-
 use App\Models\Website\BlogCategoryModel;
 use App\Models\Website\BlogCommentModel;
 use App\Models\Website\BlogPostCategoryModel;
 use App\Models\Website\BlogPostModel;
-
 use App\Models\Website\BlockHomeDealsDayModel;
 use App\Models\Website\BlockHomeDealsDayItemModel;
-
 use App\Models\Website\BlockServicePromotionModel;
 use App\Models\Website\BlockServicePromotionItemModel;
-
 use App\Models\Website\FaqModel;
 use App\Models\Website\FaqItemModel;
-
 use App\Models\Website\BlockTopCategoryFilterModel;
 use App\Models\Website\BlockTopCategoryFilterTabItemModel;
 use App\Models\Website\BlockTopCategoryFilterTabModel;
-
-
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsImagesModel;
@@ -44,13 +35,11 @@ class HomeController extends BaseController
 {
     protected HomeModel $homeModel;
     protected HomeBlockModel $homeBlockModel;
-
     public function __construct()
     {
         $this->homeModel      = new HomeModel();
         $this->homeBlockModel = new HomeBlockModel();
     }
-
     public function index()
     {
         $home = $this->homeModel
@@ -169,7 +158,6 @@ class HomeController extends BaseController
 
         return $block;
     }
-
     /* ---------------- HELPERS ---------------- */
     private function loadProduct(int $productId, ?int $variantId = null): ?array
     {
@@ -281,7 +269,6 @@ class HomeController extends BaseController
 
         return $block;
     }
-
     private function resolveFaq(array $block): array
     {
         $faqModel     = new FaqModel();

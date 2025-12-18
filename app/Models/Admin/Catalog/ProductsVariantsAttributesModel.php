@@ -4,7 +4,7 @@ namespace App\Models\Admin\Catalog;
 
 use CodeIgniter\Model;
 
-class ProductsVariantsAttributes extends Model
+class ProductsVariantsAttributesModel extends Model
 {
     protected $table            = 'products_variant_attributes';
     protected $primaryKey       = 'id';
