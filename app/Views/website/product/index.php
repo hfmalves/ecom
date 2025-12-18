@@ -8,6 +8,7 @@
     /** @var array $variants */
     /** @var array $attributes */
     ?>
+    <div class="mb-md-1 pb-md-5"></div>
     <div class="row">
         <!-- GALERIA -->
         <div class="col-lg-7">
