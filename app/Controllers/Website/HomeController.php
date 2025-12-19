@@ -27,6 +27,7 @@ use App\Models\Website\FaqItemModel;
 use App\Models\Website\BlockTopCategoryFilterModel;
 use App\Models\Website\BlockTopCategoryFilterTabItemModel;
 use App\Models\Website\BlockTopCategoryFilterTabModel;
+use App\Models\Admin\Configurations\General\GeneralModel;
 
 use App\Models\Website\BlockFooterModel;
 use App\Models\Website\BlockFooterMenuCategoryModel;
@@ -393,11 +394,12 @@ class HomeController extends BaseController
             return $block;
         }
 
-        $footerModel       = new BlockFooterModel();
-        $categoryModel     = new BlockFooterMenuCategoryModel();
-        $menuItemModel     = new BlockFooterMenuItemModel();
+        $footerModel   = new BlockFooterModel();
+        $categoryModel = new BlockFooterMenuCategoryModel();
+        $menuItemModel = new BlockFooterMenuItemModel();
+        $generalModel  = new GeneralModel();
 
-        // Footer base config
+        // Footer base config (flags show_*)
         $footer = $footerModel
             ->where('block_id', $block['id'])
             ->first();
@@ -405,6 +407,9 @@ class HomeController extends BaseController
         if (!$footer) {
             return $block;
         }
+
+        // Config geral (conf_settings) — assumo 1 registo
+        $general = $generalModel->first();
 
         // Menu categories
         $categories = $categoryModel
@@ -421,8 +426,34 @@ class HomeController extends BaseController
                 ->findAll();
         }
 
+        // Merge FINAL para a view
         $block['footer'] = [
-            'config'     => $footer,
+            'config'     => array_merge($footer, [
+                'contact_email'  => $general['contact_email']  ?? null,
+                'contact_phone'  => $general['contact_phone']  ?? null,
+
+                // MORADA DA LOJA
+                'store_name'        => $general['store_name'] ?? null,
+                'address_street'    => $general['address_street'] ?? null,
+                'address_postcode'  => $general['address_postcode'] ?? null,
+                'address_city'      => $general['address_city'] ?? null,
+                'address_country'   => $general['address_country'] ?? null,
+                // REDES SOCIAIS
+                'facebook_url'  => $general['facebook_url']  ?? null,
+                'instagram_url' => $general['instagram_url'] ?? null,
+                'twitter_url'   => $general['twitter_url']   ?? null,
+                'linkedin_url'  => $general['linkedin_url']  ?? null,
+                'youtube_url'   => $general['youtube_url']   ?? null,
+
+                // HORÁRIOS
+                'opening_monday'    => $general['opening_monday']    ?? null,
+                'opening_tuesday'   => $general['opening_tuesday']   ?? null,
+                'opening_wednesday' => $general['opening_wednesday'] ?? null,
+                'opening_thursday'  => $general['opening_thursday']  ?? null,
+                'opening_friday'    => $general['opening_friday']    ?? null,
+                'opening_saturday'  => $general['opening_saturday']  ?? null,
+                'opening_sunday'    => $general['opening_sunday']    ?? null,
+            ]),
             'categories' => $categories,
         ];
 

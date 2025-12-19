@@ -26,24 +26,86 @@ $categories   = $block['footer']['categories'] ?? [];
                     </a>
                 </div>
                 <?php if (!empty($footerConfig['show_info'])): ?>
-                    <p class="footer-address">1418 River Drive, Suite 35 Cottonhall, CA 9622 United States</p>
+                    <?php
+                    $addressParts = array_filter([
+                            $footerConfig['store_name'] ?? null,
+                            $footerConfig['address_street'] ?? null,
+                            trim(
+                                    ($footerConfig['address_postcode'] ?? '') . ' ' .
+                                    ($footerConfig['address_city'] ?? '')
+                            ),
+                            $footerConfig['address_country'] ?? null,
+                    ]);
+                    ?>
 
-                    <p class="m-0">
-                        <strong class="fw-medium">sale@uomo.com</strong>
-                    </p>
-                    <p>
-                        <strong class="fw-medium">+1 246-345-0695</strong>
-                    </p>
+                    <?php if (!empty($addressParts)): ?>
+                        <p class="footer-address">
+                            <?= esc(implode(', ', $addressParts)) ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <?php if (!empty($footerConfig['contact_email'])): ?>
+                        <p class="m-0">
+                            <strong class="fw-medium">
+                                <?= esc($footerConfig['contact_email']) ?>
+                            </strong>
+                        </p>
+                    <?php endif; ?>
+
+                    <?php if (!empty($footerConfig['contact_phone'])): ?>
+                        <p>
+                            <strong class="fw-medium">
+                                <?= esc($footerConfig['contact_phone']) ?>
+                            </strong>
+                        </p>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <?php if (!empty($footerConfig['show_social'])): ?>
                     <ul class="social-links list-unstyled d-flex flex-wrap mb-0">
-                        <li>
-                            <a href="https://www.facebook.com/" class="footer__social-link d-block">
-                                <svg class="svg-icon svg-icon_facebook" width="9" height="15" viewBox="0 0 9 15" xmlns="http://www.w3.org/2000/svg"><use href="#icon_facebook" /></svg>
-                            </a>
-                        </li>
+
+                        <?php if (!empty($footerConfig['facebook_url'])): ?>
+                            <li>
+                                <a href="<?= esc($footerConfig['facebook_url']) ?>" class="footer__social-link d-block" target="_blank">
+                                    <svg width="9" height="15"><use href="#icon_facebook" /></svg>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['instagram_url'])): ?>
+                            <li>
+                                <a href="<?= esc($footerConfig['instagram_url']) ?>" class="footer__social-link d-block" target="_blank">
+                                    <svg width="14" height="14"><use href="#icon_instagram" /></svg>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['twitter_url'])): ?>
+                            <li>
+                                <a href="<?= esc($footerConfig['twitter_url']) ?>" class="footer__social-link d-block" target="_blank">
+                                    <svg width="14" height="14"><use href="#icon_twitter" /></svg>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['linkedin_url'])): ?>
+                            <li>
+                                <a href="<?= esc($footerConfig['linkedin_url']) ?>" class="footer__social-link d-block" target="_blank">
+                                    <svg width="14" height="14"><use href="#icon_linkedin" /></svg>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['youtube_url'])): ?>
+                            <li>
+                                <a href="<?= esc($footerConfig['youtube_url']) ?>" class="footer__social-link d-block" target="_blank">
+                                    <svg width="14" height="14"><use href="#icon_youtube" /></svg>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+
                     </ul>
                 <?php endif; ?>
+
             </div>
             <?php foreach ($categories as $category): ?>
                 <div class="footer-column footer-menu mb-4 mb-lg-0">
@@ -68,12 +130,41 @@ $categories   = $block['footer']['categories'] ?? [];
             <?php endforeach; ?>
             <?php if (!empty($footerConfig['show_opening_times'])): ?>
                 <div class="footer-column mb-4 mb-lg-0">
-                    <h6 class="sub-menu__title text-uppercase">Opening Time</h6>
+                    <h6 class="sub-menu__title text-uppercase">Horário</h6>
                     <ul class="list-unstyled">
-                        <li><span class="menu-link">Mon - Fri: 8AM - 9PM</span></li>
+
+                        <?php if (!empty($footerConfig['opening_monday'])): ?>
+                            <li><span class="menu-link">Seg: <?= esc($footerConfig['opening_monday']) ?></span></li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['opening_tuesday'])): ?>
+                            <li><span class="menu-link">Ter: <?= esc($footerConfig['opening_tuesday']) ?></span></li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['opening_wednesday'])): ?>
+                            <li><span class="menu-link">Qua: <?= esc($footerConfig['opening_wednesday']) ?></span></li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['opening_thursday'])): ?>
+                            <li><span class="menu-link">Qui: <?= esc($footerConfig['opening_thursday']) ?></span></li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['opening_friday'])): ?>
+                            <li><span class="menu-link">Sex: <?= esc($footerConfig['opening_friday']) ?></span></li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['opening_saturday'])): ?>
+                            <li><span class="menu-link">Sab: <?= esc($footerConfig['opening_saturday']) ?></span></li>
+                        <?php endif; ?>
+
+                        <?php if (!empty($footerConfig['opening_sunday'])): ?>
+                            <li><span class="menu-link">Dom: <?= esc($footerConfig['opening_sunday']) ?></span></li>
+                        <?php endif; ?>
+
                     </ul>
                 </div>
             <?php endif; ?>
+
         </div>
     </div>
     <div class="footer-bottom">
