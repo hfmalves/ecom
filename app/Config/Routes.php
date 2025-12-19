@@ -336,6 +336,7 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
     $routes->get('/', 'HomeController::index');
     $routes->get('product/(:any)', 'ProductController::index/$1');
     $routes->get('page/(:any)', 'PageController::index/$1');
+    $routes->get('category/(:any)', 'categoryController::index/$1');
     $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
         $routes->get('cart', 'CartController::cart');
         $routes->get('checkout', 'CartController::checkout');
