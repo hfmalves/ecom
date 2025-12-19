@@ -334,18 +334,14 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 
 $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
     $routes->get('/', 'HomeController::index');
-    // PRODUCT
     $routes->get('product/(:any)', 'ProductController::index/$1');
-    // USER
     $routes->group('user', function ($routes) {
-        // AUTH
         $routes->group('auth', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
             $routes->get('login', 'AuthController::login');
             $routes->get('register', 'AuthController::register');
             $routes->get('recovery', 'AuthController::recovery');
             $routes->get('logout', 'AuthController::logout');
         });
-        // ACCOUNT
         $routes->group('account', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
             $routes->get('', 'AccountController::dashboard');
             $routes->get('dashboard', 'AccountController::dashboard');
@@ -354,7 +350,7 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
             $routes->get('wishlist', 'AccountController::wishlist');
             // ORDERS
             $routes->group('orders', function ($routes) {
-                $routes->get('', 'OrdersController::index');
+                $routes->get('/', 'OrdersController::index');
                 $routes->get('(:num)', 'OrdersController::show/$1');
             });
         });

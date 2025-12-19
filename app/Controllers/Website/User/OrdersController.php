@@ -9,7 +9,7 @@ class OrdersController extends BaseController
 {
     public function index()
     {
-        return view('website/user/account/orders/index');
+        return view('website/user/account/orders');
     }
 
     public function show(int $id)
