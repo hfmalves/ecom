@@ -162,12 +162,11 @@
         <path d="M5.57201 7.11914C5.8052 7.35233 6.1948 7.35233 6.42858 7.11914L11.8229 1.73867C12.059 1.50249 12.059 1.11947 11.8229 0.88389C11.5867 0.647712 11.2031 0.647712 10.9669 0.88389L6.00002 5.83696L1.03375 0.883291C0.796978 0.647112 0.413959 0.647112 0.177183 0.883291C-0.0589957 1.11947 -0.0589957 1.50249 0.177183 1.73807L5.57201 7.11914Z" fill="currentColor"/>
     </symbol>
 </svg>
-<?= $this->include('layout/partials_website//header_mobile.php') ?>
-<?= $this->include('layout/partials_website//header.php') ?>
+<?= $this->include('layout/partials_website/header_mobile.php') ?>
+<?= $this->include('layout/partials_website/header.php') ?>
 <main>
     <?= $this->renderSection('content') ?>
 </main>
-<?= $this->include('layout/partials_website/footer.php') ?>
 <?= $this->include('layout/partials_website/footer_mobile.php') ?>
 <?= $this->include('layout/partials_website/cart_drawer.php') ?>
 <?= $this->include('layout/partials_website/newsletter_popup') ?>

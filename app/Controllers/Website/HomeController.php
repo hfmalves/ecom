@@ -27,9 +27,16 @@ use App\Models\Website\FaqItemModel;
 use App\Models\Website\BlockTopCategoryFilterModel;
 use App\Models\Website\BlockTopCategoryFilterTabItemModel;
 use App\Models\Website\BlockTopCategoryFilterTabModel;
+
+use App\Models\Website\BlockFooterModel;
+use App\Models\Website\BlockFooterMenuCategoryModel;
+use App\Models\Website\BlockFooterMenuItemModel;
+
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
 use App\Models\Admin\Catalog\ProductsImagesModel;
+
+
 
 class HomeController extends BaseController
 {
@@ -382,6 +389,43 @@ class HomeController extends BaseController
     }
     private function resolveFooter(array $block): array
     {
+        if (empty($block['id'])) {
+            return $block;
+        }
+
+        $footerModel       = new BlockFooterModel();
+        $categoryModel     = new BlockFooterMenuCategoryModel();
+        $menuItemModel     = new BlockFooterMenuItemModel();
+
+        // Footer base config
+        $footer = $footerModel
+            ->where('block_id', $block['id'])
+            ->first();
+
+        if (!$footer) {
+            return $block;
+        }
+
+        // Menu categories
+        $categories = $categoryModel
+            ->where('block_id', $block['id'])
+            ->where('is_active', 1)
+            ->orderBy('position', 'ASC')
+            ->findAll();
+
+        foreach ($categories as &$category) {
+            $category['items'] = $menuItemModel
+                ->where('category_id', $category['id'])
+                ->where('is_active', 1)
+                ->orderBy('position', 'ASC')
+                ->findAll();
+        }
+
+        $block['footer'] = [
+            'config'     => $footer,
+            'categories' => $categories,
+        ];
+
         return $block;
     }
 
