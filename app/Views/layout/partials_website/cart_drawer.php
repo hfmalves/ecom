@@ -5,9 +5,7 @@
         </h3>
         <button class="btn-close-lg js-close-aside btn-close-aside ms-auto"></button>
     </div>
-
     <div class="aside-content cart-drawer-items-list">
-
         <div class="cart-drawer-item d-flex position-relative">
             <div class="position-relative">
                 <a href="<?= base_url('product/zessi-dresses') ?>">
@@ -21,7 +19,6 @@
                 </h6>
                 <p class="cart-drawer-item__option text-secondary">Cor: Amarelo</p>
                 <p class="cart-drawer-item__option text-secondary">Tamanho: L</p>
-
                 <div class="d-flex align-items-center justify-content-between mt-1">
                     <div class="qty-control position-relative">
                         <input type="number" name="quantity" value="1" min="1"
@@ -32,12 +29,9 @@
                     <span class="cart-drawer-item__price money price">€99</span>
                 </div>
             </div>
-
             <button class="btn-close-xs position-absolute top-0 end-0 js-cart-item-remove"></button>
         </div>
-
         <hr class="cart-drawer-divider">
-
         <div class="cart-drawer-item d-flex position-relative">
             <div class="position-relative">
                 <a href="<?= base_url('product/kirby-tshirt') ?>">
@@ -51,7 +45,6 @@
                 </h6>
                 <p class="cart-drawer-item__option text-secondary">Cor: Preto</p>
                 <p class="cart-drawer-item__option text-secondary">Tamanho: XS</p>
-
                 <div class="d-flex align-items-center justify-content-between mt-1">
                     <div class="qty-control position-relative">
                         <input type="number" name="quantity" value="4" min="1"
@@ -62,12 +55,9 @@
                     <span class="cart-drawer-item__price money price">€89</span>
                 </div>
             </div>
-
             <button class="btn-close-xs position-absolute top-0 end-0 js-cart-item-remove"></button>
         </div>
-
         <hr class="cart-drawer-divider">
-
         <div class="cart-drawer-item d-flex position-relative">
             <div class="position-relative">
                 <a href="<?= base_url('product/cableknit-shawl') ?>">
@@ -92,12 +82,9 @@
                     <span class="cart-drawer-item__price money price">€129</span>
                 </div>
             </div>
-
             <button class="btn-close-xs position-absolute top-0 end-0 js-cart-item-remove"></button>
         </div>
-
     </div>
-
     <div class="cart-drawer-actions position-absolute start-0 bottom-0 w-100">
         <hr class="cart-drawer-divider">
         <div class="d-flex justify-content-between">
