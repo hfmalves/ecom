@@ -335,6 +335,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
 $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
     $routes->get('/', 'HomeController::index');
     $routes->get('product/(:any)', 'ProductController::index/$1');
+    $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
+        $routes->get('cart', 'CartController::cart');
+        $routes->get('checkout', 'CartController::checkout');
+        $routes->get('order_complete', 'CartController::complete');
+    });
     $routes->group('user', function ($routes) {
         $routes->group('auth', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
             $routes->get('login', 'AuthController::login');
