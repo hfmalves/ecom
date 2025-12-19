@@ -36,7 +36,7 @@
             <div class="overflow-hidden">
                 <ul class="navigation__list list-unstyled position-relative">
                     <?php
-                    helper('website/menu');
+                    helper('website/menu_mobile');
                     echo website_menu_mobile($menu);
                     ?>
                 </ul><!-- /.navigation__list -->
