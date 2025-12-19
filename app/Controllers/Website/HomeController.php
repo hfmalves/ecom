@@ -79,6 +79,9 @@ class HomeController extends BaseController
                 case 'top_category_filter':
                     $block = $this->resolveTopCategoryFilter($block);
                     break;
+                case 'footer':
+                    $block = $this->resolveFooter($block);
+                    break;
             }
         }
         unset($block);
@@ -377,10 +380,9 @@ class HomeController extends BaseController
         $block['tabs'] = $tabs;
         return $block;
     }
-
-
-
-
-
+    private function resolveFooter(array $block): array
+    {
+        return $block;
+    }
 
 }
