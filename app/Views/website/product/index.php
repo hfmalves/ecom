@@ -8,6 +8,7 @@
     /** @var array $variants */
     /** @var array $attributes */
     ?>
+    <div class="mb-md-1 pb-md-5"></div>
     <div class="row">
         <!-- GALERIA -->
         <div class="col-lg-7">
@@ -59,7 +60,11 @@
                         </div>
                     </div>
                 </div>
-                <?php if (!empty($product['special_price'])): ?>
+                <?php if (
+                    isset($product['special_price']) &&
+                    is_numeric($product['special_price']) &&
+                    $product['special_price'] > 0
+                ): ?>
                     <div class="product-label sale-label">
                         <span>EM DESCONTO</span>
                     </div>
@@ -68,21 +73,35 @@
             </div>
         </div>
         <!-- INFO -->
+
         <div class="col-lg-5">
+            <div class="d-flex justify-content-between mb-4 pb-md-2">
+                <div class="breadcrumb mb-0 d-none d-md-block flex-grow-1">
+                    <a href="#" class="menu-link menu-link_us-s text-uppercase fw-medium">Home</a>
+                    <span class="breadcrumb-separator menu-link fw-medium ps-1 pe-1">/</span>
+                    <a href="#" class="menu-link menu-link_us-s text-uppercase fw-medium">The Shop</a>
+                </div>
+                <div class="product-single__prev-next d-flex align-items-center justify-content-between justify-content-md-end flex-grow-1">
+                </div>
+            </div>
             <h1 class="product-single__name">
                 <?= esc($product['name']) ?>
             </h1>
             <div class="product-single__price">
-                <?php if (!empty($product['special_price'])): ?>
+                <?php if (
+                    isset($product['special_price']) &&
+                    is_numeric($product['special_price']) &&
+                    $product['special_price'] > 0
+                ): ?>
                     <span class="old-price">
-                        €<?= number_format($product['base_price'], 2, ',', '.') ?>
+                        €<?= number_format($product['base_price_tax'], 2, ',', '.') ?>
                     </span>
-                                <span class="special-price">
+                                    <span class="special-price">
                         €<?= number_format($product['special_price'], 2, ',', '.') ?>
                     </span>
-                            <?php else: ?>
-                                <span class="current-price">
-                        €<?= number_format($product['base_price'], 2, ',', '.') ?>
+                                <?php else: ?>
+                                    <span class="current-price">
+                        €<?= number_format($product['base_price_tax'], 2, ',', '.') ?>
                     </span>
                 <?php endif; ?>
             </div>
@@ -91,6 +110,9 @@
                 <?= esc($product['description']) ?>
             </div>
             <?php
+            // =====================
+            // PRÉ-CÁLCULOS
+            // =====================
             $grouped = [];
             foreach ($attributes as $variantId => $attrs) {
                 foreach ($attrs as $code => $values) {
@@ -99,88 +121,138 @@
                     );
                 }
             }
+
+            $type = $product['type'] ?? 'simple';
+
+            $isOutOfStock = (
+                ($product['manage_stock'] ?? 0) == 1 &&
+                ($product['stock_qty'] ?? 0) == 0
+            );
             ?>
-            <!-- FORM ÚNICO -->
+
             <form name="addtocart-form" method="post">
-                <!-- VARIANTES -->
-                <div class="product-single__swatches">
-                    <?php foreach ($attributesMeta as $attr): ?>
-                    <?php
-                    $code = $attr['code'];
-                    if (empty($grouped[$code])) continue;
 
-                    $isColor = ($attr['type'] === 'color');
-                    $i = 1;
-                    ?>
+                <!-- =====================
+                     CONFIGURABLE
+                ====================== -->
+                <?php if ($type === 'configurable'): ?>
+                    <div class="product-single__swatches">
+                        <?php foreach ($attributesMeta as $attr): ?>
+                            <?php
+                            $code = $attr['code'];
+                            if (empty($grouped[$code])) continue;
+                            $isColor = ($attr['type'] === 'color');
+                            $i = 1;
+                            ?>
 
-                    <div class="product-swatch <?= $isColor ? 'color-swatches' : 'text-swatches' ?>">
-                        <label><?= esc($attr['name']) ?></label>
+                            <div class="product-swatch <?= $isColor ? 'color-swatches' : 'text-swatches' ?>">
+                                <label><?= esc($attr['name']) ?></label>
 
-                        <div class="swatch-list">
-                            <?php foreach ($grouped[$code] as $v): ?>
+                                <div class="swatch-list">
+                                    <?php foreach ($grouped[$code] as $v): ?>
+                                        <input
+                                                type="radio"
+                                                name="<?= esc($code) ?>"
+                                                id="swatch-<?= esc($code) ?>-<?= $i ?>"
+                                            <?= $i === 1 ? 'checked' : '' ?>
+                                        >
 
-                                <input
-                                    type="radio"
-                                    name="<?= esc($code) ?>"
-                                    id="swatch-<?= esc($code) ?>-<?= $i ?>"
-                                    <?= $i === 1 ? 'checked' : '' ?>
-                                >
+                                        <label
+                                                class="swatch <?= $isColor ? 'swatch-color' : '' ?> js-swatch"
+                                                for="swatch-<?= esc($code) ?>-<?= $i ?>"
+                                                title="<?= esc($v) ?>"
+                                            <?= $isColor ? 'style="color:' . esc($v) . '"' : '' ?>
+                                        >
+                                            <?= $isColor ? '' : esc($v) ?>
+                                        </label>
+                                        <?php $i++; endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
-                                <?php if ($isColor): ?>
-                                    <label
-                                        class="swatch swatch-color js-swatch"
-                                        for="swatch-<?= esc($code) ?>-<?= $i ?>"
-                                        aria-label="<?= esc($v) ?>"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="top"
-                                        title="<?= esc($v) ?>"
-                                        style="color: <?= esc($v) ?>"
-                                    ></label>
-                                <?php else: ?>
-                                    <label
-                                        class="swatch js-swatch"
-                                        for="swatch-<?= esc($code) ?>-<?= $i ?>"
-                                        aria-label="<?= esc($v) ?>"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="top"
-                                        title="<?= esc($v) ?>"
+                <!-- =====================
+                     VIRTUAL
+                ====================== -->
+                <?php if ($type === 'virtual' && $virtual): ?>
+                    <div class="product-virtual-info mb-3">
+                        <p class="mb-1">Tipo: <?= esc($virtual['virtual_type']) ?></p>
+                        <p class="mb-1">Validade: <?= (int)$virtual['virtual_expiry_days'] ?> dias</p>
+                        <?php if (!empty($virtual['virtual_url'])): ?>
+                            <small class="text-muted">Download após pagamento</small>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+
+                <!-- =====================
+                     PACK
+                ====================== -->
+                <?php if ($type === 'pack' && !empty($packItems)): ?>
+                    <div class="product-single__addtocart product-single__grouped">
+
+                        <?php foreach ($packItems as $item): ?>
+                            <div class="grouped-item">
+
+                                <div class="qty-control position-relative qty-initialized">
+                                    <input
+                                            type="number"
+                                            name="pack_qty[<?= esc($item['product_sku']) ?>]"
+                                            value="<?= (int)$item['qty'] ?>"
+                                            min="1"
+                                            class="qty-control__number text-center"
+                                            readonly
                                     >
-                                        <?= esc($v) ?>
-                                    </label>
-                                <?php endif; ?>
+                                    <div class="qty-control__reduce">-</div>
+                                    <div class="qty-control__increase">+</div>
+                                </div>
 
-                                <?php $i++; endforeach; ?>
+                                <div class="grouped-item__name">
+                                    <?= esc($item['product_sku']) ?>
+                                </div>
+
+                                <div class="grouped-item__price">
+                    <span class="regular-price">
+                        €<?= number_format($item['base_price'], 2, ',', '.') ?>
+                    </span>
+                                </div>
+
+                            </div>
+                        <?php endforeach; ?>
+
+                        <div>
+                            <button
+                                    type="submit"
+                                    class="btn btn-primary btn-addtocart js-open-aside"
+                                    data-aside="cartDrawer"
+                            >
+                                Comprasr
+                            </button>
                         </div>
-                    </div>
 
-                <?php endforeach; ?>
-                </div>
-                <!-- QTD + ADD TO CART -->
-                <div class="product-single__addtocart">
-                    <div class="qty-control position-relative qty-initialized">
-                        <input
-                            type="number"
-                            name="quantity"
-                            value="1"
-                            min="1"
-                            class="qty-control__number text-center"
-                        >
-                        <div class="qty-control__reduce">-</div>
-                        <div class="qty-control__increase">+</div>
                     </div>
-                    <button
-                        type="submit"
-                        class="btn btn-primary btn-addtocart js-open-aside"
-                        data-aside="cartDrawer"
-                    >
-                       Comprar
-                    </button>
-                </div>
+                <?php endif; ?>
+
+
+                <?php if ($type !== 'pack'): ?>
+                <!-- =====================
+                     QTD
+                ====================== -->
+                    <div class="product-single__addtocart">
+                        <div class="qty-control position-relative qty-initialized">
+                            <input type="number" name="quantity" value="1" min="1" class="qty-control__number text-center">
+                            <div class="qty-control__reduce">-</div>
+                            <div class="qty-control__increase">+</div>
+                        </div><!-- .qty-control -->
+                        <button type="submit" class="btn btn-primary btn-addtocart js-open-aside" data-aside="cartDrawer">Add to Cart</button>
+                    </div>
+                <?php endif; ?>
+
             </form>
+
             <!-- META -->
             <div class="product-single__meta-info mt-4">
                 <div><strong>SKU:</strong> <?= esc($product['sku'] ?? 'N/A') ?></div>
-<!--                <div><strong>Estado:</strong> --><?php //= esc($product['status']) ?><!--</div>-->
             </div>
             <div class="product-single__addtolinks">
                 <a href="#" class="menu-link menu-link_us-s add-to-wishlist"><svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#icon_heart" /></svg><span>Adicionar Favoritos</span></a>
@@ -216,9 +288,6 @@
             <li class="nav-item" role="presentation">
                 <a class="nav-link nav-link_underscore" id="tab-additional-info-tab" data-bs-toggle="tab" href="#tab-additional-info" role="tab" aria-controls="tab-additional-info" aria-selected="false">Informação Adicional</a>
             </li>
-<!--            <li class="nav-item" role="presentation">-->
-<!--                <a class="nav-link nav-link_underscore" id="tab-reviews-tab" data-bs-toggle="tab" href="#tab-reviews" role="tab" aria-controls="tab-reviews" aria-selected="false">Analises ()</a>-->
-<!--            </li>-->
         </ul>
         <div class="tab-content">
             <div class="tab-pane fade show active" id="tab-description" role="tabpanel" aria-labelledby="tab-description-tab">
@@ -261,101 +330,6 @@
 
                 </div>
             </div>
-
-            <!--            <div class="tab-pane fade" id="tab-reviews" role="tabpanel" aria-labelledby="tab-reviews-tab">-->
-<!--                <h2 class="product-single__reviews-title">Reviews</h2>-->
-<!--                <div class="product-single__reviews-list">-->
-<!--                    <div class="product-single__reviews-item">-->
-<!--                        <div class="customer-avatar">-->
-<!--                            <img loading="lazy" src="../images/avatar.jpg" alt="">-->
-<!--                        </div>-->
-<!--                        <div class="customer-review">-->
-<!--                            <div class="customer-name">-->
-<!--                                <h6>Janice Miller</h6>-->
-<!--                                <div class="reviews-group d-flex">-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                            <div class="review-date">April 06, 2023</div>-->
-<!--                            <div class="review-text">-->
-<!--                                <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est…</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="product-single__reviews-item">-->
-<!--                        <div class="customer-avatar">-->
-<!--                            <img loading="lazy" src="../images/avatar.jpg" alt="">-->
-<!--                        </div>-->
-<!--                        <div class="customer-review">-->
-<!--                            <div class="customer-name">-->
-<!--                                <h6>Benjam Porter</h6>-->
-<!--                                <div class="reviews-group d-flex">-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                    <svg class="review-star" viewBox="0 0 9 9" xmlns="http://www.w3.org/2000/svg"><use href="#icon_star" /></svg>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                            <div class="review-date">April 06, 2023</div>-->
-<!--                            <div class="review-text">-->
-<!--                                <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est…</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="product-single__review-form">-->
-<!--                    <form name="customer-review-form">-->
-<!--                        <h5>Be the first to review “Message Cotton T-Shirt”</h5>-->
-<!--                        <p>Your email address will not be published. Required fields are marked *</p>-->
-<!--                        <div class="select-star-rating">-->
-<!--                            <label>Your rating *</label>-->
-<!--                            <span class="star-rating">-->
-<!--                    <svg class="star-rating__star-icon" width="12" height="12" fill="#ccc" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">-->
-<!--                      <path d="M11.1429 5.04687C11.1429 4.84598 10.9286 4.76562 10.7679 4.73884L7.40625 4.25L5.89955 1.20312C5.83929 1.07589 5.72545 0.928571 5.57143 0.928571C5.41741 0.928571 5.30357 1.07589 5.2433 1.20312L3.73661 4.25L0.375 4.73884C0.207589 4.76562 0 4.84598 0 5.04687C0 5.16741 0.0870536 5.28125 0.167411 5.3683L2.60491 7.73884L2.02902 11.0871C2.02232 11.1339 2.01563 11.1741 2.01563 11.221C2.01563 11.3951 2.10268 11.5558 2.29688 11.5558C2.39063 11.5558 2.47768 11.5223 2.56473 11.4754L5.57143 9.89509L8.57813 11.4754C8.65848 11.5223 8.75223 11.5558 8.84598 11.5558C9.04018 11.5558 9.12054 11.3951 9.12054 11.221C9.12054 11.1741 9.12054 11.1339 9.11384 11.0871L8.53795 7.73884L10.9688 5.3683C11.0558 5.28125 11.1429 5.16741 11.1429 5.04687Z"/>-->
-<!--                    </svg>-->
-<!--                    <svg class="star-rating__star-icon" width="12" height="12" fill="#ccc" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">-->
-<!--                      <path d="M11.1429 5.04687C11.1429 4.84598 10.9286 4.76562 10.7679 4.73884L7.40625 4.25L5.89955 1.20312C5.83929 1.07589 5.72545 0.928571 5.57143 0.928571C5.41741 0.928571 5.30357 1.07589 5.2433 1.20312L3.73661 4.25L0.375 4.73884C0.207589 4.76562 0 4.84598 0 5.04687C0 5.16741 0.0870536 5.28125 0.167411 5.3683L2.60491 7.73884L2.02902 11.0871C2.02232 11.1339 2.01563 11.1741 2.01563 11.221C2.01563 11.3951 2.10268 11.5558 2.29688 11.5558C2.39063 11.5558 2.47768 11.5223 2.56473 11.4754L5.57143 9.89509L8.57813 11.4754C8.65848 11.5223 8.75223 11.5558 8.84598 11.5558C9.04018 11.5558 9.12054 11.3951 9.12054 11.221C9.12054 11.1741 9.12054 11.1339 9.11384 11.0871L8.53795 7.73884L10.9688 5.3683C11.0558 5.28125 11.1429 5.16741 11.1429 5.04687Z"/>-->
-<!--                    </svg>-->
-<!--                    <svg class="star-rating__star-icon" width="12" height="12" fill="#ccc" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">-->
-<!--                      <path d="M11.1429 5.04687C11.1429 4.84598 10.9286 4.76562 10.7679 4.73884L7.40625 4.25L5.89955 1.20312C5.83929 1.07589 5.72545 0.928571 5.57143 0.928571C5.41741 0.928571 5.30357 1.07589 5.2433 1.20312L3.73661 4.25L0.375 4.73884C0.207589 4.76562 0 4.84598 0 5.04687C0 5.16741 0.0870536 5.28125 0.167411 5.3683L2.60491 7.73884L2.02902 11.0871C2.02232 11.1339 2.01563 11.1741 2.01563 11.221C2.01563 11.3951 2.10268 11.5558 2.29688 11.5558C2.39063 11.5558 2.47768 11.5223 2.56473 11.4754L5.57143 9.89509L8.57813 11.4754C8.65848 11.5223 8.75223 11.5558 8.84598 11.5558C9.04018 11.5558 9.12054 11.3951 9.12054 11.221C9.12054 11.1741 9.12054 11.1339 9.11384 11.0871L8.53795 7.73884L10.9688 5.3683C11.0558 5.28125 11.1429 5.16741 11.1429 5.04687Z"/>-->
-<!--                    </svg>-->
-<!--                    <svg class="star-rating__star-icon" width="12" height="12" fill="#ccc" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">-->
-<!--                      <path d="M11.1429 5.04687C11.1429 4.84598 10.9286 4.76562 10.7679 4.73884L7.40625 4.25L5.89955 1.20312C5.83929 1.07589 5.72545 0.928571 5.57143 0.928571C5.41741 0.928571 5.30357 1.07589 5.2433 1.20312L3.73661 4.25L0.375 4.73884C0.207589 4.76562 0 4.84598 0 5.04687C0 5.16741 0.0870536 5.28125 0.167411 5.3683L2.60491 7.73884L2.02902 11.0871C2.02232 11.1339 2.01563 11.1741 2.01563 11.221C2.01563 11.3951 2.10268 11.5558 2.29688 11.5558C2.39063 11.5558 2.47768 11.5223 2.56473 11.4754L5.57143 9.89509L8.57813 11.4754C8.65848 11.5223 8.75223 11.5558 8.84598 11.5558C9.04018 11.5558 9.12054 11.3951 9.12054 11.221C9.12054 11.1741 9.12054 11.1339 9.11384 11.0871L8.53795 7.73884L10.9688 5.3683C11.0558 5.28125 11.1429 5.16741 11.1429 5.04687Z"/>-->
-<!--                    </svg>-->
-<!--                    <svg class="star-rating__star-icon" width="12" height="12" fill="#ccc" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg">-->
-<!--                      <path d="M11.1429 5.04687C11.1429 4.84598 10.9286 4.76562 10.7679 4.73884L7.40625 4.25L5.89955 1.20312C5.83929 1.07589 5.72545 0.928571 5.57143 0.928571C5.41741 0.928571 5.30357 1.07589 5.2433 1.20312L3.73661 4.25L0.375 4.73884C0.207589 4.76562 0 4.84598 0 5.04687C0 5.16741 0.0870536 5.28125 0.167411 5.3683L2.60491 7.73884L2.02902 11.0871C2.02232 11.1339 2.01563 11.1741 2.01563 11.221C2.01563 11.3951 2.10268 11.5558 2.29688 11.5558C2.39063 11.5558 2.47768 11.5223 2.56473 11.4754L5.57143 9.89509L8.57813 11.4754C8.65848 11.5223 8.75223 11.5558 8.84598 11.5558C9.04018 11.5558 9.12054 11.3951 9.12054 11.221C9.12054 11.1741 9.12054 11.1339 9.11384 11.0871L8.53795 7.73884L10.9688 5.3683C11.0558 5.28125 11.1429 5.16741 11.1429 5.04687Z"/>-->
-<!--                    </svg>-->
-<!--                  </span>-->
-<!--                            <input type="hidden" id="form-input-rating" value="">-->
-<!--                        </div>-->
-<!--                        <div class="mb-4">-->
-<!--                            <textarea id="form-input-review" class="form-control form-control_gray" placeholder="Your Review" cols="30" rows="8"></textarea>-->
-<!--                        </div>-->
-<!--                        <div class="form-label-fixed mb-4">-->
-<!--                            <label for="form-input-name" class="form-label">Name *</label>-->
-<!--                            <input id="form-input-name" class="form-control form-control-md form-control_gray">-->
-<!--                        </div>-->
-<!--                        <div class="form-label-fixed mb-4">-->
-<!--                            <label for="form-input-email" class="form-label">Email address *</label>-->
-<!--                            <input id="form-input-email" class="form-control form-control-md form-control_gray">-->
-<!--                        </div>-->
-<!--                        <div class="form-check mb-4">-->
-<!--                            <input class="form-check-input form-check-input_fill" type="checkbox" value="" id="remember_checkbox">-->
-<!--                            <label class="form-check-label" for="remember_checkbox">-->
-<!--                                Save my name, email, and website in this browser for the next time I comment.-->
-<!--                            </label>-->
-<!--                        </div>-->
-<!--                        <div class="form-action">-->
-<!--                            <button type="submit" class="btn btn-primary">Submit</button>-->
-<!--                        </div>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </div>-->
         </div>
     </div>
 </section>
@@ -363,7 +337,6 @@
     <h2 class="h3 text-uppercase mb-4 pb-xl-2 mb-xl-4">
         Related <strong>Products</strong>
     </h2>
-
     <div id="related_products" class="position-relative">
         <div class="swiper-container js-swiper-slider"
              data-settings='{
