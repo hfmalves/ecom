@@ -57,7 +57,7 @@ class CategoryController extends BaseController
             ->orderBy('position', 'ASC')
             ->findAll();
 
-        // Subcategorias da atual
+        // Subcategorias
         $subcategories = $this->categoriesModel
             ->where('parent_id', $category['id'])
             ->where('is_active', 1)
@@ -67,36 +67,67 @@ class CategoryController extends BaseController
         // Produtos da categoria
         $products   = [];
         $productIds = $this->productsCategoriesModel
-            ->select('product_id')
             ->where('category_id', $category['id'])
             ->findColumn('product_id');
 
         if (!empty($productIds)) {
             $products = $this->productsModel
                 ->whereIn('id', $productIds)
-                ->where('is_active', 1)
                 ->findAll();
         }
+
+        // ============================
+        // ATRIBUTOS (via VARIANTS)
+        // ============================
+
         $attributes = [];
+
         if (!empty($productIds)) {
-            $attributes = $this->attributesModel
-                ->where('is_active', 1)
-                ->where('is_filterable', 1)
-                ->orderBy('sort_order', 'ASC')
-                ->findAll();
-            foreach ($attributes as $k => &$attribute) {
-                $attribute['values'] = $this->attributeValuesModel
-                    ->select('value')
-                    ->where('attribute_id', $attribute['id'])
-                    ->whereIn('product_id', $productIds)
-                    ->groupBy('value')
-                    ->orderBy('value', 'ASC')
-                    ->findAll();
-                if (empty($attribute['values'])) {
-                    unset($attributes[$k]); // remove atributo sem valores
+
+            // 1️⃣ Variants dos produtos
+            $variantIds = $this->variantsModel
+                ->whereIn('product_id', $productIds)
+                ->where('status', 1)
+                ->findColumn('id');
+
+            if (!empty($variantIds)) {
+
+                // 2️⃣ Attribute Value IDs usados nessas variants
+                $attributeValueIds = $this->db
+                    ->table('products_variant_attributes')
+                    ->select('attribute_value_id')
+                    ->whereIn('variant_id', $variantIds)
+                    ->groupBy('attribute_value_id')
+                    ->get()
+                    ->getResultArray();
+
+                $attributeValueIds = array_column($attributeValueIds, 'attribute_value_id');
+
+                if (!empty($attributeValueIds)) {
+
+                    // 3️⃣ Atributos filtráveis
+                    $attributes = $this->attributesModel
+                        ->where('is_active', 1)
+                        ->where('is_filterable', 1)
+                        ->orderBy('sort_order', 'ASC')
+                        ->findAll();
+
+                    foreach ($attributes as $k => &$attribute) {
+
+                        $attribute['values'] = $this->attributeValuesModel
+                            ->where('attribute_id', $attribute['id'])
+                            ->whereIn('id', $attributeValueIds)
+                            ->orderBy('sort_order', 'ASC')
+                            ->findAll();
+
+                        if (empty($attribute['values'])) {
+                            unset($attributes[$k]);
+                        }
+                    }
                 }
             }
         }
+
         return view('website/category/index', [
             'category'      => $category,
             'allCategories' => $allCategories,
@@ -105,8 +136,6 @@ class CategoryController extends BaseController
             'attributes'    => $attributes,
         ]);
     }
-
-
 
 
 }
