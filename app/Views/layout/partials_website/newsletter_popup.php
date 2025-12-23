@@ -1,34 +1,50 @@
 <?php if (!empty($newsletter)): ?>
-    <div class="modal fade" id="newsletterPopup" tabindex="-1" aria-hidden="true">
+    <div
+            class="modal fade"
+            id="newsletterPopup"
+            tabindex="-1"
+            aria-hidden="true"
+            x-data="newsletterPopup"
+    >
         <div class="modal-dialog newsletter-popup modal-dialog-centered">
             <div class="modal-content">
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        @click="close"
+                ></button>
+
                 <div class="row p-0 m-0">
+
                     <?php if (!empty($newsletter['image'])): ?>
                         <div class="col-md-6 p-0 d-none d-md-block">
                             <img
-                                    src="<?= esc($newsletter['image'] ?? 'https://placehold.co/600x400') ?>"
+                                    src="<?= esc($newsletter['image']) ?>"
                                     onerror="this.onerror=null;this.src='https://placehold.co/600x400';"
                                     class="h-100 w-100 object-fit-cover"
                                     alt=""
                             >
                         </div>
                     <?php endif; ?>
+
                     <div class="col-md-6 d-flex align-items-center">
-                        <div class="block-newsletter w-100" x-data="newsletterPopup">
+                        <div class="block-newsletter w-100">
+
                             <h3><?= esc($newsletter['title']) ?></h3>
                             <p><?= esc($newsletter['description']) ?></p>
+
                             <form
                                     class="footer-newsletter__form position-relative bg-body"
-                                    x-data="newsletterPopup"
                                     @submit.prevent="submit"
                             >
                                 <input
                                         class="form-control border-2"
                                         type="email"
-                                        name="email"
                                         placeholder="Endereço de email"
                                         x-ref="email"
+                                        required
                                 >
 
                                 <input
@@ -38,11 +54,10 @@
                                 >
                             </form>
 
-
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
