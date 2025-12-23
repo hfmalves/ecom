@@ -15,13 +15,29 @@
                         </div>
                     <?php endif; ?>
                     <div class="col-md-6 d-flex align-items-center">
-                        <div class="block-newsletter w-100">
+                        <div class="block-newsletter w-100" x-data="newsletterPopup">
                             <h3><?= esc($newsletter['title']) ?></h3>
                             <p><?= esc($newsletter['description']) ?></p>
-                            <form action="" class="footer-newsletter__form position-relative bg-body">
-                                <input class="form-control border-2" type="email" name="email" placeholder="Endereço de email">
-                                <input class="btn-link fw-medium bg-transparent position-absolute top-0 end-0 h-100" type="submit" value="Entrar">
+                            <form
+                                    class="footer-newsletter__form position-relative bg-body"
+                                    x-data="newsletterPopup"
+                                    @submit.prevent="submit"
+                            >
+                                <input
+                                        class="form-control border-2"
+                                        type="email"
+                                        name="email"
+                                        placeholder="Endereço de email"
+                                        x-ref="email"
+                                >
+
+                                <input
+                                        class="btn-link fw-medium bg-transparent position-absolute top-0 end-0 h-100"
+                                        type="submit"
+                                        value="Entrar"
+                                >
                             </form>
+
 
                         </div>
                     </div>
