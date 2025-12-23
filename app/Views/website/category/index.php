@@ -151,14 +151,27 @@
 
                         <div class="pc__img-wrapper">
                             <a href="<?= site_url('product/' . $product['slug']) ?>">
-                                <img
-                                    loading="lazy"
-                                    src="<?= esc($product['image'] ?? '/assets/website/images/no-image.png') ?>"
-                                    width="330"
-                                    height="400"
-                                    alt="<?= esc($product['name']) ?>"
-                                    class="pc__img"
-                                >
+                                <?php if (!empty($product['image'])): ?>
+                                    <img
+                                            loading="lazy"
+                                            src="<?= base_url('uploads/product_images/' . esc($product['image'])) ?>"
+                                            alt="<?= esc($product['name']) ?>"
+                                            width="330"
+                                            height="400"
+                                            class="pc__img mb-2"
+                                            onerror="this.onerror=null;this.src='https://placehold.co/330x400';"
+                                    />
+                                <?php else: ?>
+                                    <img
+                                            loading="lazy"
+                                            src="https://placehold.co/330x400"
+                                            alt="Imagem não disponível"
+                                            width="330"
+                                            height="400"
+                                            class="pc__img mb-2"
+                                    />
+                                <?php endif; ?>
+
                             </a>
 
                             <button
@@ -178,7 +191,7 @@
 
                             <div class="product-card__price d-flex">
                         <span class="money price">
-                            <?= number_format($product['price'], 2, ',', '.') ?> €
+                            <?= number_format($product['base_price'], 2, ',', '.') ?> €
                         </span>
                             </div>
 

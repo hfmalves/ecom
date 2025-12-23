@@ -13,65 +13,82 @@
         <!-- GALERIA -->
         <div class="col-lg-7">
             <div class="product-single__media vertical-thumbnail product-media-initialized">
+
+                <!-- THUMBNAILS -->
                 <div class="product-single__thumbnail">
                     <div class="swiper-container">
                         <div class="swiper-wrapper">
-                            <?php foreach ($images as $img): ?>
+
+                            <?php if (!empty($images)): ?>
+                                <?php foreach ($images as $img): ?>
+                                    <div class="swiper-slide product-single__image-item">
+                                        <img
+                                                src="<?= !empty($img['path'])
+                                                        ? base_url('uploads/product_images/' . esc($img['path']))
+                                                        : 'https://placehold.co/104x104'; ?>"
+                                                width="104"
+                                                height="104"
+                                                onerror="this.onerror=null;this.src='https://placehold.co/104x104';"
+                                        >
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <!-- PLACEHOLDER THUMB -->
                                 <div class="swiper-slide product-single__image-item">
                                     <img
-                                            src="<?= !empty($img['path'])
-                                                    ? base_url('uploads/product_images/' . esc($img['path']))
-                                                    : 'https://placehold.co/104x104'; ?>"
+                                            src="https://placehold.co/104x104"
                                             width="104"
                                             height="104"
-                                            onerror="this.onerror=null;this.src='https://placehold.co/104x104';"
                                     >
                                 </div>
-                            <?php endforeach; ?>
+                            <?php endif; ?>
+
                         </div>
                     </div>
                 </div>
+
+                <!-- IMAGEM PRINCIPAL -->
                 <div class="product-single__image">
                     <div class="swiper-container">
                         <div class="swiper-wrapper">
-                            <?php foreach ($images as $img): ?>
+
+                            <?php if (!empty($images)): ?>
+                                <?php foreach ($images as $img): ?>
+                                    <div class="swiper-slide product-single__image-item">
+                                        <img
+                                                loading="lazy"
+                                                class="h-auto"
+                                                src="<?= !empty($img['path'])
+                                                        ? base_url('uploads/product_images/' . esc($img['path']))
+                                                        : 'https://placehold.co/674x674'; ?>"
+                                                width="674"
+                                                height="674"
+                                                alt="<?= esc($product['name']) ?>"
+                                                onerror="this.onerror=null;this.src='https://placehold.co/674x674';"
+                                        >
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <!-- PLACEHOLDER MAIN -->
                                 <div class="swiper-slide product-single__image-item">
                                     <img
-                                        loading="lazy"
-                                        class="h-auto"
-                                        src="<?= !empty($img['path'])
-                                            ? base_url('uploads/product_images/' . esc($img['path']))
-                                            : 'https://placehold.co/674x674'; ?>"
-                                        width="674"
-                                        height="674"
-                                        alt="<?= esc($product['name']) ?>"
-                                        onerror="this.onerror=null;this.src='https://placehold.co/674x674';"
+                                            loading="lazy"
+                                            class="h-auto"
+                                            src="https://placehold.co/674x674"
+                                            width="674"
+                                            height="674"
+                                            alt="Imagem não disponível"
                                     >
-                                    <a data-fancybox="gallery"
-                                       href="<?= !empty($img['path'])
-                                           ? base_url('uploads/product_images/' . esc($img['path']))
-                                           : 'https://placehold.co/674x674'; ?>">
-                                        <svg width="16" height="16">
-                                            <use href="#icon_zoom"/>
-                                        </svg>
-                                    </a>
                                 </div>
-                            <?php endforeach; ?>
+                            <?php endif; ?>
+
                         </div>
                     </div>
                 </div>
-                <?php if (
-                    isset($product['special_price']) &&
-                    is_numeric($product['special_price']) &&
-                    $product['special_price'] > 0
-                ): ?>
-                    <div class="product-label sale-label">
-                        <span>EM DESCONTO</span>
-                    </div>
-                <?php endif; ?>
 
             </div>
         </div>
+
         <!-- INFO -->
 
         <div class="col-lg-5">
