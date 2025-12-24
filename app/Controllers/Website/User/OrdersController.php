@@ -3,19 +3,49 @@
 namespace App\Controllers\Website\User;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\Admin\Sales\OrdersModel;
 
 class OrdersController extends BaseController
 {
-    public function index()
+    protected OrdersModel $orders;
+
+    public function __construct()
     {
-        return view('website/user/account/orders');
+        $this->orders = new OrdersModel();
     }
 
-    public function show(int $id)
+    private function customerId(): int
     {
-        return view('website/user/account/orders/show', [
-            'orderId' => $id
+        return session('user.id');
+    }
+
+    public function index()
+    {
+        return view('website/user/account/orders', [
+            'orders' => $this->orders
+                ->where('customer_id', $this->customerId())
+                ->findAll(),
         ]);
+    }
+
+    public function show($id)
+    {
+        return view('website/user/account/order_detail', [
+            'order' => $this->orders
+                ->where('id', $id)
+                ->where('customer_id', $this->customerId())
+                ->first(),
+        ]);
+    }
+
+    public function cancel($id)
+    {
+        $this->orders
+            ->where('id', $id)
+            ->where('customer_id', $this->customerId())
+            ->set('status', 'cancelled')
+            ->update();
+
+        return redirect()->back();
     }
 }

@@ -336,38 +336,49 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
     $routes->get('/', 'HomeController::index');
     $routes->get('product/(:any)', 'ProductController::index/$1');
     $routes->get('page/(:any)', 'PageController::index/$1');
-    $routes->get('category/(:any)', 'categoryController::index/$1');
-    $routes->get('promo/(:any)', 'categoryController::index/$1');
-
-    $routes->group('newsletter', ['namespace' => 'App\Controllers\Website'], function ($routes) {
+    $routes->get('category/(:any)', 'CategoryController::index/$1');
+    $routes->get('promo/(:any)', 'CategoryController::index/$1');
+    $routes->group('newsletter', function ($routes) {
         $routes->post('subscribe', 'NewsletterController::subscribe');
         $routes->post('seen', 'NewsletterController::seen');
         $routes->get('status', 'NewsletterController::status');
     });
-
-    $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
-        $routes->get('cart', 'CartController::cart');
-        $routes->get('checkout', 'CartController::checkout');
-        $routes->get('order_complete', 'CartController::complete');
-    });
+    $routes->get('cart', 'CartController::cart');
+    $routes->get('checkout', 'CartController::checkout');
+    $routes->get('order_complete', 'CartController::complete');
     $routes->group('user', function ($routes) {
         $routes->group('auth', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
             $routes->get('login', 'AuthController::login');
+            $routes->post('login', 'AuthController::makelogin');
             $routes->get('register', 'AuthController::register');
+            $routes->post('register', 'AuthController::makeRegister');
             $routes->get('recovery', 'AuthController::recovery');
+            $routes->post('recovery', 'AuthController::makeRecovery');
             $routes->get('logout', 'AuthController::logout');
         });
-        $routes->group('account', ['namespace' => 'App\Controllers\Website\User'], function ($routes) {
-            $routes->get('', 'AccountController::dashboard');
+        $routes->group('account', [
+            'namespace' => 'App\Controllers\Website\User',
+            'filter'    => 'userAuth'
+        ], function ($routes) {
+            $routes->get('/', 'AccountController::dashboard');
             $routes->get('dashboard', 'AccountController::dashboard');
             $routes->get('edit', 'AccountController::edit');
-            $routes->get('address', 'AccountController::address');
-            $routes->get('wishlist', 'AccountController::wishlist');
-            // ORDERS
+            $routes->get('address', 'AddressController::index');
+            $routes->post('address', 'AddressController::store');
+            $routes->post('address/(:num)', 'AddressController::update/$1');
+            $routes->get('address/delete/(:num)', 'AddressController::delete/$1');
+            $routes->get('wishlist', 'WishlistController::index');
+            $routes->get('wishlist/add/(:num)', 'WishlistController::add/$1');
+            $routes->get('wishlist/remove/(:num)', 'WishlistController::remove/$1');
             $routes->group('orders', function ($routes) {
                 $routes->get('/', 'OrdersController::index');
                 $routes->get('(:num)', 'OrdersController::show/$1');
+                $routes->post('cancel/(:num)', 'OrdersController::cancel/$1');
             });
+            $routes->post('pay/(:num)', 'PaymentsController::pay/$1');
+            $routes->post('refund/(:num)', 'PaymentsController::refund/$1');
         });
     });
 });
+
+
