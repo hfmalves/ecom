@@ -338,6 +338,13 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
     $routes->get('page/(:any)', 'PageController::index/$1');
     $routes->get('category/(:any)', 'categoryController::index/$1');
     $routes->get('promo/(:any)', 'categoryController::index/$1');
+
+    $routes->group('newsletter', ['namespace' => 'App\Controllers\Website'], function ($routes) {
+        $routes->post('subscribe', 'NewsletterController::subscribe');
+        $routes->post('seen', 'NewsletterController::seen');
+        $routes->get('status', 'NewsletterController::status');
+    });
+
     $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes) {
         $routes->get('cart', 'CartController::cart');
         $routes->get('checkout', 'CartController::checkout');

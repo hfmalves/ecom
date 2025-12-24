@@ -1163,8 +1163,8 @@ function pureFadeOut(e) {
     }
 
     initCookieConsient() {
-      const purecookieDesc = "In order to provide you a personalized shopping experience, our site uses cookies. By continuing to use this site, you are agreeing to our cookie policy.",
-      purecookieButton = "Accept";
+      const purecookieDesc = "Para lhe proporcionar uma experiência de compra personalizada, o nosso site utiliza cookies. Ao continuar a navegar, está a aceitar a nossa política de cookies.",
+      purecookieButton = "Aceitar";
 
       function pureFadeIn(e, o) {
         var i = document.getElementById(e);
@@ -1384,8 +1384,6 @@ function pureFadeOut(e) {
   });
 
   window.onload = () => {
-    if($("#newsletterPopup").length > 0)
-      $("#newsletterPopup").modal("show");
 
     $('.btn-video-player').each(function() {
       $(this).on("click", function() {

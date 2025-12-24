@@ -6,13 +6,12 @@
             aria-hidden="true"
             x-data="newsletterPopup"
     >
-        <div class="modal-dialog newsletter-popup modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered newsletter-popup">
             <div class="modal-content">
 
                 <button
                         type="button"
                         class="btn-close"
-                        data-bs-dismiss="modal"
                         @click="close"
                 ></button>
 
