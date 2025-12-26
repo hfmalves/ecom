@@ -11,7 +11,7 @@ class HomeModel extends Model
     protected $useAutoIncrement = true;
 
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
 
     protected $protectFields    = true;
     protected $allowedFields    = [
@@ -19,6 +19,11 @@ class HomeModel extends Model
         'home_code',
         'created_at',
         'updated_at',
+        'name',
+        'is_default',
+        'active_start',
+        'active_end',
+        'is_active'
     ];
 
     protected bool $allowEmptyInserts = false;

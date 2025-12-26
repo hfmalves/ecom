@@ -193,6 +193,11 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
         $routes->group('showcases', ['filter' => 'adminNoAuth'], function ($routes) {
             $routes->get('/', 'ShowcasesController::index');
+            $routes->post('create', 'ShowcasesController::create');
+            $routes->get('edit/(:num)', 'ShowcasesController::edit/$1');
+            $routes->post('update', 'ShowcasesController::update');
+            $routes->post('delete', 'ShowcasesController::delete');
+            $routes->post('deactivate', 'ShowcasesController::deactivate');
         });
         $routes->group('blog', ['filter' => 'adminNoAuth'], function ($routes) {
             $routes->get('/', 'BlogController::index');
