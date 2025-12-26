@@ -73,12 +73,12 @@
                         <span>Loja</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="<?= base_url('admin/website/design') ?>">Página Inicial</a></li>
-                        <li><a href="<?= base_url('admin/website/menu') ?>">Menus de Acesso</a></li>
-                        <li><a href="<?= base_url('admin/website/modules') ?>">Módulos</a></li>
+                        <li><a href="<?= base_url('admin/website/showcases') ?>">Digital showcases</a></li>
+                        <li><a href="<?= base_url('admin/website/menu') ?>">Menu</a></li>
                         <li><a href="<?= base_url('admin/website/blog') ?>">Blog & Artigos</a></li>
                         <li><a href="<?= base_url('admin/website/faq') ?>">Faq's</a></li>
                         <li><a href="<?= base_url('admin/website/pages') ?>">Páginas</a></li>
+                        <li><a href="<?= base_url('admin/website/promo') ?>">Promos</a></li>
                     </ul>
                 </li>
                 <!-- Relatórios -->

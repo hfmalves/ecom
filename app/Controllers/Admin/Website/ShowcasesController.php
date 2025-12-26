@@ -4,7 +4,7 @@ namespace App\Controllers\Admin\Website;
 
 use App\Controllers\BaseController;
 
-class ModulesController extends BaseController
+class ShowcasesController extends BaseController
 {
     public function index()
     {

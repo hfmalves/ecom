@@ -181,9 +181,6 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
         });
     });
     $routes->group('website', ['namespace' => 'App\Controllers\Admin\Website'], function ($routes) {
-        $routes->group('design', ['filter' => 'adminNoAuth'], function ($routes) {
-            $routes->get('/', 'DesignController::index');
-        });
         $routes->group('menu', ['filter' => 'adminNoAuth'], function ($routes) {
             $routes->get('/', 'MenuController::index');
             $routes->get('edit/(:num)', 'MenuController::edit/$1');
@@ -194,8 +191,8 @@ $routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($rou
             $routes->post('enable', 'MenuController::enable');
             $routes->post('reorder', 'MenuController::reorder');
         });
-        $routes->group('modules', ['filter' => 'adminNoAuth'], function ($routes) {
-            $routes->get('/', 'ModulesController::index');
+        $routes->group('showcases', ['filter' => 'adminNoAuth'], function ($routes) {
+            $routes->get('/', 'ShowcasesController::index');
         });
         $routes->group('blog', ['filter' => 'adminNoAuth'], function ($routes) {
             $routes->get('/', 'BlogController::index');
