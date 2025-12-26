@@ -26,6 +26,15 @@ Módulos
             </div>
             <div class="card-body">
                 <div class="table-responsive">
+                    <?php foreach ($blocks as $block): ?>
+                        <div class="mb-0">
+                            <div class="d-flex gap-2 mt-2">
+                                <?php foreach ($images[$block['id']] as $img): ?>
+                                    <img style="width: 100%" src="<?= $img ?>">
+                                <?php endforeach ?>
+                            </div>
+                        </div>
+                    <?php endforeach ?>
 
                 </div>
             </div>

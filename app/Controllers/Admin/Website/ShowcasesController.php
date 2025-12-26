@@ -4,13 +4,16 @@ namespace App\Controllers\Admin\Website;
 
 use App\Controllers\BaseController;
 use App\Models\Website\HomeModel;
+use App\Models\Website\HomeBlockModel;
 class ShowcasesController extends BaseController
 {
     protected $HomeModel;
+    protected $HomeBlockModel;
 
     public function __construct()
     {
         $this->HomeModel = new HomeModel();
+        $this->HomeBlockModel = new HomeBlockModel();
     }
     public function index()
     {
@@ -51,12 +54,29 @@ class ShowcasesController extends BaseController
     }
     public function edit($id)
     {
+        $blocks = $this->HomeBlockModel->where('home_id', $id)->orderBy('position', 'asc')->findAll();
         $showcase = $this->HomeModel->find($id);
         if (!$showcase) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
+        $themeImages = [];
+
+        foreach ($blocks as $block) {
+            $file = FCPATH . 'theme/theme_' . $block['block_type'] . '.png';
+
+            if (is_file($file)) {
+                $themeImages[$block['id']] = [
+                    base_url('theme/theme_' . $block['block_type'] . '.png')
+                ];
+            } else {
+                $themeImages[$block['id']] = [];
+            }
+        }
+
         return view('admin/website/showcases/edit', [
             'showcase' => $showcase,
+            'blocks'   => $blocks,
+            'images'  => $themeImages,
         ]);
     }
     public function update()
