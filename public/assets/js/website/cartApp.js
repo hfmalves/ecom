@@ -159,6 +159,16 @@ async function refreshDrawer() {
     const target = document.getElementById('cartDrawerContent');
     if (target) target.innerHTML = html;
 }
+async function refreshCartPage() {
+    const res = await fetch('/cart/content', {
+        credentials: 'same-origin',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    const html = await res.text();
+    const target = document.querySelector('.shopping-cart');
+    if (target) target.innerHTML = html;
+}
 
 function openDrawer() {
     document.getElementById('cartDrawer')?.classList.add('is-open');
@@ -184,6 +194,7 @@ async function updateCartQty(input) {
         body: JSON.stringify(payload)
     });
     await refreshDrawer();
+    await refreshCartPage();
 }
 async function removeCartItem(btn) {
     const payload = {
@@ -202,7 +213,9 @@ async function removeCartItem(btn) {
         body: JSON.stringify(payload)
     });
     await refreshDrawer();
+    await refreshCartPage();
 }
+
 document.addEventListener('click', async (e) => {
 
     /* =========================
@@ -227,7 +240,10 @@ document.addEventListener('click', async (e) => {
     /* =========================
        CARRINHO — UPDATE
     ========================= */
-    if (e.target.closest('#cartDrawer')) {
+    if (
+        e.target.closest('#cartDrawer') ||
+        e.target.closest('.cart-table')
+    ) {
 
         // QTY
         if (

@@ -352,7 +352,9 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
         $routes->post('remove', 'CartController::remove');
         $routes->post('clear', 'CartController::clear');
         $routes->get('drawer', 'CartController::drawer');
+        $routes->get('content', 'CartController::cartContent');
     });
+
 
     $routes->get('checkout', 'CartController::checkout');
     $routes->get('order_complete', 'CartController::complete');

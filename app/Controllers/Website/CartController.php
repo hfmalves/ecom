@@ -26,22 +26,18 @@ class CartController extends BaseController
     }
     public function cart()
     {
-        return view('website/cart/cart');
-    }
+        $data = $this->getCartData();
 
+        return view('website/cart/cart', $data);
+    }
     public function checkout()
     {
         return view('website/cart/checkout');
     }
-
     public function complete()
     {
         return view('website/cart/complete');
     }
-    // =====================
-    // ACTIONS (AJAX)
-    // =====================
-
     public function add(): ResponseInterface
     {
         $data = $this->request->getJSON(true);
@@ -176,9 +172,6 @@ class CartController extends BaseController
             'cart'    => $this->cartSummary($cartId)
         ]);
     }
-
-
-
     public function update(): ResponseInterface
     {
         $data = $this->request->getJSON(true);
@@ -252,9 +245,6 @@ class CartController extends BaseController
             'cart'    => $this->cartSummary($cart['id'])
         ]);
     }
-
-
-
     public function remove(): ResponseInterface
     {
         $data = $this->request->getJSON(true);
@@ -301,10 +291,6 @@ class CartController extends BaseController
             'cart'    => $this->cartSummary($cart['id'])
         ]);
     }
-
-
-
-
     public function clear(): ResponseInterface
     {
         $cart = $this->OrdersCartsModel
@@ -330,7 +316,6 @@ class CartController extends BaseController
             'cart'    => $cart ? $this->cartSummary($cart['id']) : ['total_items' => 0, 'total_value' => 0]
         ]);
     }
-
     private function recalculateCart(int $cartId): void
     {
         $totals = $this->OrdersCartItemsModel
@@ -344,7 +329,6 @@ class CartController extends BaseController
             'total_value' => (float) ($totals['total_value'] ?? 0),
         ]);
     }
-
     private function cartSummary(int $cartId): array
     {
         $cart = $this->OrdersCartsModel->find($cartId);
@@ -356,6 +340,13 @@ class CartController extends BaseController
     }
     public function drawer()
     {
+        $data = $this->getCartData();
+
+        return view('layout/partials_website/cart_drawer_content', $data);
+    }
+
+    private function getCartData(): array
+    {
         $sessionId = session_id();
 
         $cart = $this->OrdersCartsModel
@@ -364,13 +355,13 @@ class CartController extends BaseController
             ->first();
 
         if (!$cart) {
-            return view('layout/partials_website/cart_drawer', [
+            return [
                 'cartItems' => [],
                 'cartTotals' => [
                     'total_items' => 0,
-                    'total_value' => 0
+                    'total_value' => 0,
                 ]
-            ]);
+            ];
         }
 
         $items = $this->OrdersCartItemsModel
@@ -390,14 +381,21 @@ class CartController extends BaseController
             ];
         }
 
-        return view('layout/partials_website/cart_drawer_content', [
+        return [
             'cartItems' => $cartItems,
             'cartTotals' => [
                 'total_items' => (int) $cart['total_items'],
                 'total_value' => (float) $cart['total_value'],
             ]
-        ]);
+        ];
     }
+
+    public function cartContent()
+    {
+        $data = $this->getCartData();
+        return view('layout/partials_website/cart_content', $data);
+    }
+
 
 
 
