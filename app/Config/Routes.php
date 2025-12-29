@@ -345,7 +345,14 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
         $routes->post('seen', 'NewsletterController::seen');
         $routes->get('status', 'NewsletterController::status');
     });
-    $routes->get('cart', 'CartController::cart');
+    $routes->group('cart', ['namespace' => 'App\Controllers\Website'], function ($routes) {
+        $routes->get('/', 'CartController::cart');
+        $routes->post('add', 'CartController::add');
+        $routes->post('update', 'CartController::update');
+        $routes->post('remove', 'CartController::remove');
+        $routes->post('clear', 'CartController::clear');
+    });
+
     $routes->get('checkout', 'CartController::checkout');
     $routes->get('order_complete', 'CartController::complete');
     $routes->group('user', function ($routes) {

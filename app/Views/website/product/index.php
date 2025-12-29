@@ -10,6 +10,23 @@
     ?>
     <div class="mb-md-1 pb-md-5"></div>
     <div class="row">
+        <?php
+        $grouped = [];
+        foreach ($attributes as $variantId => $attrs) {
+            foreach ($attrs as $code => $values) {
+                $grouped[$code] = array_unique(
+                        array_merge($grouped[$code] ?? [], $values)
+                );
+            }
+        }
+
+        $type = $product['type'] ?? 'simple';
+
+        $isOutOfStock = (
+                ($product['manage_stock'] ?? 0) == 1 &&
+                ($product['stock_qty'] ?? 0) == 0
+        );
+        ?>
         <!-- GALERIA -->
         <div class="col-lg-7">
             <div class="product-single__media vertical-thumbnail product-media-initialized">
@@ -88,10 +105,12 @@
 
             </div>
         </div>
-
-        <!-- INFO -->
-
-        <div class="col-lg-5">
+        <div
+                class="col-lg-5"
+                x-data="cartApp"
+                data-product-type="<?= esc($type) ?>"
+                data-product-id="<?= (int)$product['id'] ?>"
+        >
             <div class="d-flex justify-content-between mb-4 pb-md-2">
                 <div class="breadcrumb mb-0 d-none d-md-block flex-grow-1">
                     <a href="#" class="menu-link menu-link_us-s text-uppercase fw-medium">Home</a>
@@ -105,47 +124,19 @@
                 <?= esc($product['name']) ?>
             </h1>
             <div class="product-single__price">
-                <?php if (
-                    isset($product['special_price']) &&
-                    is_numeric($product['special_price']) &&
-                    $product['special_price'] > 0
-                ): ?>
-                    <span class="old-price">
-                        €<?= number_format($product['base_price_tax'], 2, ',', '.') ?>
-                    </span>
-                                    <span class="special-price">
-                        €<?= number_format($product['special_price'], 2, ',', '.') ?>
-                    </span>
-                                <?php else: ?>
-                                    <span class="current-price">
-                        €<?= number_format($product['base_price_tax'], 2, ',', '.') ?>
-                    </span>
-                <?php endif; ?>
+                <span class="old-price d-none"></span>
+                <span class="current-price"></span>
+
+                <span class="d-none"
+                      data-price-base="<?= (float)$product['base_price_tax'] ?>"
+                      data-price-special="<?= (float)$product['special_price'] ?>">
+    </span>
             </div>
+
             <div class="product-single__short-desc">
                 <?= esc($product['short_description']) ?>
                 <?= esc($product['description']) ?>
             </div>
-            <?php
-            // =====================
-            // PRÉ-CÁLCULOS
-            // =====================
-            $grouped = [];
-            foreach ($attributes as $variantId => $attrs) {
-                foreach ($attrs as $code => $values) {
-                    $grouped[$code] = array_unique(
-                        array_merge($grouped[$code] ?? [], $values)
-                    );
-                }
-            }
-
-            $type = $product['type'] ?? 'simple';
-
-            $isOutOfStock = (
-                ($product['manage_stock'] ?? 0) == 1 &&
-                ($product['stock_qty'] ?? 0) == 0
-            );
-            ?>
 
             <form name="addtocart-form" method="post">
 
@@ -158,36 +149,46 @@
                             <?php
                             $code = $attr['code'];
                             if (empty($grouped[$code])) continue;
-                            $isColor = ($attr['type'] === 'color');
-                            $i = 1;
+                            $first = true;
                             ?>
 
-                            <div class="product-swatch <?= $isColor ? 'color-swatches' : 'text-swatches' ?>">
+                            <div class="product-swatch <?= ($attr['type'] === 'color') ? 'color-swatches' : 'text-swatches' ?>">
                                 <label><?= esc($attr['name']) ?></label>
 
                                 <div class="swatch-list">
-                                    <?php foreach ($grouped[$code] as $v): ?>
-                                        <input
-                                                type="radio"
-                                                name="<?= esc($code) ?>"
-                                                id="swatch-<?= esc($code) ?>-<?= $i ?>"
-                                            <?= $i === 1 ? 'checked' : '' ?>
-                                        >
+                                    <?php foreach ($grouped[$code] as $value): ?>
+                                        <input type="radio"
+                                               name="<?= esc($code) ?>"
+                                               id="<?= $code ?>-<?= md5($value) ?>"
+                                                <?= $first ? 'checked' : '' ?>>
 
-                                        <label
-                                                class="swatch <?= $isColor ? 'swatch-color' : '' ?> js-swatch"
-                                                for="swatch-<?= esc($code) ?>-<?= $i ?>"
-                                                title="<?= esc($v) ?>"
-                                            <?= $isColor ? 'style="color:' . esc($v) . '"' : '' ?>
-                                        >
-                                            <?= $isColor ? '' : esc($v) ?>
+                                        <label class="swatch js-swatch"
+                                               for="<?= $code ?>-<?= md5($value) ?>"
+                                               data-attr="<?= esc($code) ?>"
+                                               data-value="<?= esc($value) ?>">
+                                            <?= esc($value) ?>
                                         </label>
-                                        <?php $i++; endforeach; ?>
+                                        <?php $first = false; endforeach; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
+
+                    <div id="variants-map" class="d-none">
+                        <?php foreach ($variants as $variant): ?>
+                            <div class="variant"
+                                 data-id="<?= $variant['id'] ?>"
+                                 data-base="<?= $variant['base_price_tax'] ?>"
+                                 data-special="<?= $variant['special_price'] ?>"
+                                    <?php foreach ($attributes[$variant['id']] as $code => $vals): ?>
+                                        data-<?= esc($code) ?>="<?= esc($vals[0]) ?>"
+                                    <?php endforeach; ?>
+                            ></div>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endif; ?>
+
+
 
                 <!-- =====================
                      VIRTUAL
@@ -206,47 +207,44 @@
                      PACK
                 ====================== -->
                 <?php if ($type === 'pack' && !empty($packItems)): ?>
-                    <div class="product-single__addtocart product-single__grouped">
+                    <div class="product-single__addtocart product-single__grouped"
+                         x-data="{
+                            sku: '<?= esc($packItems[0]['product_sku']) ?>',
+                            price: <?= (float) $packItems[0]['base_price'] ?>
+                         }">
 
                         <?php foreach ($packItems as $item): ?>
-                            <div class="grouped-item">
-
-                                <div class="qty-control position-relative qty-initialized">
-                                    <input
-                                            type="number"
-                                            name="pack_qty[<?= esc($item['product_sku']) ?>]"
-                                            value="<?= (int)$item['qty'] ?>"
-                                            min="1"
-                                            class="qty-control__number text-center"
-                                            readonly
-                                    >
-                                    <div class="qty-control__reduce">-</div>
-                                    <div class="qty-control__increase">+</div>
-                                </div>
+                            <div class="grouped-item"
+                                 @click="
+                sku = '<?= esc($item['product_sku']) ?>';
+                price = <?= (float) $item['base_price'] ?>;
+             "
+                                 style="cursor:pointer">
 
                                 <div class="grouped-item__name">
                                     <?= esc($item['product_sku']) ?>
                                 </div>
 
                                 <div class="grouped-item__price">
-                    <span class="regular-price">
-                        €<?= number_format($item['base_price'], 2, ',', '.') ?>
-                    </span>
+                                    €<?= number_format($item['base_price'], 2, ',', '.') ?>
                                 </div>
-
                             </div>
                         <?php endforeach; ?>
 
-                        <div>
-                            <button
-                                    type="submit"
-                                    class="btn btn-primary btn-addtocart js-open-aside"
-                                    data-aside="cartDrawer"
-                            >
-                                Comprasr
-                            </button>
+                        <!-- PREÇO ATUAL -->
+                        <div class="mt-3">
+                            <strong>SKU:</strong>
+                            <span x-text="sku"></span>
+                            <br>
+                            <strong>Preço:</strong>
+                            €<span x-text="price.toFixed(2)"></span>
                         </div>
 
+                        <button type="submit"
+                                class="btn btn-primary btn-addtocart js-open-aside"
+                                data-aside="cartDrawer">
+                            Comprar 1
+                        </button>
                     </div>
                 <?php endif; ?>
 
@@ -260,8 +258,15 @@
                             <input type="number" name="quantity" value="1" min="1" class="qty-control__number text-center">
                             <div class="qty-control__reduce">-</div>
                             <div class="qty-control__increase">+</div>
-                        </div><!-- .qty-control -->
-                        <button type="submit" class="btn btn-primary btn-addtocart js-open-aside" data-aside="cartDrawer">Add to Cart</button>
+                        </div>
+                        <button
+                                type="button"
+                                class="btn btn-primary btn-addtocart js-open-aside"
+                                data-aside="cartDrawer"
+                                @click="addToCart(document.querySelector('[name=quantity]').value)"
+                        >
+                            Comprar Simples
+                        </button>
                     </div>
                 <?php endif; ?>
 
@@ -326,25 +331,22 @@
             </div>
             <div class="tab-pane fade" id="tab-additional-info" role="tabpanel" aria-labelledby="tab-additional-info-tab">
                 <div class="product-single__addtional-info">
-
                     <?php if (!empty($product['weight'])): ?>
                         <div class="item">
                             <label class="h6">Peso</label>
                             <span><?= esc($product['weight']) ?> kg</span>
                         </div>
                     <?php endif; ?>
-
                     <?php if (!empty($product['width']) || !empty($product['height']) || !empty($product['length'])): ?>
                         <div class="item">
                             <label class="h6">Dimenções</label>
                             <span>
-                    <?= esc($product['width'] ?? '-') ?>
-                    x <?= esc($product['height'] ?? '-') ?>
-                    x <?= esc($product['length'] ?? '-') ?> cm
-                </span>
+                            <?= esc($product['width'] ?? '-') ?>
+                            x <?= esc($product['height'] ?? '-') ?>
+                            x <?= esc($product['length'] ?? '-') ?> cm
+                        </span>
                         </div>
                     <?php endif; ?>
-
                 </div>
             </div>
         </div>
@@ -403,9 +405,15 @@
                                      class="pc__img pc__img-second">
                             </a>
 
-                            <button class="pc__atc btn anim_appear-bottom btn position-absolute border-0 text-uppercase fw-medium">
-                                Add To Cart
+                            <button
+                                    type="button"
+                                    class="btn btn-primary btn-addtocart"
+                                    @click="addSimple(<?= (int)$product['id'] ?>, document.querySelector('[name=quantity]').value)"
+                            >
+                                Add to Cart 1
                             </button>
+
+
                         </div>
 
                         <div class="pc__info position-relative">

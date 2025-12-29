@@ -12,7 +12,18 @@ class OrdersCartItemsModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['cart_id','product_id','variant_id','qty','price','created_at','updated_at'];
+    protected $allowedFields = [
+        'cart_id',
+        'product_id',
+        'variant_id',
+        'qty',
+        'price',
+        'discount',
+        'subtotal',
+        'removed_at',
+        'created_at',
+        'updated_at'
+    ];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +32,7 @@ class OrdersCartItemsModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
