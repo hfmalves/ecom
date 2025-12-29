@@ -25,18 +25,23 @@ Módulos
                 </button>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                <div class="table-responsive" x-data="showcasesApp()">
                     <?php foreach ($blocks as $block): ?>
-                        <div class="mb-0">
-                            <div class="d-flex gap-2 mt-2">
-                                <?php foreach ($images[$block['id']] as $img): ?>
-                                    <img style="width: 100%" src="<?= $img ?>">
-                                <?php endforeach ?>
-                            </div>
+                        <div class="d-flex flex-column gap-2 mt-2" data-block-id="<?= $block['id'] ?>">
+                            <?php foreach ($images[$block['id']] as $img): ?>
+                                <img
+                                        src="<?= esc($img) ?>"
+                                        draggable="true"
+                                        style="width:100%; cursor: grab"
+                                        @dragstart="dragStart($event)"
+                                        @dragover.prevent
+                                        @drop="drop($event)"
+                                >
+                            <?php endforeach ?>
                         </div>
                     <?php endforeach ?>
-
                 </div>
+
             </div>
         </div>
     </div>
@@ -157,4 +162,7 @@ Módulos
         </form>
     </div>
 </div>
+<?= $this->endSection() ?>
+<?= $this->section('content-script') ?>
+<script src="<?= base_url('assets/js/admin/showcasesApp.js') ?>"></script>
 <?= $this->endSection() ?>
