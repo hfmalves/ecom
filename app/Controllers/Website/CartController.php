@@ -188,8 +188,18 @@ class CartController extends BaseController
         }
 
         $productId = (int) $data['product_id'];
-        $variantId = isset($data['variant_id']) ? (int) $data['variant_id'] : null;
         $qty       = (int) $data['quantity'];
+
+        // 🔒 NORMALIZAÇÃO CORRETA DO variant_id
+        $variantId = null;
+        if (
+            array_key_exists('variant_id', $data) &&
+            $data['variant_id'] !== null &&
+            $data['variant_id'] !== '' &&
+            $data['variant_id'] !== 'null'
+        ) {
+            $variantId = (int) $data['variant_id'];
+        }
 
         $cart = $this->OrdersCartsModel
             ->where('session_id', session_id())
@@ -200,26 +210,37 @@ class CartController extends BaseController
             return $this->response->setStatusCode(404);
         }
 
-        $item = $this->OrdersCartItemsModel
+        // 🔥 QUERY CORRETA (NULL vs =)
+        $query = $this->OrdersCartItemsModel
             ->where('cart_id', $cart['id'])
             ->where('product_id', $productId)
-            ->where('variant_id', $variantId)
-            ->where('removed_at', null)
-            ->first();
+            ->where('removed_at', null);
+
+        if ($variantId === null) {
+            $query->where('variant_id IS NULL', null, false);
+        } else {
+            $query->where('variant_id', $variantId);
+        }
+
+        $item = $query->first();
 
         if (!$item) {
             return $this->response->setStatusCode(404);
         }
 
+        // =====================
+        // UPDATE
+        // =====================
         if ($qty <= 0) {
+            // soft delete (como já tinhas definido)
             $this->OrdersCartItemsModel->update($item['id'], [
                 'removed_at' => date('Y-m-d H:i:s')
             ]);
         } else {
             $this->OrdersCartItemsModel->update($item['id'], [
                 'qty'      => $qty,
-                'price'    => $item['price'],      // preço não muda
-                'discount' => $item['discount'],   // desconto mantém
+                'price'    => $item['price'],
+                'discount' => $item['discount'],
                 'subtotal' => $item['price'] * $qty
             ]);
         }
@@ -233,16 +254,27 @@ class CartController extends BaseController
     }
 
 
+
     public function remove(): ResponseInterface
     {
         $data = $this->request->getJSON(true);
-
+        log_message('debug', 'CART REMOVE REQUEST', [
+            'payload' => $data,
+        ]);
         if (!isset($data['product_id'])) {
             return $this->response->setStatusCode(400);
         }
 
         $productId = (int) $data['product_id'];
-        $variantId = isset($data['variant_id']) ? (int) $data['variant_id'] : null;
+
+        $variantId = null;
+        if (
+            array_key_exists('variant_id', $data) &&
+            $data['variant_id'] !== null &&
+            $data['variant_id'] !== 'null'
+        ) {
+            $variantId = (int) $data['variant_id'];
+        }
 
         $cart = $this->OrdersCartsModel
             ->where('session_id', session_id())
@@ -253,21 +285,25 @@ class CartController extends BaseController
             return $this->response->setStatusCode(404);
         }
 
-        $this->OrdersCartItemsModel
+        $query = $this->OrdersCartItemsModel
             ->where('cart_id', $cart['id'])
-            ->where('product_id', $productId)
-            ->where('variant_id', $variantId)
-            ->where('removed_at', null)
-            ->set(['removed_at' => date('Y-m-d H:i:s')])
-            ->update();
+            ->where('product_id', $productId);
 
+        if ($variantId === null) {
+            $query->where('variant_id IS NULL', null, false);
+        } else {
+            $query->where('variant_id', $variantId);
+        }
+        $query->delete();
         $this->recalculateCart($cart['id']);
-
         return $this->response->setJSON([
             'success' => true,
             'cart'    => $this->cartSummary($cart['id'])
         ]);
     }
+
+
+
 
     public function clear(): ResponseInterface
     {
@@ -318,6 +354,52 @@ class CartController extends BaseController
             'total_value' => (float) $cart['total_value'],
         ];
     }
+    public function drawer()
+    {
+        $sessionId = session_id();
+
+        $cart = $this->OrdersCartsModel
+            ->where('session_id', $sessionId)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$cart) {
+            return view('layout/partials_website/cart_drawer', [
+                'cartItems' => [],
+                'cartTotals' => [
+                    'total_items' => 0,
+                    'total_value' => 0
+                ]
+            ]);
+        }
+
+        $items = $this->OrdersCartItemsModel
+            ->where('cart_id', $cart['id'])
+            ->where('removed_at', null)
+            ->findAll();
+
+        $cartItems = [];
+
+        foreach ($items as $item) {
+            $cartItems[] = [
+                'item'    => $item,
+                'product' => $this->ProductsModel->find($item['product_id']),
+                'variant' => $item['variant_id']
+                    ? $this->ProductsVariantsModel->find($item['variant_id'])
+                    : null,
+            ];
+        }
+
+        return view('layout/partials_website/cart_drawer_content', [
+            'cartItems' => $cartItems,
+            'cartTotals' => [
+                'total_items' => (int) $cart['total_items'],
+                'total_value' => (float) $cart['total_value'],
+            ]
+        ]);
+    }
+
+
 
 
 

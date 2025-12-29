@@ -41,6 +41,48 @@ abstract class BaseController extends Controller
         'company',
         'category'
     ];
+    protected $cartItems = [];
+    protected $cartTotals = [
+        'total_items' => 0,
+        'total_value' => 0,
+    ];
+    protected function loadCart(): void
+    {
+        $OrdersCartsModel = new \App\Models\Admin\Sales\OrdersCartsModel();
+        $OrdersCartItemsModel = new \App\Models\Admin\Sales\OrdersCartItemsModel();
+        $ProductsModel = new \App\Models\Admin\Catalog\ProductsModel();
+        $ProductsVariantsModel = new \App\Models\Admin\Catalog\ProductsVariantsModel();
+
+        $cart = $OrdersCartsModel
+            ->where('session_id', session_id())
+            ->where('status', 'active')
+            ->first();
+
+        if (!$cart) {
+            return;
+        }
+
+        $items = $OrdersCartItemsModel
+            ->where('cart_id', $cart['id'])
+            ->where('removed_at', null)
+            ->findAll();
+
+        foreach ($items as $item) {
+            $this->cartItems[] = [
+                'item'    => $item,
+                'product' => $ProductsModel->find($item['product_id']),
+                'variant' => $item['variant_id']
+                    ? $ProductsVariantsModel->find($item['variant_id'])
+                    : null,
+            ];
+        }
+
+        $this->cartTotals = [
+            'total_items' => (int) $cart['total_items'],
+            'total_value' => (float) $cart['total_value'],
+        ];
+    }
+
 
     /**
      * Be sure to declare properties for any property fetch you initialized.
@@ -60,22 +102,22 @@ abstract class BaseController extends Controller
 
         $this->session = service('session');
 
-        // MENU
+        // =====================
+        // MENU / CATEGORIAS
+        // =====================
         $menuModel = new \App\Models\Website\MenuModel();
         $menu = $menuModel->getMenuTree();
 
-        // CATEGORIES
         $categoryModel = new \App\Models\Admin\Catalog\CategoriesModel();
         $categories = $categoryModel->findAll();
 
-        // NEWSLETTER (GLOBAL)
+        // =====================
+        // HOME / NEWSLETTER
+        // =====================
         $homeModel = new HomeModel();
         $newsletterModel = new BlockHomeNewsletterModel();
 
-        $home = $homeModel
-            ->where('is_active', 1)
-            ->first();
-
+        $home = $homeModel->where('is_active', 1)->first();
         $newsletter = null;
 
         if ($home) {
@@ -85,10 +127,22 @@ abstract class BaseController extends Controller
                 ->first();
         }
 
-        // 🔥 VARIÁVEIS GLOBAIS DO LAYOUT
+        // =====================
+        // CARRINHO (ISTO FALTAVA)
+        // =====================
+        $this->loadCart();
+
+        // =====================
+        // VARIÁVEIS GLOBAIS
+        // =====================
         service('renderer')->setVar('items', $categories);
         service('renderer')->setVar('menu', $menu);
         service('renderer')->setVar('newsletter', $newsletter);
+
+        // 👉 ESTAS DUAS LINHAS RESOLVEM TUDO
+        service('renderer')->setVar('cartItems', $this->cartItems);
+        service('renderer')->setVar('cartTotals', $this->cartTotals);
     }
+
 
 }
