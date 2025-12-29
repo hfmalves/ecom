@@ -104,6 +104,20 @@ class ProductController extends BaseController
                 ->where('deleted_at', null)
                 ->first();
         }
+        $now = date('Y-m-d H:i:s');
+
+        $hasValidSpecial =
+            !empty($product['special_price']) &&
+            $product['special_price'] < $product['base_price_tax'] &&
+            !empty($product['special_price_start']) &&
+            !empty($product['special_price_end']) &&
+            $product['special_price_start'] <= $now &&
+            $product['special_price_end'] >= $now;
+
+        if (!$hasValidSpecial) {
+            $product['special_price'] = 0;
+        }
+
         return view('website/product/index', [
             'product'          => $product,
             'images'           => $images,

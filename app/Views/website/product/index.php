@@ -126,11 +126,10 @@
             <div class="product-single__price">
                 <span class="old-price d-none"></span>
                 <span class="current-price"></span>
-
                 <span class="d-none"
                       data-price-base="<?= (float)$product['base_price_tax'] ?>"
                       data-price-special="<?= (float)$product['special_price'] ?>">
-    </span>
+                </span>
             </div>
 
             <div class="product-single__short-desc">
@@ -139,10 +138,6 @@
             </div>
 
             <form name="addtocart-form" method="post">
-
-                <!-- =====================
-                     CONFIGURABLE
-                ====================== -->
                 <?php if ($type === 'configurable'): ?>
                     <div class="product-single__swatches">
                         <?php foreach ($attributesMeta as $attr): ?>
@@ -187,12 +182,6 @@
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-
-
-
-                <!-- =====================
-                     VIRTUAL
-                ====================== -->
                 <?php if ($type === 'virtual' && $virtual): ?>
                     <div class="product-virtual-info mb-3">
                         <p class="mb-1">Tipo: <?= esc($virtual['virtual_type']) ?></p>
@@ -202,76 +191,34 @@
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>
-
-                <!-- =====================
-                     PACK
-                ====================== -->
                 <?php if ($type === 'pack' && !empty($packItems)): ?>
-                    <div class="product-single__addtocart product-single__grouped"
-                         x-data="{
-                            sku: '<?= esc($packItems[0]['product_sku']) ?>',
-                            price: <?= (float) $packItems[0]['base_price'] ?>
-                         }">
-
+                    <div class="product-single__addtocart product-single__grouped">
                         <?php foreach ($packItems as $item): ?>
-                            <div class="grouped-item"
-                                 @click="
-                sku = '<?= esc($item['product_sku']) ?>';
-                price = <?= (float) $item['base_price'] ?>;
-             "
-                                 style="cursor:pointer">
-
-                                <div class="grouped-item__name">
-                                    <?= esc($item['product_sku']) ?>
-                                </div>
-
+                            <div class="grouped-item">
+                                <div class="grouped-item__name"><?= esc($item['product_sku']) ?></div>
                                 <div class="grouped-item__price">
                                     €<?= number_format($item['base_price'], 2, ',', '.') ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-
-                        <!-- PREÇO ATUAL -->
-                        <div class="mt-3">
-                            <strong>SKU:</strong>
-                            <span x-text="sku"></span>
-                            <br>
-                            <strong>Preço:</strong>
-                            €<span x-text="price.toFixed(2)"></span>
-                        </div>
-
-                        <button type="submit"
-                                class="btn btn-primary btn-addtocart js-open-aside"
-                                data-aside="cartDrawer">
-                            Comprar 1
-                        </button>
                     </div>
                 <?php endif; ?>
-
-
-                <?php if ($type !== 'pack'): ?>
-                <!-- =====================
-                     QTD
-                ====================== -->
-                    <div class="product-single__addtocart">
-                        <div class="qty-control position-relative qty-initialized">
-                            <input type="number" name="quantity" value="1" min="1" class="qty-control__number text-center">
-                            <div class="qty-control__reduce">-</div>
-                            <div class="qty-control__increase">+</div>
-                        </div>
-                        <button
-                                type="button"
-                                class="btn btn-primary btn-addtocart js-open-aside"
-                                data-aside="cartDrawer"
-                                @click="addToCart(document.querySelector('[name=quantity]').value)"
-                        >
-                            Comprar Simples
-                        </button>
+                <div class="product-single__addtocart">
+                    <div class="qty-control position-relative qty-initialized">
+                        <input type="number" name="quantity" value="1" min="1" class="qty-control__number text-center">
+                        <div class="qty-control__reduce">-</div>
+                        <div class="qty-control__increase">+</div>
                     </div>
-                <?php endif; ?>
-
+                    <button
+                            type="button"
+                            class="btn btn-primary btn-addtocart js-open-aside"
+                            data-aside="cartDrawer"
+                            @click="addToCart(document.querySelector('[name=quantity]').value)"
+                    >
+                        Comprar
+                    </button>
+                </div>
             </form>
-
             <!-- META -->
             <div class="product-single__meta-info mt-4">
                 <div><strong>SKU:</strong> <?= esc($product['sku'] ?? 'N/A') ?></div>

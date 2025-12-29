@@ -15,7 +15,11 @@ document.addEventListener('alpine:init', () => {
             const root = this.$el.closest('[data-product-id]');
             if (!root) return;
 
-            if (root.dataset.productType === 'simple') {
+            if (
+                root.dataset.productType === 'simple' ||
+                root.dataset.productType === 'pack' ||
+                root.dataset.productType === 'virtual'
+            ) {
                 const source = document.querySelector('[data-price-base]');
                 if (source) {
                     this.setPrice(
@@ -25,6 +29,8 @@ document.addEventListener('alpine:init', () => {
                 }
                 return;
             }
+
+
 
             this.bindConfigurable();
         },
