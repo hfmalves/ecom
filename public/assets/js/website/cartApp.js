@@ -144,6 +144,31 @@ document.addEventListener('alpine:init', () => {
         }
 
     }));
+    Alpine.store('coupon', {
+        async apply(code) {
+            if (!code || code.trim() === '') return;
+
+            const res = await fetch('/cart/coupon', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ code: code.trim() })
+            });
+
+            const json = await res.json();
+
+            if (!json.success) {
+                alert(json.message || 'Cupão inválido');
+                return;
+            }
+
+            await refreshDrawer();
+            await refreshCartPage();
+        }
+    });
 });
 
 // ===============================

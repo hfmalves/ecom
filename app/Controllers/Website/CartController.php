@@ -8,6 +8,8 @@ use App\Models\Admin\Sales\OrdersCartsModel;
 use App\Models\Admin\Sales\OrdersCartItemsModel;
 use App\Models\Admin\Catalog\ProductsModel;
 use App\Models\Admin\Catalog\ProductsVariantsModel;
+use App\Models\Admin\Marketing\CartRuleCouponModel;
+use App\Models\Admin\Marketing\CartRuleModel;
 
 
 class CartController extends BaseController
@@ -16,6 +18,8 @@ class CartController extends BaseController
     protected $OrdersCartItemsModel;
     protected $ProductsModel;
     protected $ProductsVariantsModel;
+    protected $CartRuleModel;
+    protected $CartRuleCouponModel;
 
     public function __construct()
     {
@@ -23,6 +27,8 @@ class CartController extends BaseController
         $this->OrdersCartItemsModel = new OrdersCartItemsModel();
         $this->ProductsModel = new ProductsModel();
         $this->ProductsVariantsModel = new ProductsVariantsModel();
+        $this->CartRuleModel = new CartRuleModel();
+        $this->CartRuleCouponModel = new CartRuleCouponModel();
     }
     public function cart()
     {
@@ -386,7 +392,8 @@ class CartController extends BaseController
             'cartTotals' => [
                 'total_items' => (int) $cart['total_items'],
                 'total_value' => (float) $cart['total_value'],
-            ]
+            ],
+            'coupon' => session('coupon')
         ];
     }
 
@@ -398,7 +405,75 @@ class CartController extends BaseController
 
 
 
+    public function coupon()
+    {
+        $data = $this->request->getJSON(true);
+        $code = strtoupper(trim($data['code'] ?? ''));
 
+        if ($code === '') {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Código inválido'
+            ]);
+        }
+
+        // Cupão
+        $coupon = $this->CartRuleCouponModel
+            ->where('code', $code)
+            ->where('include', 1)
+            ->first();
+
+        if (!$coupon) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cupão não existe'
+            ]);
+        }
+
+        // Regra associada
+        $rule = $this->CartRuleModel->find($coupon['rule_id']);
+
+        if (!$rule) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Regra inválida'
+            ]);
+        }
+
+        // Validade temporal
+        $now = date('Y-m-d H:i:s');
+        if ($now < $rule['start_date'] || $now > $rule['end_date']) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cupão expirado'
+            ]);
+        }
+
+        // Limite de utilização
+        if (
+            (int)$coupon['uses_per_coupon'] > 0 &&
+            (int)$coupon['times_used'] >= (int)$coupon['uses_per_coupon']
+        ) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Cupão esgotado'
+            ]);
+        }
+
+        // Guardar na sessão
+        session()->set('coupon', [
+            'code'           => $coupon['code'],
+            'rule_id'        => $rule['id'],
+            'discount_type'  => $rule['discount_type'],
+            'discount_value' => $rule['discount_value'],
+            'conditions'     => json_decode($rule['condition_json'], true)
+        ]);
+
+        return $this->response->setJSON([
+            'success' => true,
+            'message' => 'Cupão aplicado com sucesso'
+        ]);
+    }
 
 
 }

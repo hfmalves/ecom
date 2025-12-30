@@ -104,18 +104,40 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
                 </tbody>
-
-
             </table>
-
             <div class="cart-table-footer mb-5">
-                <form class="position-relative bg-body">
-                    <input class="form-control" type="text" placeholder="Código de desconto">
-                    <input class="btn-link fw-medium position-absolute top-0 end-0 h-100 px-4"
-                           type="submit" value="APLICAR">
+                <form x-data class="position-relative bg-body">
+                    <input class="form-control" type="text" name="code" placeholder="Código de desconto">
+                    <button
+                            type="button"
+                            class="btn-link fw-medium position-absolute top-0 end-0 h-100 px-4"
+                            x-on:click="$store.coupon.apply($el.form.code.value)"
+                    >
+                        APLICAR
+                    </button>
                 </form>
+
                 <button class="btn btn-light">Atualizar Carrinho</button>
             </div>
+            <?php if (!empty($coupon) && !empty($coupon['code'])): ?>
+                <div class="alert alert-success d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong><?= esc($coupon['code']) ?></strong>
+                        <span class="ms-2 text-muted">
+                (<?= esc($coupon['discount_type']) ?>)
+            </span>
+                    </div>
+
+                    <form method="post" action="/cart/coupon-remove">
+                        <button type="submit" class="btn btn-sm btn-link text-danger">
+                            remover
+                        </button>
+                    </form>
+                </div>
+            <?php endif; ?>
+
+
+
         </div>
 
         <!-- TOTAL -->

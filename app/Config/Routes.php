@@ -353,6 +353,7 @@ $routes->group('', ['namespace' => 'App\Controllers\Website'], function ($routes
         $routes->post('clear', 'CartController::clear');
         $routes->get('drawer', 'CartController::drawer');
         $routes->get('content', 'CartController::cartContent');
+        $routes->post('coupon', 'CartController::coupon');
     });
 
 
